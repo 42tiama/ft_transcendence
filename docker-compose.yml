@@ -1,0 +1,36 @@
+services:
+
+# Serviço de desenvolvimento
+    dev:
+        restart: always
+        build:
+            context: ./docker/dev
+            dockerfile: dockerfile
+        volumes:
+            - ./docker/dev/scripts:/start
+            - ./src:/src
+        env_file:
+            - .env
+    
+    api:
+        restart: always
+        build:
+            context: ./docker/node
+            dockerfile: dockerfile
+        volumes:
+            - ./docker/node/scripts:/start
+            - ./src/build:/build
+        env_file:
+            - .env
+
+    nginx:
+        restart: always
+        build:
+            context: ./docker/nginx
+            dockerfile: dockerfile
+        volumes:
+            - ./src/build:/build
+        ports:
+            - "8443:443"
+        depends_on:
+            - api

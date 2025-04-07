@@ -1,0 +1,9 @@
+FROM node:22.14
+
+ENV LANG=en_US.utf8
+ENV LANGUAGE=en_US.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /src
+
+CMD sh /start/start.sh
