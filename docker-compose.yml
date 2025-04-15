@@ -9,6 +9,7 @@ services:
         volumes:
             - ./docker/dev/scripts:/start
             - ./src:/src
+            - ./:/fullbase
         env_file:
             - .env
     
