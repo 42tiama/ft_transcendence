@@ -4,6 +4,15 @@ ENV LANG=en_US.utf8
 ENV LANGUAGE=en_US.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
+ENV NODE_PATH=/usr/local/lib/node_modules
+ENV NODE_OPTIONS=--max_old_space_size=4096
+ENV NODE_ENV=production
+
+RUN npm install -g typescript
+RUN npm install -g fastify
+RUN npm install -g sqlite3
+RUN npm install -g mime-types@2.1.3
+
 WORKDIR /src
 
 CMD sh /start/start.sh
