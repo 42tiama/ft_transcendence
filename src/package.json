@@ -1,0 +1,16 @@
+{
+  "name": "trancendence",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node ./build/server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "workspaces": [
+    "backend/server",
+    "frontend"
+  ]
+}
