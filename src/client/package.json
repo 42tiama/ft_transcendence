@@ -1,0 +1,29 @@
+{
+  "name": "ft_transcendence_client",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run lint",
+    "live": "live-server --port=8080 --open=src/static/html/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "gts": "^6.0.2",
+    "live-server": "^1.2.2",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "tsx": "^4.19.3",
+    "typescript": "^5.6.3"
+  }
+}
