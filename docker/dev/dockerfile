@@ -4,6 +4,24 @@ ENV LANG=en_US.utf8
 ENV LANGUAGE=en_US.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 
+ENV NODE_PATH=/usr/local/lib/node_modules
+ENV NODE_OPTIONS=--max_old_space_size=4096
+ENV NODE_ENV=production
+
+RUN npm install -g typescript
+RUN npm install -g fastify
+RUN npm install -g sqlite3
+RUN npm install -g mime-types@2.1.3
+
+#neovim rocks
+RUN apt-get update && apt-get install -y libfuse2 fuse lua5.4 tmux
+RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage &&\
+	chmod +x nvim-linux-x86_64.appimage &&\
+	mv nvim-linux-x86_64.appimage /usr/bin/nvim &&\
+	echo "alias nvim='/usr/bin/nvim --appimage-extract-and-run'" >> /root/.bashrc &&\
+	echo "alias tmux='tmux -2'" >> /root/.bashrc
+RUN curl https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /root/.config/nvim/init.lua
+
 WORKDIR /src
 
 CMD sh /start/start.sh
