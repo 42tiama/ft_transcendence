@@ -1,8 +1,10 @@
 const showFormBtn = document.getElementById('showFormBtn') as HTMLButtonElement;
+const fetchServiceBtn = document.getElementById('fetchServiceBtn') as HTMLButtonElement;
 const dataForm = document.getElementById('dataForm') as HTMLFormElement;
 const responseDiv = document.getElementById('response') as HTMLDivElement;
+const serviceResponseDiv = document.getElementById('serviceResponse') as HTMLDivElement;
 
-showFormBtn.addEventListener('click', () => {
+showFormBtn.addEventListener('click', function () {
   dataForm.style.display = 'block';
 });
 
@@ -12,7 +14,7 @@ dataForm.addEventListener('submit', function (event) {
   const formData = new FormData(dataForm);
   const payload: Record<string, string> = {};
 
-  formData.forEach((value, key) => {
+  formData.forEach(function (value, key) {
     payload[key] = value.toString();
   });
 
@@ -33,3 +35,17 @@ dataForm.addEventListener('submit', function (event) {
       responseDiv.textContent = 'Error: ' + err;
     });
 });
+
+fetchServiceBtn.addEventListener('click', function () {
+  fetch('/service1')
+    .then(function (res) {
+      return res.text(); // Read body as plain text
+    })
+    .then(function (body) {
+      serviceResponseDiv.textContent = body;
+    })
+    .catch(function (err) {
+      serviceResponseDiv.textContent = 'Error: ' + err;
+    });
+});
+

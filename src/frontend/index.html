@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SPA POST Form</title>
+  <title>SPA Example</title>
 </head>
 <body>
-  <h1>Submit Form</h1>
-  
+  <h1>Send Data and Request Service</h1>
+
   <button id="showFormBtn">Show Form</button>
+  <button id="fetchServiceBtn">Call /service1</button>
 
   <form id="dataForm" style="display: none;">
     <label>
@@ -23,7 +24,9 @@
   </form>
 
   <div id="response"></div>
+  <div id="serviceResponse"></div>
 
   <script type="module" src="main.js"></script>
 </body>
 </html>
+

@@ -1,20 +1,4 @@
 {
-<<<<<<< HEAD:src/client/tsconfig.json
-  "extends": "./node_modules/gts/tsconfig-google.json",
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "./build",
-    "lib": ["ESNext", "dom"],
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "esModuleInterop": true,
-    "resolveJsonModule": true
-  },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "build"]
-=======
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -42,7 +26,7 @@
     // "moduleDetection": "auto",                        /* Control what method is used to detect module-format JS files. */
 
     /* Modules */
-    "module": "commonJS",                                /* Specify what module code is generated. */
+    "module": "nodenext",                                /* Specify what module code is generated. */
     // "rootDir": "./",                                  /* Specify the root folder within your source files. */
     // "moduleResolution": "node10",                     /* Specify how TypeScript looks up a file from a given module specifier. */
     // "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
@@ -75,7 +59,7 @@
     // "inlineSourceMap": true,                          /* Include sourcemap files inside the emitted JavaScript. */
     // "noEmit": true,                                   /* Disable emitting files from a compilation. */
     // "outFile": "./",                                  /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
-    "outDir": "../build/client",                                   /* Specify an output folder for all emitted files. */
+    "outDir": "../../build/service1",                                   /* Specify an output folder for all emitted files. */
     // "removeComments": true,                           /* Disable emitting comments. */
     // "importHelpers": true,                            /* Allow importing helper functions from tslib once per project, instead of including them per-file. */
     // "downlevelIteration": true,                       /* Emit more compliant, but verbose and less performant JavaScript for iteration. */
@@ -126,5 +110,4 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   }
->>>>>>> f68beeb (state: reproducible example of serving static page using fastify/static (without nginx) and with npm workspaces (package.json at the project level and one for each service):src/frontend/tsconfig.json
 }
