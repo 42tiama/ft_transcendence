@@ -2,7 +2,7 @@
   "name": "service1",
   "version": "1.0.0",
   "scripts": {
-	"build": "tsc",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,5 +11,8 @@
   "description": "",
   "dependencies": {
     "fastify": "^5.3.2"
+  },
+  "devDependencies": {
+    "pino-pretty": "^13.0.0"
   }
 }

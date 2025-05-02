@@ -1,6 +1,14 @@
 import fastify from 'fastify'
 
-const app = fastify({logger: true});
+const loggerOptions = {
+	transport: {
+		target: 'pino-pretty',
+		options: {
+		translateTime: 'HH:MM:ss Z'}
+	}
+}
+
+const app = fastify({logger: loggerOptions});
 
 app.get('/', (request, reply) => reply.send('Hello from service1'));
 

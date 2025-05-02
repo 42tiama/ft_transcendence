@@ -4,8 +4,15 @@ import fastifyHttpProxy from '@fastify/http-proxy'
 
 import { join } from 'node:path'
 
+const loggerOptions = {
+	transport: {
+		target: 'pino-pretty',
+		options: {
+		translateTime: 'HH:MM:ss Z'}
+	}
+}
 //instatiate server
-const server = fastify({logger: true});
+const server = fastify({logger: loggerOptions});
 
 //register plugin to server static files
 server.register(fastifyStatic,
