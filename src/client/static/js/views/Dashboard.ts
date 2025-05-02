@@ -8,7 +8,7 @@ export default class Dashboard extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('/src/static/html/dashboard.html');
+      const response = await fetch('/static/html/dashboard.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

@@ -1,7 +1,7 @@
 export default class AbstractView {
   constructor() {}
 
-  setTitle(title) {
+  setTitle(title: string) {
     document.title = title;
   };
 
