@@ -18,9 +18,9 @@ RUN apt-get update && apt-get install -y libfuse2 fuse lua5.4 tmux
 RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage &&\
 	chmod +x nvim-linux-x86_64.appimage &&\
 	mv nvim-linux-x86_64.appimage /usr/bin/nvim &&\
-	echo "alias nvim='/usr/bin/nvim --appimage-extract-and-run'" >> /root/.bashrc &&\
-	echo "alias tmux='tmux -2'" >> /root/.bashrc
-RUN curl https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /root/.config/nvim/init.lua
+	echo "alias nvim='/usr/bin/nvim --appimage-extract-and-run'" >> /home/node/.bashrc &&\
+	echo "alias tmux='tmux -2'" >> /home/node/.bashrc
+RUN curl https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /home/node/.config/nvim/init.lua
 
 WORKDIR /src
 
