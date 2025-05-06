@@ -2,8 +2,8 @@
   "name": "trancendence",
   "version": "1.0.0",
   "scripts": {
-    "build": "npm run build --workspace=backend/server && npm run build --workspace=frontend && npm run build --workspace=backend/service1",
-    "start": "node ./build/service1/service1.js & node ./build/server/server.js",
+    "build": "npm run build --workspace=backend/server && npm run build --workspace=frontend && npm run build --workspace=backend/users-service",
+    "start": "node ./build/users-service.js & node ./build/server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +13,6 @@
   "workspaces": [
     "backend/server",
     "frontend",
-    "backend/service1"
+    "backend/users-service"
   ]
 }

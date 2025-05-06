@@ -23,7 +23,7 @@ server.register(fastifyStatic,
 //register plugin to send request to other services
 server.register(fastifyHttpProxy, {
 	upstream: 'http://localhost:8043',
-	prefix: '/service1'
+	prefix: '/users'
 	});
 
 console.log(join(__dirname, '../../build/client'));

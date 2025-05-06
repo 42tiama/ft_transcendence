@@ -18,7 +18,7 @@ dataForm.addEventListener('submit', function (event) {
     payload[key] = value.toString();
   });
 
-  fetch('/api/submit', {
+  fetch('/users', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
