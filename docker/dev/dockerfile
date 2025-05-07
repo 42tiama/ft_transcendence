@@ -12,6 +12,7 @@ RUN npm install -g typescript
 RUN npm install -g fastify
 RUN npm install -g sqlite3
 RUN npm install -g mime-types@2.1.3
+RUN npm install -g tsx
 
 #neovim rocks
 RUN apt-get update && apt-get install -y libfuse2 fuse lua5.4 tmux
@@ -21,6 +22,7 @@ RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linu
 	echo "alias nvim='/usr/bin/nvim --appimage-extract-and-run'" >> /home/node/.bashrc &&\
 	echo "alias tmux='tmux -2'" >> /home/node/.bashrc
 RUN curl https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /home/node/.config/nvim/init.lua
+RUN chown node:node -R /home/node/.config
 
 WORKDIR /src
 
