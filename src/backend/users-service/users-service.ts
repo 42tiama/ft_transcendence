@@ -48,6 +48,16 @@ app.post('/', (request: FastifyRequest<{ Body: UserRequestBody }>, reply) => {
   }
 })
 
+app.get('/', () => {
+	const db = app.betterSqlite3;
+
+	console.log("inside route callback");
+	const stmt = db.prepare(`SELECT * FROM users`);
+	const result = stmt.all();
+
+	console.log(result);
+})
+
 
 app.listen({ port: 8043 }, (err, address) => {
 
