@@ -56,6 +56,8 @@ app.get('/', () => {
 	const result = stmt.all();
 
 	console.log(result);
+
+	return result;
 })
 
 
