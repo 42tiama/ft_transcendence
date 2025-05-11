@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPA Example</title>
+</head>
+<body>
+  <h1>Send Data and Request Service</h1>
+
+  <button id="showFormBtn">Show Form</button>
+  <button id="fetchUsersBtn">GET /users</button>
+
+  <form id="dataForm" style="display: none;">
+    <label>
+      Name:
+      <input type="text" name="name" required />
+    </label><br />
+    <label>
+      Email:
+      <input type="email" name="email" required />
+    </label><br />
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="response"></div>
+  <div id="usersResponse">
+	  <table id="usersTable" border="1"></table>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
+

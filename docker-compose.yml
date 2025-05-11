@@ -10,6 +10,9 @@ services:
             - ./docker/dev/scripts:/start
             - ./src:/src
             - ./:/fullbase
+            - nvim-data:/root/.local
+        ports:
+            - "8042:8042"
         env_file:
             - .env
     
@@ -35,3 +38,6 @@ services:
             - "8443:443"
         depends_on:
             - api
+
+volumes:
+  nvim-data:

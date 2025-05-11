@@ -1,0 +1,5 @@
+src/node_modules/
+src/build/
+*.db
+.env
+.vscode
