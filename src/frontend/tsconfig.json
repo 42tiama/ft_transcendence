@@ -1,20 +1,4 @@
 {
-<<<<<<< HEAD:src/client/tsconfig.json
-  "extends": "./node_modules/gts/tsconfig-google.json",
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "./build",
-    "lib": ["ESNext", "dom"],
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "esModuleInterop": true,
-    "resolveJsonModule": true
-  },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "build"]
-=======
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
@@ -126,5 +110,4 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   }
->>>>>>> f68beeb (state: reproducible example of serving static page using fastify/static (without nginx) and with npm workspaces (package.json at the project level and one for each service):src/frontend/tsconfig.json
 }

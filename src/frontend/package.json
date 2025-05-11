@@ -1,20 +1,4 @@
 {
-<<<<<<< HEAD:src/client/package.json
-  "name": "ft_transcendence_client",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "gts lint",
-    "clean": "gts clean",
-    "compile": "tsc",
-    "fix": "gts fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint",
-    "live": "live-server --port=8080 --open=/static/html/index.html",
-    "style": "npx @tailwindcss/cli -i ./static/css/style.in.css -o ./static/css/style.out.css"
-=======
   "name": "frontend",
   "version": "1.0.0",
   "main": "main.js",
@@ -22,26 +6,9 @@
   "scripts": {
 	"build": "tsc && cp index.html ../build/client/",
     "test": "echo \"Error: no test specified\" && exit 1"
->>>>>>> f68beeb (state: reproducible example of serving static page using fastify/static (without nginx) and with npm workspaces (package.json at the project level and one for each service):src/frontend/package.json
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-<<<<<<< HEAD:src/client/package.json
-  "description": "",
-  "devDependencies": {
-    "@types/node": "^22.7.5",
-    "gts": "^6.0.2",
-    "live-server": "^1.2.2",
-    "prettier": "^3.5.3",
-    "prettier-plugin-tailwindcss": "^0.6.11",
-    "typescript": "^5.6.3"
-  },
-  "dependencies": {
-    "@tailwindcss/cli": "^4.1.5",
-    "tailwindcss": "^4.1.5"
-  }
-=======
   "description": ""
->>>>>>> f68beeb (state: reproducible example of serving static page using fastify/static (without nginx) and with npm workspaces (package.json at the project level and one for each service):src/frontend/package.json
 }
