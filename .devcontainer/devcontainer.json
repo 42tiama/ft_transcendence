@@ -20,7 +20,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-                "nodesource.vscode-for-node-js-development-pack"
+				"nodesource.vscode-for-node-js-development-pack",
+				"bradlc.vscode-tailwindcss"
 			]
 		}
 	},
