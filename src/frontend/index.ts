@@ -1,4 +1,4 @@
-import Dashboard from './static/js/views/Dashboard.js';
+import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Leaderboard from './static/js/views/Leaderboard.js';
@@ -10,7 +10,8 @@ const navigateTo = (url: string) => {
 
 const router = async () => {
   const routes = [
-    {path: '/', view: Dashboard},
+    {path: '/', view: Home},
+    {path: '/Home', view: Home},
     {path: '/login', view: Login},
     {path: '/register', view: Register},
     {path: '/leaderboard', view: Leaderboard},
@@ -65,6 +66,5 @@ document.addEventListener('DOMContentLoaded', () => {
       navigateTo(e.target.href);
     }
   });
-
   void router();
 });

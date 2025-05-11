@@ -13,7 +13,6 @@ const loggerOptions = {
 }
 //instatiate server
 const server = fastify({logger: loggerOptions});
-// const server = fastify({logger: true});
 
 //register plugin to server static files
 server.register(fastifyStatic,
@@ -27,11 +26,11 @@ server.register(fastifyStatic,
 // 	prefix: '/service1'
 // 	});
 
-console.log(join(__dirname, '../client/'));
 
 //business logic
-server.get('/', (request, reply) => reply.sendFile('static/html/index.html'));
-// server.get('/', (request, reply) => reply.send('index.html'));
+server.get('/:path*', (request, reply) => {
+  reply.sendFile('static/html/index.html');
+});
 
 //start listening
 server.listen({ host: '0.0.0.0', port: 8042 }, (err, address) => {
