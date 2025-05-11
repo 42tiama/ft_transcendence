@@ -1,0 +1,47 @@
+<!-- <script src="https://accounts.google.com/gsi/client" async></script> -->
+<div class="text-white min-h-screen flex items-center justify-center px-4">
+  <div class="bg-[#23272a] rounded-lg shadow-lg flex flex-col md:flex-row overflow-hidden">
+    
+    <div class="w-full p-8">
+      <h2 class="text-2xl font-bold mb-1">Are you ready!?</h2>
+      <p class="mb-6 text-sm text-gray-300">Let's PONG through the transcendence!</p>
+
+      <!-- <div id="g_id_onload" class="h-8"
+        data-client_id="YOUR_GOOGLE_CLIENT_ID"
+        data-login_uri="http://localhost:8042/login"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin h-8" 
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+      </div> -->
+
+      <div class="g-signin2" data-onsuccess="() => {console.log('trying to log in')}"></div>
+      
+      <form class="space-y-4">
+        <div>
+          <label for="email" class="block text-xs font-semibold uppercase mb-1">Email 
+            <!-- <span class="text-red-500">*</span> -->
+          </label>
+          <input type="text" id="email" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+        
+        <div>
+          <label for="password" class="block text-xs font-semibold uppercase mb-1">Password
+            <!-- <span class="text-red-500">*</span> -->
+          </label>
+          <input type="password" id="password" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          <a href="#" class="text-xs text-amber-400 hover:underline mt-1 inline-block">Forgot your password?</a>
+        </div>
+
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded transition">Log In</button>
+      </form>
+
+      <p class="text-xs text-gray-400 mt-4">Not registered yet? <a href="/register" class="text-amber-400 hover:underline" data-link>Register</a></p>
+    </div>
+  </div>
+</div>

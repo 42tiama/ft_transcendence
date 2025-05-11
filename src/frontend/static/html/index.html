@@ -3,16 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
     <link href="/static/css/style.out.css" type="text/css" rel="stylesheet">
     <title>ft_transcendence</title>
+    <!-- <script src="https://accounts.google.com/gsi/client" async></script> -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
-<body class="h-max bg-radial">
-    <nav class="nav bg-green-700 h-1/3">
-        <a href="/" class="nav__link bg-red-700" data-link>Dashboard</a>
-        <a href="/Posts" class="nav__link bg-red-700" data-link>Posts</a>
-        <a href="/Settings" class="nav__link bg-red-700" data-link>Settings</a>
-    </nav>
-    <div class="h-96 bg-blue-700" id="app"></div>
-    <script type="module" src="/build/index.js"></script>
-</body>
+    <body class="h-max bg-radial bg-[url(/static/images/background.jpg)] bg-cover bg-center">
+        <!-- Header -->
+        <header class="flex justify-between items-center p-6 bg-black bg-opacity-70">
+            <h1 class="text-5xl text-white font-bold tracking-widest">TIAMA PONG</h1>
+            <nav class="flex gap-6 text-lg">
+                <a href="/" class="hover:text-yellow-400 text-white" data-link>Home</a>
+                <!-- <a href="/about" class="hover:text-yellow-400 text-white" data-link>About</a> -->
+                <a href="/leaderboard" class="hover:text-yellow-400 text-white" data-link>Leaderboard</a>
+                <a href="/login" class="hover:text-yellow-400 text-white" data-link>Log In</a>
+            </nav>
+        </header>
+        <main id="app">
+            <!-- Our app is being rendered here, SPA magic! -->
+        </main>
+        <script type="module" src="/build/index.js"></script>
+    </body>
 </html>
+
+<!-- src/client/static/images/background.jpg -->

@@ -1,8 +1,7 @@
-console.log('Script started loading');
-
 import Dashboard from './static/js/views/Dashboard.js';
-import Posts from './static/js/views/Posts.js';
-import Settings from './static/js/views/Settings.js';
+import Login from './static/js/views/Login.js';
+import Register from './static/js/views/Register.js';
+import Leaderboard from './static/js/views/Leaderboard.js';
 
 const navigateTo = (url: string) => {
   history.pushState(null, '', url);
@@ -12,8 +11,9 @@ const navigateTo = (url: string) => {
 const router = async () => {
   const routes = [
     {path: '/', view: Dashboard},
-    {path: '/Posts', view: Posts},
-    {path: '/Settings', view: Settings},
+    {path: '/login', view: Login},
+    {path: '/register', view: Register},
+    {path: '/leaderboard', view: Leaderboard},
     // {path: '/404,', view: 404}
   ];
 
@@ -51,9 +51,9 @@ const router = async () => {
 
 window.addEventListener('popstate', router);
 
-window.addEventListener('load', () => {
-  alert('TESTE');
-});
+// window.addEventListener('load', () => {
+//   alert('TESTE');
+// });
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('click', (e: MouseEvent) => {

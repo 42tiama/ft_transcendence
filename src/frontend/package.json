@@ -12,7 +12,7 @@
     "pretest": "npm run compile",
     "posttest": "npm run lint",
     "live": "live-server --port=8080 --open=/static/html/index.html",
-    "style": "npx @tailwindcss/cli -i ./static/css/style.in.css -o ./static/css/style.out.css"
+    "style": "npx @tailwindcss/cli -i ./static/css/style.in.css -o ./static/css/style.out.css --watch"
   },
   "keywords": [],
   "author": "",
