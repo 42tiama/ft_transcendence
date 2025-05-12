@@ -10,7 +10,7 @@ services:
             - ./docker/dev/scripts:/start
             - ./src:/src
             - ./:/fullbase
-            - nvim-data:/root/.local
+            - nvim-data:/home/node/.local
         ports:
             - "8042:8042"
         env_file:
