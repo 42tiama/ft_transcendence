@@ -17,9 +17,15 @@ RUN npm install -g tsx
 RUN npm install -g pino-pretty
 
 #neovim rocks
-
+# RUN apt-get update && apt-get install -y libfuse2 fuse lua5.4 tmux sqlite3
+# RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage &&\
+# 	chmod +x nvim-linux-x86_64.appimage &&\
+# 	mv nvim-linux-x86_64.appimage /usr/bin/nvim &&\
+# 	echo "alias nvim='/usr/bin/nvim --appimage-extract-and-run'" >> /home/node/.bashrc &&\
+# 	echo "alias tmux='tmux -2'" >> /home/node/.bashrc
+RUN curl https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /home/node/.config/nvim/init.lua
 RUN chown node:node -R /home/node/.config
 
 WORKDIR /src
 
-CMD sh /start/start.sh
+CMD bash /start/start.sh
