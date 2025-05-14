@@ -29,7 +29,7 @@ const app = fastify({logger: loggerOptions});
 
 //register plugin
 app.register(fastifyBetterSqlite3, {
-	"pathToDb": './users.db',
+	"pathToDb": './data/users.db',
 	"verbose": console.log
 })
 

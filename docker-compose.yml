@@ -10,7 +10,7 @@ services:
             - ./docker/dev/scripts:/start
             - ./src:/src
             - ./:/fullbase
-            - nvim-data:/root/.local
+            - nvim-data:/home/node/.local
         ports:
             - "8042:8042"
         env_file:
@@ -26,18 +26,6 @@ services:
             - ./src/build:/build
         env_file:
             - .env
-
-    nginx:
-        restart: always
-        build:
-            context: ./docker/nginx
-            dockerfile: dockerfile
-        volumes:
-            - ./src/build:/build
-        ports:
-            - "8443:443"
-        depends_on:
-            - api
 
 volumes:
   nvim-data:

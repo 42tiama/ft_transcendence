@@ -23,9 +23,11 @@ RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linu
 	mv nvim-linux-x86_64.appimage /usr/bin/nvim &&\
 	echo "alias nvim='/usr/bin/nvim --appimage-extract-and-run'" >> /home/node/.bashrc &&\
 	echo "alias tmux='tmux -2'" >> /home/node/.bashrc
-RUN curl https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /home/node/.config/nvim/init.lua
+RUN curl -L https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/init.lua --create-dirs --output /home/node/.config/nvim/init.lua
+RUN curl -L https://raw.githubusercontent.com/iuryr/kickstart.nvim/refs/heads/master/lua/kickstart/plugins/autoformat.lua --create-dirs --output /home/node/.config/nvim/lua/kickstart/plugins/autoformat.lua
 RUN chown node:node -R /home/node/.config
+RUN mkdir -p /home/node/.local && chown node:node -R /home/node/.local
 
-WORKDIR /src
+WORKDIR /fullbase/src
 
 CMD sh /start/start.sh
