@@ -27,17 +27,5 @@ services:
         env_file:
             - .env
 
-    nginx:
-        restart: always
-        build:
-            context: ./docker/nginx
-            dockerfile: dockerfile
-        volumes:
-            - ./src/build:/build
-        ports:
-            - "8443:443"
-        depends_on:
-            - api
-
 volumes:
   nvim-data:
