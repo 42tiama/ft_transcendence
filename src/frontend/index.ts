@@ -39,9 +39,11 @@ const router = async () => {
     const appElement = document.querySelector('#app');
 
     if (appElement) {
-      // Actually update the HTML with the view's content
       const html = await view.getHtml();
       appElement.innerHTML = html;
+      if (match.route.path === '/login') {
+        await view.onMount();
+      }
     } else {
       console.error('Could not find #app element');
     }
@@ -51,10 +53,6 @@ const router = async () => {
 };
 
 window.addEventListener('popstate', router);
-
-// window.addEventListener('load', () => {
-//   alert('TESTE');
-// });
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('click', (e: MouseEvent) => {

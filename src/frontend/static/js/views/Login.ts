@@ -18,4 +18,39 @@ export default class Login extends AbstractView {
       return '<h1 class="h-96 bg-amber-600">Error Loading login</h1>';
     }
   }
+
+  async onMount() {
+    // Wait for Google script to load
+    if (!window.google) {
+      await new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+          if (window.google) {
+            clearInterval(checkInterval);
+            resolve(true);
+          }
+        }, 100);
+      });
+    }
+
+    // Render button programmatically
+    window.google.accounts.id.initialize({
+      client_id: "445999956724-9nbpuf3kfd38j2hrji5sl86aajcrsaou.apps.googleusercontent.com",
+      context: "signin",
+      ux_mode: "popup",
+      login_uri: "http://localhost:8042/",
+    });
+
+    window.google.accounts.id.renderButton(
+      document.getElementById("google-signin-button"), // Target element
+      {
+        type: "standard",
+        theme: "filled_black",
+        size: "large",
+        text: "continuar com",
+        shape: "rectangular",
+        logo_alignment: "left",
+      }
+    );
+  }
 }
+

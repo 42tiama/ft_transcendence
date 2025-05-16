@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-signin-client_id" content="YOUR_CLIENT_ID.apps.googleusercontent.com">
     <link href="/static/css/style.out.css" type="text/css" rel="stylesheet">
     <title>ft_transcendence</title>
-    <!-- <script src="https://accounts.google.com/gsi/client" async></script> -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
     <body class="h-max bg-radial bg-[url(/static/images/background.jpg)] bg-cover bg-center">
         <!-- Header -->
@@ -18,13 +16,16 @@
                 <!-- <a href="/about" class="hover:text-yellow-400 text-white" data-link>About</a> -->
                 <a href="/leaderboard" class="hover:text-yellow-400 text-white" data-link>Leaderboard</a>
                 <a href="/login" class="hover:text-yellow-400 text-white" data-link>Log In</a>
+
+                
+                <!-- <div class="g-signin2" data-onsuccess="() => {console.log('trying to log in')}"></div> -->
             </nav>
         </header>
-        <main id="app">
-            <!-- Our app is being rendered here, SPA magic! -->
+        <main>
+            <div id="app">
+                <!-- Our app is being rendered here, SPA magic! -->
+            </div>
         </main>
         <script type="module" src="/build/index.js"></script>
     </body>
 </html>
-
-<!-- src/client/static/images/background.jpg -->

@@ -26,7 +26,6 @@ server.register(fastifyStatic,
 // 	prefix: '/service1'
 // 	});
 
-
 //business logic
 server.get('/:path*', (request, reply) => {
   reply.sendFile('static/html/index.html');
