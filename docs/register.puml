@@ -1,0 +1,32 @@
+@startuml
+autonumber
+
+title Registering a new user
+
+actor user as user
+participant client as client
+participant "API Gateway" as gateway
+participant auth as auth
+database authDB as authDB
+
+user -> client :  Fills register form\n with email and password
+client -> gateway :  POST /register
+gateway -> auth :  forwards request
+auth -> authDB :  Check if email exists
+
+alt Email exists
+authDB -> auth : send something 
+auth -> gateway : send "email already registered" code
+gateway -> client : forwards response
+client -> user : please try again
+
+autonumber 5
+else Email does NOT exists
+authDB -> auth : send confirmation of creation of new user on table
+auth -> gateway : forwards response
+gateway -> client : send "User created" response
+client -> user: user created
+end 
+
+
+@enduml
