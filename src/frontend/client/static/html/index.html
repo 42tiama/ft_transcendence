@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/css/style.out.css" type="text/css" rel="stylesheet">
+    <title>ft_transcendence</title>
+    <script src="https://accounts.google.com/gsi/client" async></script>
+</head>
+    <body class="h-max bg-radial bg-[url(/static/images/background.jpg)] bg-cover bg-center">
+        <!-- Header -->
+        <header class="flex justify-between items-center p-6 bg-black bg-opacity-70">
+            <h1 class="text-5xl text-white font-bold tracking-widest">TIAMA PONG</h1>
+            <nav class="flex gap-6 text-lg">
+                <a href="/" class="hover:text-yellow-400 text-white" data-link>Home</a>
+                <!-- <a href="/about" class="hover:text-yellow-400 text-white" data-link>About</a> -->
+                <a href="/leaderboard" class="hover:text-yellow-400 text-white" data-link>Leaderboard</a>
+                <a href="/login" class="hover:text-yellow-400 text-white" data-link>Log In</a>
+
+                
+                <!-- <div class="g-signin2" data-onsuccess="() => {console.log('trying to log in')}"></div> -->
+            </nav>
+        </header>
+        <main>
+            <div id="app">
+                <!-- Our app is being rendered here, SPA magic! -->
+            </div>
+        </main>
+        <script type="module" src="/build/index.js"></script>
+    </body>
+</html>

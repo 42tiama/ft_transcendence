@@ -17,20 +17,19 @@ const server = fastify({logger: loggerOptions});
 //register plugin to server static files
 server.register(fastifyStatic,
 {
-	root: join(__dirname, '../../build/client')
+	root: join(__dirname, '../../frontend/client/')
 });
 
 //register plugin to send request to other services
-server.register(fastifyHttpProxy, {
-	upstream: 'http://localhost:8043',
-	prefix: '/users'
-	});
-
-console.log(join(__dirname, '../../build/client'));
+// server.register(fastifyHttpProxy, {
+// 	upstream: 'http://localhost:8043',
+// 	prefix: '/service1'
+// 	});
 
 //business logic
-server.get('/', (request, reply) => reply.sendFile('index.html'));
-
+server.get('/:path*', (request, reply) => {
+  reply.sendFile('static/html/index.html');
+});
 
 //start listening
 server.listen({ host: '0.0.0.0', port: 8042 }, (err, address) => {
