@@ -5,24 +5,19 @@ package FrontEnd {
 	component [Client]
 }
 
-component [API Gateway\n(NodeJs app)] as AG
 
 package BackEnd {
-	component [Users]
-	database UsersDB
+	component [API Gateway\n(NodeJs app)] as AG
 
 	component [Auth]
+	database AuthDB
 
-	component [Tournament]
-	database TournamentDB
 }
 
 Client --down--> AG
 AG --> Client
-AG --down--> Users
-Users --> AG
+AG <--down--> Auth
 
-Users <--> UsersDB
-Tournament <--> TournamentDB
+Auth <--> AuthDB
 
 @enduml

@@ -1,0 +1,26 @@
+@startuml
+
+package FrontEnd {
+	component [Client]
+}
+
+component [Reverse Proxy\n(NGINX)] as RP
+
+package BackEnd {
+	component [Users]
+	database UsersDB
+
+	component [Auth]
+
+	component [Tournament]
+	database TournamentDB
+}
+
+Client --> RP
+RP --> BackEnd
+BackEnd --> RP
+
+Users <--> UsersDB
+Tournament <--> TournamentDB
+
+@enduml
