@@ -1,0 +1,56 @@
+@startuml
+autonumber
+
+title Authenticating a user
+
+actor user as user
+participant client as client
+participant "API Gateway" as gateway
+participant auth as auth
+database authDB as authDB
+
+user -> client : Fills SignIn form\n with email and password
+client -> gateway : POST /signin with JSON body
+gateway -> auth : forwards request
+auth -> authDB : check if email exists
+
+alt Email does NOT exist
+authDB -> auth : send empty query result
+auth -> gateway : send "user not found" code
+gateway -> client : forwards response
+client -> user : please try again
+
+autonumber 5
+else Email does exist AND password does not match
+authDB -> auth : send user info
+auth -> gateway : check password and send "wrong password" code
+gateway -> client : forwards response
+client -> user : please try again
+
+autonumber 5
+else Email exist AND password is OK
+authDB -> auth : send user info
+auth -> gateway : check password and send "OK password" code\n now we need 2nd Factor to authenticate
+gateway -> client : forwards response
+client -> user : please send 2nd Factor
+end
+
+user -> client : fill 2FA token
+client -> gateway : POST /signin (or other url?) with JSON body
+gateway -> auth : forwards request
+auth -> auth : check if 2FA token is correct
+
+alt 2FA token is NOT correct
+auth -> gateway : send "wrong 2FA token" code
+gateway -> client : forwards request
+client -> user : please try again
+
+autonumber 13
+else 2FA token is correct
+auth -> gateway : send "OK 2FA token" code \n and JWT
+gateway -> client : forwards request
+client -> user : User authenticated message
+client -> client : store JWT for future requests
+end
+
+@enduml

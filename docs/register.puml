@@ -10,7 +10,7 @@ participant auth as auth
 database authDB as authDB
 
 user -> client :  Fills register form\n with email and password
-client -> gateway :  POST /register
+client -> gateway :  POST /register with JSON body
 gateway -> auth :  forwards request
 auth -> authDB :  Check if email exists
 
