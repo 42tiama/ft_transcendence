@@ -21,7 +21,7 @@
 		"vscode": {
 			"extensions": [
 				"bradlc.vscode-tailwindcss",
-				"esbenp.prettier-vscode",
+				"esbenp.prettier-vscode"
 			]
 		}
 	},
