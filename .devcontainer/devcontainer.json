@@ -20,11 +20,12 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"nodesource.vscode-for-node-js-development-pack",
-				"bradlc.vscode-tailwindcss"
+				"bradlc.vscode-tailwindcss",
+				"esbenp.prettier-vscode",
 			]
 		}
 	},
+	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "node"
 	
 	// Features to add to the dev container. More info: https://containers.dev/features.
@@ -45,6 +46,4 @@
 	// Configure tool-specific properties.
 	// "customizations": {},
 
-	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "devcontainer"
 }

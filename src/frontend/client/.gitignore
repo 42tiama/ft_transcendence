@@ -1,9 +1,0 @@
-node_modules
-build
-.eslintcache
-.tsbuildinfo
-.env
-.vscode/
-package-lock.json
-../package-lock.json
-

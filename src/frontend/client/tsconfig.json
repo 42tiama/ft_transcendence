@@ -1,9 +1,11 @@
 {
-  // "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "../build",
-    "lib": ["ESNext", "dom"],
+    "outDir": "../../build/frontend",
+    "lib": [
+      "ESNext",
+      "dom"
+    ],
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "node",
@@ -11,6 +13,10 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules", "build"]
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

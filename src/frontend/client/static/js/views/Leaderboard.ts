@@ -8,7 +8,7 @@ export default class Leaderboard extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('/static/html/leaderboard.html');
+      const response = await fetch('build/frontend/static/html/leaderboard.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

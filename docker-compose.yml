@@ -15,17 +15,6 @@ services:
             - "8042:8042"
         env_file:
             - .env
-    
-    api:
-        restart: always
-        build:
-            context: ./docker/node
-            dockerfile: dockerfile
-        volumes:
-            - ./docker/node/scripts:/start
-            - ./src/build:/build
-        env_file:
-            - .env
 
 volumes:
   nvim-data:

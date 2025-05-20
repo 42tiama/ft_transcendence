@@ -1,5 +1,5 @@
-src/node_modules/
-src/build/
-*.db
+src/build
+client_secret_445999956724-9nbpuf3kfd38j2hrji5sl86aajcrsaou.apps.googleusercontent.com.json
 .env
-.vscode
+src/node_modules
+*.db

@@ -8,7 +8,7 @@ export default class Login extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('/static/html/login.html');
+      const response = await fetch('build/frontend/static/html/login.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

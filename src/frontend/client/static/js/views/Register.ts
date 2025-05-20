@@ -8,7 +8,7 @@ export default class Register extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('/static/html/register.html');
+      const response = await fetch('build/frontend/static/html/register.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
