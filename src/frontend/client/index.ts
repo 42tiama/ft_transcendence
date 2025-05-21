@@ -1,8 +1,7 @@
-console.log('Script started loading');
-
-import Dashboard from './static/js/views/Dashboard.js';
-import Posts from './static/js/views/Posts.js';
-import Settings from './static/js/views/Settings.js';
+import Home from './static/js/views/Home.js';
+import Login from './static/js/views/Login.js';
+import Register from './static/js/views/Register.js';
+import Leaderboard from './static/js/views/Leaderboard.js';
 
 const navigateTo = (url: string) => {
   history.pushState(null, '', url);
@@ -11,9 +10,11 @@ const navigateTo = (url: string) => {
 
 const router = async () => {
   const routes = [
-    {path: '/', view: Dashboard},
-    {path: '/Posts', view: Posts},
-    {path: '/Settings', view: Settings},
+    {path: '/', view: Home},
+    {path: '/Home', view: Home},
+    {path: '/login', view: Login},
+    {path: '/register', view: Register},
+    {path: '/leaderboard', view: Leaderboard},
     // {path: '/404,', view: 404}
   ];
 
@@ -38,9 +39,11 @@ const router = async () => {
     const appElement = document.querySelector('#app');
 
     if (appElement) {
-      // Actually update the HTML with the view's content
       const html = await view.getHtml();
       appElement.innerHTML = html;
+      if (match.route.path === '/login') {
+        await view.onMount();
+      }
     } else {
       console.error('Could not find #app element');
     }
@@ -50,10 +53,6 @@ const router = async () => {
 };
 
 window.addEventListener('popstate', router);
-
-window.addEventListener('load', () => {
-  alert('TESTE');
-});
 
 document.addEventListener('DOMContentLoaded', () => {
   document.body.addEventListener('click', (e: MouseEvent) => {
@@ -65,6 +64,5 @@ document.addEventListener('DOMContentLoaded', () => {
       navigateTo(e.target.href);
     }
   });
-
   void router();
 });

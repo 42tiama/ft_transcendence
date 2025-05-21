@@ -1,21 +1,21 @@
 import AbstractView from './AbstractView.js';
 
-export default class Dashboard extends AbstractView {
+export default class Leaderboard extends AbstractView {
   constructor() {
     super();
-    this.setTitle('Dashboard');
+    this.setTitle('Leaderboard');
   }
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('/static/html/dashboard.html');
+      const response = await fetch('build/frontend/static/html/leaderboard.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return await response.text();
     } catch (error) {
       console.error('Error loading template:', error);
-      return '<h1 class="h-96 bg-amber-600">Error Loading Dashboard</h1>';
+      return '<h1 class="h-96 bg-amber-600">Error Loading leaderboard</h1>';
     }
   }
 }
