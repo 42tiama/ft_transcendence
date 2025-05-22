@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "npm run build --workspaces",
-    "start": "node ./build/users-service.js & node ./build/server/server.js"
+    "start": "npm run build && node build/backend/server.js"
   },
   "keywords": [],
   "author": "",
