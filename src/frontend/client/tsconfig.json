@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "../../build/frontend",
+    "outDir": "../../build",
     "lib": [
       "ESNext",
       "dom"
     ],
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "target": "ES2016",
+    // "moduleResolution": "node",
     "baseUrl": ".",
     "esModuleInterop": true,
     "resolveJsonModule": true

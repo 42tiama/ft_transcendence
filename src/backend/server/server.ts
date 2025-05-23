@@ -34,7 +34,7 @@ server.get("/:path*", (request, reply) => {
 });
 
 //start listening
-server.listen({ host: "0.0.0.0", port: 8042 }, (err, address) => {
+server.listen({ host: "0.0.0.0", port: 8043 }, (err, address) => {
     if (err) {
         server.log.error(err);
         process.exit(1);

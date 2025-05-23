@@ -12,7 +12,7 @@ services:
             - ./:/fullbase:cached
             - nvim-data:/home/node/.local
         ports:
-            - "8042:8042"
+            - "8043:8043"
         env_file:
             - .env
 
@@ -21,6 +21,14 @@ services:
         build:
           context: .
           dockerfile: containers/server/Dockerfile
+
+    client:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/client/Dockerfile
+        ports:
+            - "8042:8042"
 
 volumes:
   nvim-data:

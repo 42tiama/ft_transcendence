@@ -12,4 +12,4 @@ COPY --from=builder /src/build/backend/server.js .
 COPY --from=builder /src/backend/server/package.json .
 COPY --from=builder /src/node_modules ./node_modules
 
-CMD node server.js
+ENTRYPOINT ["node", "server.js"]
