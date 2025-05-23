@@ -1,8 +1,5 @@
 import fastify from "fastify";
-import fastifyStatic from "@fastify/static";
 import fastifyHttpProxy from "@fastify/http-proxy";
-
-import { join } from "node:path";
 
 const loggerOptions = {
     transport: {
@@ -15,13 +12,6 @@ const loggerOptions = {
 //instatiate server
 const server = fastify({ logger: loggerOptions });
 
-//register plugin to server static files
-
-server.register(fastifyStatic,
-{
-	root: join(__dirname, '../../')
-});
-
 //register plugin to send request to other services
 // server.register(fastifyHttpProxy, {
 // 	upstream: 'http://localhost:8043',
@@ -29,11 +19,9 @@ server.register(fastifyStatic,
 // 	});
 
 //business logic
-server.get("/:path*", (request, reply) => {
-    reply.sendFile("build/frontend/static/html/index.html");
-});
 
 //start listening
+//TODO: change port that api-gateway is listening. Since we'll use https, it will be 443
 server.listen({ host: "0.0.0.0", port: 8043 }, (err, address) => {
     if (err) {
         server.log.error(err);

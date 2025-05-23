@@ -27,7 +27,7 @@
     "tsx": "^4.19.4"
   },
   "workspaces": [
-    "backend/server",
+    "backend/api-gateway",
     "frontend/client"
   ]
 }

@@ -16,17 +16,19 @@ services:
         env_file:
             - .env
 
-    server:
+    api-gateway:
         restart: always
         build:
           context: .
-          dockerfile: containers/server/Dockerfile
+          dockerfile: containers/api-gateway/Dockerfile
 
     client:
         restart: always
         build:
           context: .
           dockerfile: containers/client/Dockerfile
+        links:
+          - "api-gateway:api.transcendence"
         ports:
             - "8042:8042"
 
