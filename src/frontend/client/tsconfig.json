@@ -14,9 +14,6 @@
     "resolveJsonModule": true
   },
   "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "**/*.ts",
+    "game/pong.ts"  ]
 }

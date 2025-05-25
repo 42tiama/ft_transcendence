@@ -1,7 +1,7 @@
 import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
-import Leaderboard from './static/js/views/Leaderboard.js';
+import Game from './static/js/views/Game.js';
 
 
 const navigateTo = (url: string) => {
@@ -15,7 +15,7 @@ const router = async () => {
     {path: '/Home', view: Home},
     {path: '/login', view: Login},
     {path: '/register', view: Register},
-    {path: '/leaderboard', view: Leaderboard},
+    {path: '/game', view: Game},
     // {path: '/404,', view: 404}
   ];
 
@@ -44,7 +44,10 @@ const router = async () => {
       appElement.innerHTML = html;
       if (match.route.path === '/login' || match.route.path === '/register') {
         await view.onMount();
-      }
+      } 
+      // else if (match.route.path === '/game') {
+      //   await view.renderGame();
+      // }
     } else {
       console.error('Could not find #app element');
     }
