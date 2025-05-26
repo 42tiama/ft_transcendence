@@ -1,5 +1,6 @@
 import fastify from "fastify";
 import fastifyHttpProxy from "@fastify/http-proxy";
+import cors from "@fastify/cors";
 
 const loggerOptions = {
     transport: {
@@ -9,20 +10,31 @@ const loggerOptions = {
         },
     },
 };
+
+const corsOptions = {
+	origin : true
+}
 //instatiate server
 const server = fastify({ logger: loggerOptions });
 
-//register plugin to send request to other services
+
+//enabling cors
+server.register(cors, corsOptions);
+
+// register plugin to send request to other services
 // server.register(fastifyHttpProxy, {
-// 	upstream: 'http://localhost:8043',
-// 	prefix: '/service1'
-// 	});
+// 	upstream: 'http://auth:8043',
+// 	prefix: '/register'
+// });
+
+server.get('/', (req, reply)=> {
+	reply.send({hello: 'world'});
+})
 
 //business logic
 
 //start listening
-//TODO: change port that api-gateway is listening. Since we'll use https, it will be 443
-server.listen({ host: "0.0.0.0", port: 8043 }, (err, address) => {
+server.listen({ host: "0.0.0.0", port: 8044 }, (err, address) => {
     if (err) {
         server.log.error(err);
         process.exit(1);

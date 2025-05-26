@@ -3,6 +3,7 @@ import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Leaderboard from './static/js/views/Leaderboard.js';
 
+
 const navigateTo = (url: string) => {
   history.pushState(null, '', url);
   void router();
@@ -35,13 +36,13 @@ const router = async () => {
   }
 
   try {
-    const view = new match.route.view();
+    const view = new match.route.view() as any;
     const appElement = document.querySelector('#app');
 
     if (appElement) {
       const html = await view.getHtml();
       appElement.innerHTML = html;
-      if (match.route.path === '/login') {
+      if (match.route.path === '/login' || match.route.path === '/register') {
         await view.onMount();
       }
     } else {

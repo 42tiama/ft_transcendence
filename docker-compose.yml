@@ -21,6 +21,14 @@ services:
         build:
           context: .
           dockerfile: containers/api-gateway/Dockerfile
+        ports:
+            - "8044:8044"
+
+    auth:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/auth/Dockerfile
 
     client:
         restart: always
