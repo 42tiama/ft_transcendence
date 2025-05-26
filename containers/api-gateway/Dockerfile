@@ -12,5 +12,5 @@ COPY --from=builder /src/build/backend/api-gateway.js .
 COPY --from=builder /src/backend/api-gateway/package.json .
 COPY --from=builder /src/node_modules ./node_modules
 
-# ENTRYPOINT ["node", "api-gateway.js"]
-CMD sleep infinity
+ENTRYPOINT ["node", "api-gateway.js"]
+# CMD sleep infinity

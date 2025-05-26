@@ -6,9 +6,9 @@
       "ESNext",
       "dom"
     ],
-    "module": "NodeNext",
-    "target": "ES2016",
-    // "moduleResolution": "node",
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "node",
     "baseUrl": ".",
     "esModuleInterop": true,
     "resolveJsonModule": true

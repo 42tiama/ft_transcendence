@@ -8,7 +8,7 @@ export default class Home extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('build/frontend/static/html/home.html');
+      const response = await fetch('build/static/html/home.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
