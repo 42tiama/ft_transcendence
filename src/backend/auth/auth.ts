@@ -29,7 +29,7 @@ const app = fastify({logger: loggerOptions});
 
 //register plugin
 app.register(fastifyBetterSqlite3, {
-	"pathToDb": './data/users.db',
+	"pathToDb": '/data/users.db',
 	"verbose": console.log
 })
 
@@ -62,7 +62,7 @@ app.get('/', (request, reply) => {
 })
 
 
-app.listen({ port: 8043 }, (err, address) => {
+app.listen({host: "0.0.0.0", port: 8043 }, (err, address) => {
 
 	//these commands will run before server starts listening
 	const db = app.betterSqlite3;

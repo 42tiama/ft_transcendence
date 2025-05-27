@@ -27,22 +27,23 @@ export default class Register extends AbstractView {
 			return;
 		}
 
-		registerBtn.addEventListener('click', this.submitRegistration.bind(this));
+		registerBtn.addEventListener('click', this.submitRegistration);
 	}
 
 	private async submitRegistration(e: Event) : Promise<any> {
 		e.preventDefault();
 
 		try {
-			const response = await fetch("http://localhost:8044");
+			const response = await fetch("http://localhost:8044/register");
 
 			if (!response.ok) {
 				const errText = await response.text();
 				throw new Error(`Server responded with ${response.status}: ${errText}`);
 			}
 
-			const text = response.text();
+			const text = await response.text();
 			alert(`Server says ${text}`);
+			return;
 		}
 		catch (error) {
 			console.error('GET request failed:', error);

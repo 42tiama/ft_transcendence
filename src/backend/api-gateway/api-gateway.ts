@@ -22,13 +22,13 @@ const server = fastify({ logger: loggerOptions });
 server.register(cors, corsOptions);
 
 // register plugin to send request to other services
-// server.register(fastifyHttpProxy, {
-// 	upstream: 'http://auth:8043',
-// 	prefix: '/register'
-// });
+server.register(fastifyHttpProxy, {
+	upstream: 'http://auth:8043',
+	prefix: '/register'
+});
 
 server.get('/', (req, reply)=> {
-	reply.send({hello: 'world'});
+	reply.send({hello: 'from api-gateway'});
 })
 
 //business logic

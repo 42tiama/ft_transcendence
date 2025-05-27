@@ -29,6 +29,8 @@ services:
         build:
           context: .
           dockerfile: containers/auth/Dockerfile
+        volumes:
+          - auth-data:/data
 
     client:
         restart: always
@@ -42,3 +44,4 @@ services:
 
 volumes:
   nvim-data:
+  auth-data:
