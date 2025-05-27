@@ -13,5 +13,5 @@ COPY --from=builder /src/build/auth.js .
 COPY --from=builder /src/backend/auth/package.json .
 COPY --from=builder /src/node_modules ./node_modules
 
-# ENTRYPOINT ["node", "auth.js"]
-CMD sleep infinity
+ENTRYPOINT ["node", "auth.js"]
+# CMD sleep infinity

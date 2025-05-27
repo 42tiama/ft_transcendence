@@ -13,7 +13,7 @@ COPY --from=builder /src/build/ .
 COPY --from=builder /src/frontend/client/package.json .
 COPY --from=builder /src/node_modules ./node_modules
 
-# ENTRYPOINT ["node", "client.js"]
+ENTRYPOINT ["node", "client.js"]
 
 #For debugging purposes
-CMD sleep infinity
+# CMD sleep infinity
