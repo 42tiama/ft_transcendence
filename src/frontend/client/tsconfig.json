@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "../../build/frontend",
+    "outDir": "../../build",
     "lib": [
       "ESNext",
       "dom"

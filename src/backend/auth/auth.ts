@@ -29,7 +29,7 @@ const app = fastify({logger: loggerOptions});
 
 //register plugin
 app.register(fastifyBetterSqlite3, {
-	"pathToDb": './data/users.db',
+	"pathToDb": '/data/users.db',
 	"verbose": console.log
 })
 
@@ -48,20 +48,21 @@ app.post('/', (request: FastifyRequest<{ Body: UserRequestBody }>, reply) => {
   }
 })
 
-app.get('/', () => {
-	const db = app.betterSqlite3;
-
-	console.log("inside route callback");
-	const stmt = db.prepare(`SELECT * FROM users`);
-	const result = stmt.all();
-
-	console.log(result);
-
-	return result;
+app.get('/', (request, reply) => {
+	reply.send("Hello from auth service");
+	// const db = app.betterSqlite3;
+	//
+	// console.log("inside route callback");
+	// const stmt = db.prepare(`SELECT * FROM users`);
+	// const result = stmt.all();
+	//
+	// console.log(result);
+	//
+	// return result;
 })
 
 
-app.listen({ port: 8043 }, (err, address) => {
+app.listen({host: "0.0.0.0", port: 8043 }, (err, address) => {
 
 	//these commands will run before server starts listening
 	const db = app.betterSqlite3;

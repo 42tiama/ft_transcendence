@@ -4,17 +4,44 @@ services:
     dev:
         restart: always
         build:
-            context: ./docker/dev
-            dockerfile: dockerfile
+            context: .
+            dockerfile: .devcontainer/Dockerfile
         volumes:
-            - ./docker/dev/scripts:/start
+            # - ./docker/dev/scripts:/start
             - ./src:/src
-            - ./:/fullbase
+            - ./:/fullbase:cached
             - nvim-data:/home/node/.local
         ports:
-            - "8042:8042"
+            - "8043:8043"
         env_file:
             - .env
 
+    api-gateway:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/api-gateway/Dockerfile
+        ports:
+            - "8044:8044"
+
+    auth:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/auth/Dockerfile
+        volumes:
+          - auth-data:/data
+
+    client:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/client/Dockerfile
+        links:
+          - "api-gateway:api.transcendence"
+        ports:
+            - "8042:8042"
+
 volumes:
   nvim-data:
+  auth-data:

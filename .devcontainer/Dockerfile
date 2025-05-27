@@ -24,4 +24,4 @@ RUN mkdir -p /home/node/.local && chown node:node -R /home/node/.local
 
 WORKDIR /fullbase/src
 
-CMD sh /start/start.sh
+CMD sleep infinity
