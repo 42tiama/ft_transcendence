@@ -20,6 +20,9 @@ rebuild-apigateway:
 rebuild-auth:
 	docker compose up --detach --build auth
 
+rebuild-cert:
+	docker compose up --detach --build certificate-authority
+
 #clean entire build folder
 bclean:
 	rm -rf src/build/*

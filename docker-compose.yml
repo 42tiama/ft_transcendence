@@ -42,6 +42,13 @@ services:
         ports:
             - "8042:8042"
 
+    certificate-authority:
+        build:
+            context: containers/certificate-authority
+        volumes:
+          - certs:/out
+
 volumes:
   nvim-data:
   auth-data:
+  certs:
