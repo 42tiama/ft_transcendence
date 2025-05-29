@@ -1,6 +1,8 @@
 import fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 
+import { readFileSync } from "node:fs";
+
 const loggerOptions = {
     transport: {
         target: "pino-pretty",
@@ -10,7 +12,15 @@ const loggerOptions = {
     },
 };
 
-const server = fastify({ logger: loggerOptions });
+const httpsOptions = {
+	key: readFileSync("/certs/key.pem"),
+	cert: readFileSync("/certs/cert.pem")
+}
+
+const server = fastify({ 
+	logger: loggerOptions,
+	https: httpsOptions
+});
 
 server.register(fastifyStatic,
 {

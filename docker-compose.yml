@@ -17,9 +17,6 @@ services:
             - .env
 
     api-gateway:
-        depends_on:
-          certificate-authority:
-            condition: service_completed_successfully
         restart: always
         build:
           context: .
@@ -27,57 +24,27 @@ services:
         ports:
             - "8044:8044"
         volumes:
-          - type: volume
-            source: certs
-            target: /certs
-            volume:
-              subpath: api-gateway
+            - ./certs/api-gateway:/certs
 
     auth:
-        depends_on:
-          certificate-authority:
-            condition: service_completed_successfully
         restart: always
         build:
           context: .
           dockerfile: containers/auth/Dockerfile
         volumes:
-          #only has access to relevant certificate
-          - type: volume
-            source: certs
-            target: /certs
-            volume:
-              subpath: auth
-          #another volume
+          - ./certs/auth:/certs
           - auth-data:/data
 
     client:
-        depends_on:
-          certificate-authority:
-            condition: service_completed_successfully
         restart: always
         build:
           context: .
           dockerfile: containers/client/Dockerfile
         volumes:
-          #only has access to relevant certificate
-          - type: volume
-            source: certs
-            target: /certs
-            volume:
-              subpath: client
-        links:
-          - "api-gateway:api.transcendence"
+            - ./certs/client:/certs
         ports:
             - "8042:8042"
-
-    certificate-authority:
-        build:
-            context: containers/certificate-authority
-        volumes:
-          - certs:/out
 
 volumes:
   nvim-data:
   auth-data:
-  certs:

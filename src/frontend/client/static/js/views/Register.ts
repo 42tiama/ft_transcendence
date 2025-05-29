@@ -34,7 +34,7 @@ export default class Register extends AbstractView {
 		e.preventDefault();
 
 		try {
-			const response = await fetch("http://localhost:8044/register");
+			const response = await fetch("https://localhost:8044/register");
 
 			if (!response.ok) {
 				const errText = await response.text();
