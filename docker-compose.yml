@@ -17,26 +17,55 @@ services:
             - .env
 
     api-gateway:
+        depends_on:
+          certificate-authority:
+            condition: service_completed_successfully
         restart: always
         build:
           context: .
           dockerfile: containers/api-gateway/Dockerfile
         ports:
             - "8044:8044"
+        volumes:
+          - type: volume
+            source: certs
+            target: /certs
+            volume:
+              subpath: api-gateway
 
     auth:
+        depends_on:
+          certificate-authority:
+            condition: service_completed_successfully
         restart: always
         build:
           context: .
           dockerfile: containers/auth/Dockerfile
         volumes:
+          #only has access to relevant certificate
+          - type: volume
+            source: certs
+            target: /certs
+            volume:
+              subpath: auth
+          #another volume
           - auth-data:/data
 
     client:
+        depends_on:
+          certificate-authority:
+            condition: service_completed_successfully
         restart: always
         build:
           context: .
           dockerfile: containers/client/Dockerfile
+        volumes:
+          #only has access to relevant certificate
+          - type: volume
+            source: certs
+            target: /certs
+            volume:
+              subpath: client
         links:
           - "api-gateway:api.transcendence"
         ports:

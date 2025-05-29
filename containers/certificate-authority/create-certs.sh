@@ -3,7 +3,7 @@
 set -e
 
 OUT_DIR="/out"
-SERVICES=("api-gateway" "auth")
+SERVICES=("api-gateway" "auth" "client")
 
 ###Generate self signed root Certificate
 mkdir -p $OUT_DIR/ca
@@ -44,5 +44,3 @@ for SERVICE in "${SERVICES[@]}"; do
 	#Explain
 	rm $OUT_DIR/$SERVICE/csr.pem
 done
-
-sleep 5
