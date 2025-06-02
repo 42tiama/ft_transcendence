@@ -2,6 +2,7 @@ import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Game from './static/js/views/Game.js';
+import NotFound from './static/js/views/404.js';
 
 
 const navigateTo = (url: string) => {
@@ -11,12 +12,12 @@ const navigateTo = (url: string) => {
 
 const router = async () => {
   const routes = [
+    {path: '/404,', view: NotFound},
     {path: '/', view: Home},
     {path: '/Home', view: Home},
     {path: '/login', view: Login},
     {path: '/register', view: Register},
     {path: '/game', view: Game},
-    // {path: '/404,', view: 404}
   ];
 
   const potentialMatches = routes.map(route => {
