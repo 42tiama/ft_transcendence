@@ -45,9 +45,9 @@ const router = async () => {
       if (match.route.path === '/login' || match.route.path === '/register') {
         await view.onMount();
       } 
-      // else if (match.route.path === '/game') {
-      //   await view.renderGame();
-      // }
+      else if (match.route.path === '/game') {
+        await view.renderGame();
+      }
     } else {
       console.error('Could not find #app element');
     }

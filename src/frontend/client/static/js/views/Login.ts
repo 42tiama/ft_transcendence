@@ -41,7 +41,7 @@ export default class Login extends AbstractView {
     });
 
     window.google.accounts.id.renderButton(
-      document.getElementById("google-signin-button"), // Target element
+      document.getElementById("google-signin-button")!, // Target element
       {
         type: "standard",
         theme: "filled_black",

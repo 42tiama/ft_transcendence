@@ -1,4 +1,5 @@
 import AbstractView from './AbstractView.js';
+import run from '../../../game/index.js'
 
 export default class Game extends AbstractView {
   constructor() {
@@ -20,6 +21,6 @@ export default class Game extends AbstractView {
   }
 
   async renderGame() {
-  
+    run();
   }
 }
