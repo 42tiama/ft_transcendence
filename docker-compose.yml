@@ -42,6 +42,69 @@ services:
         ports:
             - "8042:8042"
 
+# TODO - enable security, add ssl certificate 
+    elasticsearch:
+        restart: always
+        image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
+        container_name: elasticsearch
+        environment:
+            - ES_JAVA_OPTS=-Xms1g -Xmx1g
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+        mem_limit: 2g
+        ports:
+            - "9200:9200"
+        networks:
+            - elk
+
+    logstash:
+        restart: always
+        image: docker.elastic.co/logstash/logstash:9.0.1
+        container_name: logstash
+        environment:
+            - LS_JAVA_OPTS=-Xms512m -Xmx512m
+        mem_limit: 1g
+        volumes:
+            - ./containers/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+        ports:
+            - "5044:5044"
+        depends_on:
+            - elasticsearch
+        networks:
+            - elk
+
+    kibana:
+        restart: always
+        image: docker.elastic.co/kibana/kibana:9.0.1
+        container_name: kibana
+        environment:
+            - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+        ports:
+            - "5601:5601"
+        depends_on:
+            - elasticsearch
+        networks:
+            - elk
+
+    filebeat:
+        restart: always
+        build:
+          context: ./containers/filebeat
+          dockerfile: Dockerfile
+        container_name: filebeat
+        user: root
+        volumes:
+            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        depends_on:
+            - logstash
+        networks:
+            - elk
+
 volumes:
   nvim-data:
   auth-data:
+
+networks:
+  elk:
+    driver: bridge
