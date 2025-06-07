@@ -4,15 +4,6 @@ import cors from "@fastify/cors";
 
 import { readFileSync } from "node:fs";
 
-const loggerOptions = {
-    transport: {
-        target: "pino-pretty",
-        options: {
-            translateTime: "HH:MM:ss Z",
-        },
-    },
-};
-
 const httpsOptions = {
 	key: readFileSync("/certs/key.pem"),
 	cert: readFileSync("/certs/cert.pem")
@@ -23,8 +14,8 @@ const corsOptions = {
 }
 
 //instatiate server
-const server = fastify({ 
-	logger: loggerOptions,
+const server = fastify({
+	logger: true,
 	https: httpsOptions
 });
 
@@ -64,6 +55,7 @@ server.register(fastifyHttpProxy, {
 });
 
 server.get('/', (req, reply)=> {
+    req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});
 })
 
@@ -75,4 +67,5 @@ server.listen({ host: "0.0.0.0", port: 8044 }, (err, address) => {
         server.log.error(err);
         process.exit(1);
     }
+    server.log.info(`Api-gateway listening at ${address}`);
 });

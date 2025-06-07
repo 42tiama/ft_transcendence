@@ -1,12 +1,12 @@
 filebeat.inputs:
-  - type: filestream 
+  - type: filestream
     enabled: true
     id: "transcendence"
     paths:
       - /var/lib/docker/containers/*/*.log
     parsers:
       - container:
-          stream: all 
+          stream: all
           format: auto
 
 processors:
@@ -16,6 +16,9 @@ processors:
       fields: ["message"]
       target: ""
       overwrite_keys: true
+
+output.elasticsearch:
+  enabled: false
 
 output.logstash:
   hosts: ["logstash:5044"]
