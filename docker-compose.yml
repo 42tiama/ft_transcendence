@@ -42,16 +42,16 @@ services:
         ports:
             - "8042:8042"
 
-# TODO - enable security, add ssl certificate 
+# TODO - enable security, add ssl certificate
     elasticsearch:
         restart: always
         image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
         container_name: elasticsearch
         environment:
-            - ES_JAVA_OPTS=-Xms1g -Xmx1g
+            - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node
             - xpack.security.enabled=false
-        mem_limit: 2g
+        mem_limit: 1g
         ports:
             - "9200:9200"
         networks:
@@ -62,8 +62,8 @@ services:
         image: docker.elastic.co/logstash/logstash:9.0.1
         container_name: logstash
         environment:
-            - LS_JAVA_OPTS=-Xms512m -Xmx512m
-        mem_limit: 1g
+            - LS_JAVA_OPTS=-Xms256m -Xmx256m
+        mem_limit: 512m
         volumes:
             - ./containers/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
         ports:

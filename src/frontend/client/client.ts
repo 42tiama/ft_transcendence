@@ -1,16 +1,16 @@
 import fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 
-const loggerOptions = {
-    transport: {
-        target: "pino-pretty",
-        options: {
-            translateTime: "HH:MM:ss Z",
-        },
-    },
-};
+// const loggerOptions = {
+//     transport: {
+//         target: "pino-pretty",
+//         options: {
+//             translateTime: "HH:MM:ss Z",
+//         },
+//     },
+// };
 
-const server = fastify({ logger: loggerOptions });
+const server = fastify({ logger: true});
 
 server.register(fastifyStatic,
 {

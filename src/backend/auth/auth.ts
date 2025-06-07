@@ -17,15 +17,12 @@ interface UserRequestBody {
   email: string;
 }
 
-const loggerOptions = {
-	transport: {
-		target: 'pino-pretty',
-		options: {
-		translateTime: 'HH:MM:ss Z'}
-	}
-}
+// const loggerOptions = {
+	// base: {service: 'auth'},
+	// timestamp: () => `,"@timestamp":"${new Date().toISOString()}"`
+// }
 
-const app = fastify({logger: loggerOptions});
+const app = fastify({logger: true});
 
 //register plugin
 app.register(fastifyBetterSqlite3, {
@@ -72,9 +69,9 @@ app.listen({host: "0.0.0.0", port: 8043 }, (err, address) => {
 				  name TEXT NOT NULL,
 				  email TEXT NOT NULL UNIQUE)`).run();
 
-	if (err)
-		{
+	if (err) {
 		app.log.error(err);
 		process.exit(1);
-		}
-	});
+	}
+	app.log.info('Auth Service listening at ${address}');
+});
