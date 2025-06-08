@@ -3,6 +3,7 @@ import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Game from './static/js/views/Game.js';
 import NotFound from './static/js/views/404.js';
+import GameMenu from './static/js/views/GameMenu.js';
 
 
 const navigateTo = (url: string) => {
@@ -18,6 +19,7 @@ const router = async () => {
     {path: '/login', view: Login},
     {path: '/register', view: Register},
     {path: '/game', view: Game},
+    {path: '/game-menu', view: GameMenu},
   ];
 
   const potentialMatches = routes.map(route => {
@@ -48,6 +50,9 @@ const router = async () => {
       } 
       else if (match.route.path === '/game') {
         await view.renderGame();
+      }
+      else if (match.route.path === '/game-menu') {
+        view.onMount();
       }
     } else {
       console.error('Could not find #app element');
