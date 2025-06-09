@@ -2,6 +2,8 @@ import { fastify, FastifyRequest } from 'fastify';
 import { Database } from 'better-sqlite3'
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3';
 
+import { readFileSync } from "node:fs";
+
 //since fastify-better-sqlite3 will only decorate fastify instance at runtime,
 //we need to warn the compiler that the fastify object will have a property called
 //betterSqlite3
@@ -25,7 +27,15 @@ const loggerOptions = {
 	}
 }
 
-const app = fastify({logger: loggerOptions});
+const httpsOptions = {
+	key: readFileSync("/certs/key.pem"),
+	cert: readFileSync("/certs/cert.pem")
+}
+
+const app = fastify({
+	logger: loggerOptions,
+	https: httpsOptions
+});
 
 //register plugin
 app.register(fastifyBetterSqlite3, {

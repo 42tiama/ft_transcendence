@@ -23,6 +23,8 @@ services:
           dockerfile: containers/api-gateway/Dockerfile
         ports:
             - "8044:8044"
+        volumes:
+            - ./certs/api-gateway:/certs
 
     auth:
         restart: always
@@ -30,6 +32,7 @@ services:
           context: .
           dockerfile: containers/auth/Dockerfile
         volumes:
+          - ./certs/auth:/certs
           - auth-data:/data
 
     client:
@@ -37,8 +40,8 @@ services:
         build:
           context: .
           dockerfile: containers/client/Dockerfile
-        links:
-          - "api-gateway:api.transcendence"
+        volumes:
+            - ./certs/client:/certs
         ports:
             - "8042:8042"
 
