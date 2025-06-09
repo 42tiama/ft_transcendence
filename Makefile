@@ -10,7 +10,12 @@ all: setup
 # volumes no docker-compose.yaml
 setup:
 	@echo "We'll need your sudo password to install two packages: mkcert and libnss3-tools..."
-	sudo apt update && sudo apt install -y mkcert libnss3-tools 
+	if [ "$$(uname)" = "Darwin" ]; then \
+	brew list mkcert >/dev/null 2>&1 || brew install mkcert; \
+	brew list nss >/dev/null 2>&1 || brew install nss; \
+	else \
+	sudo apt update && sudo apt install -y mkcert libnss3-tools; \
+	fi
 	mkdir -p certs/client certs/api-gateway certs/auth
 	mkcert --install
 	mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
