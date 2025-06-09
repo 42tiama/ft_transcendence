@@ -75,7 +75,9 @@ services:
 
     kibana:
         restart: always
-        image: docker.elastic.co/kibana/kibana:9.0.1
+        build:
+            context: ./containers/kibana
+            dockerfile: Dockerfile
         container_name: kibana
         environment:
             - ELASTICSEARCH_HOSTS=http://elasticsearch:9200

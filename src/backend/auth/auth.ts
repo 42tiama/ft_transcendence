@@ -73,5 +73,5 @@ app.listen({host: "0.0.0.0", port: 8043 }, (err, address) => {
 		app.log.error(err);
 		process.exit(1);
 	}
-	app.log.info('Auth Service listening at ${address}');
+	app.log.info(`Auth Service listening at ${address}`);
 });
