@@ -35,7 +35,36 @@ server.register(cors, corsOptions);
 // register plugin to send request to other services
 server.register(fastifyHttpProxy, {
 	upstream: 'https://auth:8043',
+<<<<<<< HEAD
 	prefix: '/register'
+=======
+	prefix: '/register',
+	rewritePrefix: '/register'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://auth:8043',
+	prefix: '/login',
+	rewritePrefix: '/login'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://auth:8043',
+	prefix: '/changepass',
+	rewritePrefix: '/changepass'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://auth:8043',
+	prefix: '/profile',
+	rewritePrefix: '/profile'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://auth:8043',
+	prefix: '/google-login',
+	rewritePrefix: '/google-login'
+>>>>>>> 4b12564 (Testando Integracao)
 });
 
 server.get('/', (req, reply)=> {

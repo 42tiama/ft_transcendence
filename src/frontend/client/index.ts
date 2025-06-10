@@ -2,7 +2,12 @@ import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Leaderboard from './static/js/views/Leaderboard.js';
+<<<<<<< HEAD
 
+=======
+import ChangePass from './static/js/views/ChangePass.js'; // to change the password
+import Profile from './static/js/views/Profile.js'; // to check the JWT
+>>>>>>> 4b12564 (Testando Integracao)
 
 const navigateTo = (url: string) => {
   history.pushState(null, '', url);
@@ -16,6 +21,11 @@ const router = async () => {
     {path: '/login', view: Login},
     {path: '/register', view: Register},
     {path: '/leaderboard', view: Leaderboard},
+<<<<<<< HEAD
+=======
+		{path: '/changepass', view: ChangePass},
+		{path: '/profile', view: Profile},
+>>>>>>> 4b12564 (Testando Integracao)
     // {path: '/404,', view: 404}
   ];
 
@@ -42,7 +52,15 @@ const router = async () => {
     if (appElement) {
       const html = await view.getHtml();
       appElement.innerHTML = html;
+<<<<<<< HEAD
       if (match.route.path === '/login' || match.route.path === '/register') {
+=======
+      if (match.route.path === '/login' ||
+          match.route.path === '/register' ||
+				  match.route.path === '/changepass' ||
+				  match.route.path === '/profile'
+        ) {
+>>>>>>> 4b12564 (Testando Integracao)
         await view.onMount();
       }
     } else {
