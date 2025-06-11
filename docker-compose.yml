@@ -42,18 +42,22 @@ services:
         ports:
             - "8042:8042"
 
-# TODO - enable security, add ssl certificate
     elasticsearch:
         restart: always
-        image: docker.elastic.co/elasticsearch/elasticsearch:9.0.1
+        build:
+            context: ./containers/elk-logs/elasticsearch
+            dockerfile: Dockerfile
         container_name: elasticsearch
+        volumes:
+            - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node
-            - xpack.security.enabled=false
         mem_limit: 1g
         ports:
             - "9200:9200"
+        depends_on:
+            - certs-generator
         networks:
             - elk
 
@@ -65,7 +69,7 @@ services:
             - LS_JAVA_OPTS=-Xms256m -Xmx256m
         mem_limit: 512m
         volumes:
-            - ./containers/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+            - ./containers/elk-logs/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
         ports:
             - "5044:5044"
         depends_on:
@@ -76,7 +80,7 @@ services:
     kibana:
         restart: always
         build:
-            context: ./containers/kibana
+            context: ./containers/elk-logs/kibana
             dockerfile: Dockerfile
         container_name: kibana
         environment:
@@ -91,8 +95,8 @@ services:
     filebeat:
         restart: always
         build:
-          context: ./containers/filebeat
-          dockerfile: Dockerfile
+            context: ./containers/elk-logs/filebeat
+            dockerfile: Dockerfile
         container_name: filebeat
         user: root
         volumes:
@@ -103,6 +107,14 @@ services:
         networks:
             - elk
 
+    certs-generator:
+        build:
+            context: ./containers/elk-logs/certs-generator
+            dockerfile: Dockerfile
+        container_name: certs-generator
+        volumes:
+            - ./certs/elk:/certs
+
 volumes:
   nvim-data:
   auth-data:
@@ -110,3 +122,7 @@ volumes:
 networks:
   elk:
     driver: bridge
+
+secrets:
+    elastic_password:
+        file: ./secrets/elastic_password.txt
