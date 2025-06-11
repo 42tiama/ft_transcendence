@@ -9,7 +9,7 @@ all: setup
 # 3.Gera certificados para cada um dos servicos. Servicos acessam isso atraves de
 # volumes no docker-compose.yaml
 setup:
-	mkdir -p certs/client certs/api-gateway certs/auth
+	mkdir -p certs/client certs/api-gateway certs/auth certs/elk
 	mkcert --install
 	mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
 	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost
@@ -40,8 +40,6 @@ prepare:
 	  sudo usermod -aG docker cadete; \
 	  sudo pkill -KILL -u cadete; \
 	fi
-
-
 
 clean:
 	docker compose down --volumes --remove-orphans
