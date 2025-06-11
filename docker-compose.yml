@@ -53,6 +53,8 @@ services:
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node
+            - ELASTIC_PASSWORD=secret
+            - KIBANA_PASSWORD=secret
         mem_limit: 1g
         ports:
             - "9200:9200"
@@ -63,13 +65,16 @@ services:
 
     logstash:
         restart: always
-        image: docker.elastic.co/logstash/logstash:9.0.1
+        build:
+            context: ./containers/elk-logs/logstash
+            dockerfile: Dockerfile
         container_name: logstash
+        volumes:
+            - ./certs/elk:/usr/share/logstash/config/certs
         environment:
             - LS_JAVA_OPTS=-Xms256m -Xmx256m
+            - ELASTIC_PASSWORD=secret
         mem_limit: 512m
-        volumes:
-            - ./containers/elk-logs/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
         ports:
             - "5044:5044"
         depends_on:
@@ -83,8 +88,11 @@ services:
             context: ./containers/elk-logs/kibana
             dockerfile: Dockerfile
         container_name: kibana
+        volumes:
+            - ./certs/elk:/usr/share/kibana/config/certs
         environment:
             - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+            - KIBANA_PASSWORD=secret
         ports:
             - "5601:5601"
         depends_on:
@@ -100,6 +108,7 @@ services:
         container_name: filebeat
         user: root
         volumes:
+            - ./certs/elk:/usr/share/filebeat/config/certs
             - /var/lib/docker/containers:/var/lib/docker/containers:ro
             - /var/run/docker.sock:/var/run/docker.sock:ro
         depends_on:
