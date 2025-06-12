@@ -1,6 +1,6 @@
 src/build
 client_secret_445999956724-9nbpuf3kfd38j2hrji5sl86aajcrsaou.apps.googleusercontent.com.json
-.env
+# .env
 src/node_modules
 *.db
 package-lock.json
