@@ -91,7 +91,7 @@ services:
         volumes:
             - ./certs/elk:/usr/share/kibana/config/certs
         environment:
-            - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+            - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
             - KIBANA_PASSWORD=secret
         ports:
             - "5601:5601"
