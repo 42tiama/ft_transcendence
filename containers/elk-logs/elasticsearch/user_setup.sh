@@ -16,7 +16,7 @@ echo "Elasticsearch is ready. Setting passwords..."
 curl -k -X POST "https://localhost:9200/_security/user/kibana_system/_password" \
   -u elastic:"${ELASTIC_PASSWORD}" \
   -H "Content-Type: application/json" \
-  -d '{"password": "${KIBANA_PASSWORD}"}'
+  -d "{\"password\":\"${KIBANA_PASSWORD}\"}"
 
 echo "Passwords set."
 
