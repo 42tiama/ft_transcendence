@@ -2,68 +2,124 @@ import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Leaderboard from './static/js/views/Leaderboard.js';
+import ChangePass from './static/js/views/ChangePass.js'; // to change the password
+import Profile from './static/js/views/Profile.js'; // to check the JWT
 
+import { updateHeaderUserLink } from './static/js/views/Login.js';
+
+function getJwtExpiration(token: string | null): number | null {
+	if (!token) return null;
+	try {
+		const [, payloadB64] = token.split('.');
+		const payload = JSON.parse(atob(payloadB64));
+		return payload.exp ? payload.exp : null;
+	} catch {
+		return null;
+	}
+}
+
+function isJwtValid(token: string | null): boolean {
+	const exp = getJwtExpiration(token);
+	if (!exp) return false;
+	const now = Math.floor(Date.now() / 1000);
+	return exp > now;
+}
+
+function autoLogoutOnJwtExpiry() {
+	setInterval(() => {
+		const jwt = localStorage.getItem('jwt');
+		if (jwt && !isJwtValid(jwt)) {
+			localStorage.removeItem('jwt');
+			localStorage.removeItem('google_jwt');
+			
+			updateHeaderUserLink(false); // <-- update header to "Log In"
+			
+			// Redirect to login page (SPA navigation)
+			if (window.location.pathname !== '/login') {
+				history.pushState({}, '', '/login');
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			}
+			// Optionally, show a message only once
+			if (!window.sessionStorage.getItem('jwt_expired_alerted')) {
+				alert('Session expired. Please log in again.');
+				window.sessionStorage.setItem('jwt_expired_alerted', '1');
+			}
+		} else if (jwt && isJwtValid(jwt)) {
+			// Reset alert flag if user logs in again
+			window.sessionStorage.removeItem('jwt_expired_alerted');
+		}
+	}, 1000); // check every second
+}
 
 const navigateTo = (url: string) => {
-  history.pushState(null, '', url);
-  void router();
+	history.pushState(null, '', url);
+	void router();
 };
 
 const router = async () => {
-  const routes = [
-    {path: '/', view: Home},
-    {path: '/Home', view: Home},
-    {path: '/login', view: Login},
-    {path: '/register', view: Register},
-    {path: '/leaderboard', view: Leaderboard},
-    // {path: '/404,', view: 404}
-  ];
+	const routes = [
+		{path: '/', view: Home},
+		{path: '/Home', view: Home},
+		{path: '/login', view: Login},
+		{path: '/register', view: Register},
+		{path: '/leaderboard', view: Leaderboard},
+		{path: '/changepass', view: ChangePass},
+		{path: '/profile', view: Profile},
+		// {path: '/404,', view: 404}
+	];
 
-  const potentialMatches = routes.map(route => {
-    return {
-      route: route,
-      isMatch: location.pathname === route.path,
-    };
-  });
+	const potentialMatches = routes.map(route => {
+		return {
+			route: route,
+			isMatch: location.pathname === route.path,
+		};
+	});
 
-  let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
+	let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
 
-  if (!match) {
-    match = {
-      route: routes[0],
-      isMatch: true,
-    };
-  }
+	if (!match) {
+		match = {
+			route: routes[0],
+			isMatch: true,
+		};
+	}
 
-  try {
-    const view = new match.route.view() as any;
-    const appElement = document.querySelector('#app');
+	try {
+		const view = new match.route.view() as any;
+		const appElement = document.querySelector('#app');
 
-    if (appElement) {
-      const html = await view.getHtml();
-      appElement.innerHTML = html;
-      if (match.route.path === '/login' || match.route.path === '/register') {
-        await view.onMount();
-      }
-    } else {
-      console.error('Could not find #app element');
-    }
-  } catch (error) {
-    console.error('Error rendering view:', error);
-  }
+		if (appElement) {
+			const html = await view.getHtml();
+			appElement.innerHTML = html;
+			if (match.route.path === '/login' ||
+					match.route.path === '/register' ||
+					match.route.path === '/changepass' ||
+					match.route.path === '/profile'
+				) {
+				await view.onMount();
+			}
+		} else {
+			console.error('Could not find #app element');
+		}
+	} catch (error) {
+		console.error('Error rendering view:', error);
+	}
 };
 
 window.addEventListener('popstate', router);
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.body.addEventListener('click', (e: MouseEvent) => {
-    if (
-      e.target instanceof HTMLAnchorElement &&
-      e.target.matches('[data-link]')
-    ) {
-      e.preventDefault();
-      navigateTo(e.target.href);
-    }
-  });
-  void router();
+	document.body.addEventListener('click', (e: MouseEvent) => {
+		if (
+			e.target instanceof HTMLAnchorElement &&
+			e.target.matches('[data-link]')
+		) {
+			e.preventDefault();
+			navigateTo(e.target.href);
+		}
+	});
+	void router();
+	if (typeof window !== "undefined" && typeof document !== "undefined") {
+		autoLogoutOnJwtExpiry();
+	}
 });

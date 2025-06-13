@@ -34,6 +34,8 @@ services:
         volumes:
           - ./certs/auth:/certs
           - auth-data:/data
+        env_file:
+            - .env
 
     client:
         restart: always

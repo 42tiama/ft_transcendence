@@ -13,5 +13,8 @@ COPY --from=builder /src/build/auth.js .
 COPY --from=builder /src/backend/auth/package.json .
 COPY --from=builder /src/node_modules ./node_modules
 
+#install sqlite3
+RUN apt update && apt install -y sqlite3
+
 ENTRYPOINT ["node", "auth.js"]
 # CMD sleep infinity
