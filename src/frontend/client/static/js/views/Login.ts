@@ -53,7 +53,7 @@ function formatJwtForDisplay(jwt: string | null): string {
 }
 
 // updates the header after login (true = User || false = Log In)
-function updateHeaderUserLink(isLoggedIn: boolean) {
+export function updateHeaderUserLink(isLoggedIn: boolean) {
     const navLinks = document.querySelectorAll('header nav a');
     navLinks.forEach(link => {
         // if logged in, change "Log In" → "User"

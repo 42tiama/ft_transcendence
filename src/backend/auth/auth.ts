@@ -260,12 +260,12 @@ app.post('/login', async (request: FastifyRequest<{ Body: LoginRequestBody }>, r
 			return;
 		}
 
-		// on success: issues a JWT (expires in 10 minutes) and returns user info.
+		// on success: issues a JWT (expires in 12 horas) and returns user info.
 		const token = app.jwt.sign({
 			id: user.id,
 			email: user.email,
 			displayName: user.displayName
-		}, { expiresIn: '10m' });
+		}, { expiresIn: '12h' });
 
 		reply.code(200).send({ 
 			success: true, 
@@ -373,12 +373,12 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 			user = app.betterSqlite3.prepare('SELECT * FROM users WHERE email = ?').get(email) as User | undefined;
 		}
 
-		// issues app JWT (expires in 15 minutes), returns with user info.
+		// issues app JWT (expires in 1 minute), returns with user info.
 		const token = app.jwt.sign({
 			id: user!.id,
 			email: user!.email,
 			displayName: user!.displayName
-		}, { expiresIn: '15m' });
+		}, { expiresIn: '1m' });
 
 		reply.send({ token, email: user!.email, displayName: user!.displayName });
 	} catch (err) {
