@@ -1,0 +1,30 @@
+<div class="min-h-screen bg-transparent text-white flex flex-col items-center py-12 space-y-12">
+  <img src="build/static/css/images/TIAMA-logo.png" alt="" class="max-w-[400px] w-full h-fit drop-shadow-[0_5px_10px_rgba(255,255,255,0.6)]">
+
+  <h1 class="text-4xl font-extrabold text-yellow-400 tracking-wider animate-pulse">Player selection</h1>
+
+  <div class="flex flex-col lg:flex-row gap-10 w-full px-8 max-w-screen-xl">
+
+    <div class="flex-1 bg-white/10 p-6 rounded-2xl border-2 border-cyan-400 shadow-lg">
+      <h2 class="text-xl text-center font-bold mb-4 text-cyan-300 uppercase tracking-wider">Choose your opponents</h2>
+      <div id="available-players" class="grid grid-cols-4 md:grid-cols-6 gap-4">
+        <!-- <div class="player bg-yellow-500 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200">
+          <div class="w-14 h-14 bg-white rounded-full mb-2"></div>
+          <h3 class="font-bold">Allesson</h3>
+        </div> -->
+      </div>
+    </div>
+
+    <div class="flex-1 bg-white/10 p-6 rounded-2xl border-2 border-emerald-400 shadow-lg">
+      <h2 class="text-xl text-center font-bold mb-4 text-emerald-300 uppercase tracking-wider">Selected Players</h2>
+      <div id="selected-players" class="grid grid-cols-2 gap-6 min-h-[200px]">
+      </div>
+    </div>
+  </div>
+
+  <div class="flex gap-6">
+    <a href="/tournament" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-md" data-link>Start Tournament</a>
+    <!-- nesse momento cria-se o campeonato -->
+    <a href="/game-menu" class="bg-red-600 hover:bg-red-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-md" data-link>Cancel</a>
+  </div>
+</div>

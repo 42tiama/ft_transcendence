@@ -1,4 +1,5 @@
 import { Player as PlayerInterface, GameConfig } from '../types.js';
+import User from './User.js';
 
 export class Player implements PlayerInterface {
     x: number;
@@ -6,6 +7,7 @@ export class Player implements PlayerInterface {
     width: number;
     height: number;
     velocityY: number;
+    user: User | null;
 
     constructor(x: number, y: number, config: GameConfig) {
         this.x = x;

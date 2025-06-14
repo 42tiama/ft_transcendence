@@ -9,7 +9,7 @@
     "restart:gateway": "pm2 restart api-gateway",
     "status": "pm2 list",
     "stop": "pm2 stop all",
-    "dev": "pm2 start pm2.config.js --watch"
+    "dev": "npm run build && npm run start"
   },
   "keywords": [],
   "author": "",

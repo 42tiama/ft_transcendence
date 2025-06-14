@@ -1,4 +1,5 @@
 import AbstractView from './AbstractView.js';
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class Settings extends AbstractView {
   constructor() {
@@ -11,4 +12,12 @@ export default class Settings extends AbstractView {
             <h1>SETTINGS</h1>
         `;
   }
+
+  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+  }
+
+  async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+    return;
+  }
+
 }

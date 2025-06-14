@@ -1,4 +1,5 @@
 import AbstractView from './AbstractView.js';
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 // sets the API base URL to the API gateway for all authentication requests.
 const API_BASE = 'https://localhost:8044';
@@ -54,30 +55,30 @@ function formatJwtForDisplay(jwt: string | null): string {
 
 // updates the header after login (true = User || false = Log In)
 export function updateHeaderUserLink(isLoggedIn: boolean) {
-    const navLinks = document.querySelectorAll('header nav a');
-    navLinks.forEach(link => {
-        // if logged in, change "Log In" → "User"
-        if (isLoggedIn && link.textContent?.trim().toLowerCase() === "log in") {
-            link.textContent = "User";
-        }
-        // if logged out, change "User" → "Log In"
-        else if (!isLoggedIn && link.textContent?.trim().toLowerCase() === "user") {
-            link.textContent = "Log In";
-        }
-    });
+	const navLinks = document.querySelectorAll('header nav a');
+	navLinks.forEach(link => {
+		// if logged in, change "Log In" → "User"
+		if (isLoggedIn && link.textContent?.trim().toLowerCase() === "log in") {
+			link.textContent = "User";
+		}
+		// if logged out, change "User" → "Log In"
+		else if (!isLoggedIn && link.textContent?.trim().toLowerCase() === "user") {
+			link.textContent = "Log In";
+		}
+	});
 }
 
 
 // handles sign-in with Google
 async function handleGoogleCredential(response: any) {
-	
+
 	// prevents login if already logged in
 	const existingJwt = localStorage.getItem('jwt');
 	if (isJwtValid(existingJwt)) {
 		alert('You are already logged in. Please log out first to switch accounts.');
 		return;
 	}
-	
+
 	// receives the Google credential (JWT) from the Google sign-in button
 	const credential = response.credential; // The JWT
 
@@ -99,8 +100,8 @@ async function handleGoogleCredential(response: any) {
 			alert('Google login successful!');
 			updateHeaderUserLink(true);
 			// === SPA Navigation to /home ===
-        	window.history.pushState({}, '', '/home');
-        	window.dispatchEvent(new PopStateEvent('popstate'));
+			window.history.pushState({}, '', '/home');
+			window.dispatchEvent(new PopStateEvent('popstate'));
 		} else {
 			alert(data.error || 'Google login failed.');
 		}
@@ -133,12 +134,12 @@ export default class Login extends AbstractView {
 		}
 	}
 
-	async onMount() {
-		
-	const existingJwt = localStorage.getItem('jwt');
-	const appDiv = document.getElementById('app');
+	async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
 
-	if (isJwtValid(existingJwt)) {
+		const existingJwt = localStorage.getItem('jwt');
+		const appDiv = document.getElementById('app');
+
+		if (isJwtValid(existingJwt)) {
 
 			// try to find the header element that says "Login" and change it
 			const navLinks = document.querySelectorAll('header nav a');
@@ -167,7 +168,7 @@ export default class Login extends AbstractView {
 			const formattedJwt = formatJwtForDisplay(existingJwt);
 
 			// renders logout and change password button
-			if (appDiv) {			
+			if (appDiv) {
 				appDiv.innerHTML = `
 					<div class="flex flex-col items-center py-6">
 						<!-- 1cm (~38px) below header. Adjust as needed for your header height. -->
@@ -198,46 +199,40 @@ export default class Login extends AbstractView {
 					</div>
 				`;
 
-			// add event listener for change password
-			const changepassBtn = document.getElementById('changepass-btn');
-			if (changepassBtn) {
-				changepassBtn.addEventListener('click', () => {
-					// SPA navigation - you may need to trigger your router here
-					window.history.pushState({}, '', '/changepass');
-					// If you have a SPA router, trigger it to load the view
-					window.dispatchEvent(new PopStateEvent('popstate'));
-				});
-			}
-			
-			// add event listener for logout
-			const logoutBtn = document.getElementById('logout-btn');
-			if (logoutBtn) {
-				logoutBtn.addEventListener('click', () => {
-					localStorage.removeItem('jwt');
-					localStorage.removeItem('google_jwt');
-					updateHeaderUserLink(false);
-					window.location.reload();
-				});
-			}
+				// add event listener for change password
+				const changepassBtn = document.getElementById('changepass-btn');
+				if (changepassBtn) {
+					changepassBtn.addEventListener('click', () => {
+						// SPA navigation - you may need to trigger your router here
+						window.history.pushState({}, '', '/changepass');
+						// If you have a SPA router, trigger it to load the view
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					});
+				}
 
-			// live update the JWT expiration countdown
-			const expiresSpan = document.getElementById('jwt-expires');
-			if (expiresSpan && payload?.exp) {
-				const interval = setInterval(() => {
-					const time = getJwtTimeRemaining(existingJwt);
-					expiresSpan.textContent = time;
-					if (time === "Expired") clearInterval(interval);
-				}, 1000);
+				// add event listener for logout
+				const logoutBtn = document.getElementById('logout-btn');
+				if (logoutBtn) {
+					logoutBtn.addEventListener('click', () => {
+						localStorage.removeItem('jwt');
+						localStorage.removeItem('google_jwt');
+						updateHeaderUserLink(false);
+						window.location.reload();
+					});
+				}
+
+				// live update the JWT expiration countdown
+				const expiresSpan = document.getElementById('jwt-expires');
+				if (expiresSpan && payload?.exp) {
+					const interval = setInterval(() => {
+						const time = getJwtTimeRemaining(existingJwt);
+						expiresSpan.textContent = time;
+						if (time === "Expired") clearInterval(interval);
+					}, 1000);
+				}
 			}
+			return;
 		}
-		return;
-	}
-
-
-
-
-
-
 
 		// Finds the password field and toggle button
 		const pwd = document.getElementById('password') as HTMLInputElement | null;
@@ -256,17 +251,16 @@ export default class Login extends AbstractView {
 			console.log("Password field or toggle button not found in DOM.");
 		}
 
-
 		// finds the login form with ID login-form
 		const form = document.getElementById('login-form') as HTMLFormElement | null;
 		if (form) {
-			
+
 			// adds a submit event listener
 			form.addEventListener('submit', async (e) => {
-				
+
 				// prevents default form submission
 				e.preventDefault();
-				
+
 				// prevents new login if already logged in
 				const existingJwt = localStorage.getItem('jwt');
 				if (isJwtValid(existingJwt)) {
@@ -274,7 +268,7 @@ export default class Login extends AbstractView {
 					e.preventDefault();
 					return;
 				}
-				
+
 				// grabs input values for email, TOTP code, and new password
 				const emailInput = document.getElementById('email') as HTMLInputElement;
 				const passwordInput = document.getElementById('password') as HTMLInputElement;
@@ -368,5 +362,9 @@ export default class Login extends AbstractView {
 				logo_alignment: "left",
 			}
 		);
+	}
+
+	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+		return;
 	}
 }
