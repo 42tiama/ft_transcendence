@@ -22,7 +22,7 @@ output.elasticsearch:
 
 output.logstash:
   hosts: ["logstash:5044"]
-  ssl.certificate: "/usr/share/filebeat/config/certs/filebeat/filebeat.crt"
-  ssl.key: "/usr/share/filebeat/config/certs/filebeat/filebeat.key"
-  ssl.certificate_authorities: ["/usr/share/filebeat/config/certs/ca/ca.crt"]
+  ssl.certificate: "/usr/share/filebeat/config/certs/cert.pem"
+  ssl.key: "/usr/share/filebeat/config/certs/key.pem"
+  ssl.certificate_authorities: ["/usr/share/filebeat/config/certs/ca/rootCA.pem"]
   ssl.verification_mode: "full"

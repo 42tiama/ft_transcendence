@@ -64,8 +64,8 @@ services:
         mem_limit: 1g
         ports:
             - "9200:9200"
-        depends_on:
-            - certs-generator
+        # depends_on:
+        #     - certs-generator
         # networks:
         #     - elk
 
@@ -118,6 +118,7 @@ services:
         user: root
         volumes:
             - ./certs/filebeat:/usr/share/filebeat/config/certs
+            - ./certs/ca:/usr/share/filebeat/config/certs/ca
             - /var/lib/docker/containers:/var/lib/docker/containers:ro
             - /var/run/docker.sock:/var/run/docker.sock:ro
         depends_on:
@@ -125,13 +126,13 @@ services:
         # networks:
         #     - elk
 
-    certs-generator:
-        build:
-            context: ./containers/elk-logs/certs-generator
-            dockerfile: Dockerfile
-        container_name: temp-certs-generator
-        volumes:
-            - ./certs/elk:/certs
+    # certs-generator:
+    #     build:
+    #         context: ./containers/elk-logs/certs-generator
+    #         dockerfile: Dockerfile
+    #     container_name: temp-certs-generator
+    #     volumes:
+    #         - ./certs/elk:/certs
 
 volumes:
   nvim-data:
