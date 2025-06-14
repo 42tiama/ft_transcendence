@@ -97,6 +97,7 @@ services:
         container_name: kibana
         volumes:
             - ./certs/kibana:/usr/share/kibana/config/certs
+            - ./certs/ca:/usr/share/kibana/config/certs/ca
         environment:
             - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
             - KIBANA_PASSWORD=secret

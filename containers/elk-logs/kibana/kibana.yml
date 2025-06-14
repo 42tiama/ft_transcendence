@@ -4,8 +4,8 @@ elasticsearch.hosts: ["https://elasticsearch:9200"]
 elasticsearch.username: kibana_system
 elasticsearch.password: "${KIBANA_PASSWORD}"
 server.ssl.enabled: true
-server.ssl.certificate: /usr/share/kibana/config/certs/kibana/kibana.crt
-server.ssl.key: /usr/share/kibana/config/certs/kibana/kibana.key
-elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca/ca.crt"]
+server.ssl.certificate: /usr/share/kibana/config/certs/cert.pem
+server.ssl.key: /usr/share/kibana/config/certs/key.pem
+elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/certs/ca/rootCA.pem"]
 elasticsearch.ssl.verificationMode: full
 monitoring.ui.container.elasticsearch.enabled: true
