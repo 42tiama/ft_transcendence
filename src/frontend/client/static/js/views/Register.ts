@@ -151,7 +151,7 @@ export default class Register extends AbstractView {
 			alert('An unexpected error occurred.');
 		}
 	}
-	
+
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
 		return true;
 	}

@@ -4,7 +4,7 @@ import TiamaPong from '../../../game/entities/TiamaPong.js';
 // set the API base URL to the API gateway for all authentication requests
 const API_BASE = 'https://localhost:8044';
 
-// check if login JWT is valid 
+// check if login JWT is valid
 function isJwtValid(token: string | null): boolean {
 	if (!token) return false;
 	try {
@@ -72,15 +72,15 @@ export function updateHeaderUserLink(isLoggedIn: boolean) {
 
 // handle sign-in with Google
 async function handleGoogleCredential(response: any) {
-	
-	// prevent login if already logged in
+
+	// prevents login if already logged in
 	const existingJwt = localStorage.getItem('jwt');
 	if (isJwtValid(existingJwt)) {
 		alert('You are already logged in. Please log out first to switch accounts.');
 		return;
 	}
-	
-	// receive the Google credential (JWT) from the Google sign-in button
+
+	// receives the Google credential (JWT) from the Google sign-in button
 	const credential = response.credential; // The JWT
 
 	// store the Google ID token in localStorage for later inspection
@@ -136,9 +136,9 @@ export default class Login extends AbstractView {
 	}
 
 	async onMount() {
-		
-		const existingJwt = localStorage.getItem('jwt');
-		const appDiv = document.getElementById('app');
+
+	const existingJwt = localStorage.getItem('jwt');
+	const appDiv = document.getElementById('app');
 
 		if (isJwtValid(existingJwt)) {
 
@@ -166,8 +166,8 @@ export default class Login extends AbstractView {
 			// format JWT for 4-line display
 			const formattedJwt = formatJwtForDisplay(existingJwt);
 
-			// render logout and change password button
-			if (appDiv) {		
+			// renders logout and change password button
+			if (appDiv) {
 				appDiv.innerHTML = `
 					<div class="flex flex-col items-center py-6">
 						<p style="margin-top: 38px;" class="text-white mb-0">You are already logged in.</p>
@@ -194,26 +194,27 @@ export default class Login extends AbstractView {
 					</div>
 				`;
 
-				// add event listener for change password
-				const changepassBtn = document.getElementById('changepass-btn');
-				if (changepassBtn) {
-					changepassBtn.addEventListener('click', () => {
-						// SPA navigation to /changepass
-						window.history.pushState({}, '', '/changepass');
-						window.dispatchEvent(new PopStateEvent('popstate'));
-					});
-				}
-			
-				// add event listener for logout
-				const logoutBtn = document.getElementById('logout-btn');
-				if (logoutBtn) {
-					logoutBtn.addEventListener('click', () => {
-						localStorage.removeItem('jwt');
-						localStorage.removeItem('google_jwt');
-						updateHeaderUserLink(false);
-						window.location.reload();
-					});
-				}
+			// add event listener for change password
+			const changepassBtn = document.getElementById('changepass-btn');
+			if (changepassBtn) {
+				changepassBtn.addEventListener('click', () => {
+					// SPA navigation - you may need to trigger your router here
+					window.history.pushState({}, '', '/changepass');
+					// If you have a SPA router, trigger it to load the view
+					window.dispatchEvent(new PopStateEvent('popstate'));
+				});
+			}
+
+			// add event listener for logout
+			const logoutBtn = document.getElementById('logout-btn');
+			if (logoutBtn) {
+				logoutBtn.addEventListener('click', () => {
+					localStorage.removeItem('jwt');
+					localStorage.removeItem('google_jwt');
+					updateHeaderUserLink(false);
+					window.location.reload();
+				});
+			}
 
 				// live update the JWT expiration countdown
 				const expiresSpan = document.getElementById('jwt-expires');
@@ -275,22 +276,22 @@ export default class Login extends AbstractView {
 		// find the login form with ID login-form
 		const form = document.getElementById('login-form') as HTMLFormElement | null;
 		if (form) {
-		
-			// add a submit event listener
+
+			// adds a submit event listener
 			form.addEventListener('submit', async (e) => {
-			
-				// prevent default form submission
+
+				// prevents default form submission
 				e.preventDefault();
-			
-				// prevent new login if already logged in
+
+				// prevents new login if already logged in
 				const existingJwt = localStorage.getItem('jwt');
 				if (isJwtValid(existingJwt)) {
 					alert('You are already logged in. Please log out first to switch accounts.');
 					e.preventDefault();
 					return;
 				}
-			
-				// grab input values for email, TOTP code, and new password
+
+				// grabs input values for email, TOTP code, and new password
 				const emailInput = document.getElementById('email') as HTMLInputElement;
 				const passwordInput = document.getElementById('password') as HTMLInputElement;
 				const totpInput = document.getElementById('totp') as HTMLInputElement;

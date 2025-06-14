@@ -15,7 +15,7 @@ export default class Match {
     constructor(type: string, tournament: TiamaTournament | null, player1: User, player2: User | null) {
         this.matchType = type;
         this.tournamentId = type === 'versus-player' || type === 'versus-ai' ? null : tournament!.tournamentId;
-        this.player1 = player1; 
+        this.player1 = player1;
         this.player2 = player2;
     }
 
