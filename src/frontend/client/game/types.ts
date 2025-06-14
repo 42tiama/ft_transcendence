@@ -27,15 +27,22 @@ export interface User {
     cardColor: number;
 }
 
-export interface Match extends User {
+export interface Match extends User, Tournament {
     matchId: string;
     player1: User;
     player2: User;
 }
 
-export interface Tournament extends Match {
-    tournamentId: number;
-    matches: Match[];
+export interface Tournament {
+    tournamentId: string;
+    currentRound: Match[];
+    totalPlayers: number;
+    totalMatches: number;
+    nextPowerOf2: number;
+    totalByes: number;
+    firstRoundBracketSize: number;
+    totalRounds: number;
+    tournamentFinished: boolean;
 }
 
 export interface Ball extends Position, Size, Velocity {}

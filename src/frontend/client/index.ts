@@ -1,3 +1,5 @@
+import TiamaPong from './game/entities/TiamaPong.js'
+import SpaRouter from './SpaRouter.js';
 
 import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
@@ -9,6 +11,8 @@ import ChangePass from './static/js/views/ChangePass.js'; // to change the passw
 import Profile from './static/js/views/Profile.js'; // to check the JWT
 import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import { updateHeaderUserLink } from './static/js/views/Login.js';
+
+const gameContext: TiamaPong = new TiamaPong();
 
 function getJwtExpiration(token: string | null): number | null {
 	if (!token) return null;
@@ -126,24 +130,21 @@ const router = async () => {
 		if (appElement) {
 			const html = await view.getHtml();
 			appElement.innerHTML = html;
-
-		if (match.route.path === '/login' ||
-			match.route.path === '/register' ||
-			match.route.path === '/changepass' ||
-			match.route.path === '/profile') {
-			await view.onMount();
-      } 
-		else if (match.route.path === '/game') {
-        	await view.renderGame();
-      }
-		else if (match.route.path === '/game-ai') {
-        	await view.onMount();
-      }
-      	else if (match.route.path === '/game-menu') {
-			view.onMount();
-				}
+			if (match.route.path === '/login' ||
+					match.route.path === '/register' ||
+					match.route.path === '/changepass' ||
+					match.route.path === '/profile'
+				) {
+				await view.onMount();
+      		} 
+      		else if (match.route.path === '/game') {
+        		await view.renderGame();
+      		}
+      		else if (match.route.path === '/game-menu') {
+        		view.onMount();
+			}
 		} else {
-				console.error('Could not find #app element');
+			console.error('Could not find #app element');
 		}
 	} catch (error) {
 		console.error('Error rendering view:', error);
@@ -178,3 +179,5 @@ document.addEventListener('DOMContentLoaded', () => {
 		autoLogoutOnJwtExpiry();
 	}
 });
+
+const router: SpaRouter = new SpaRouter(gameContext);

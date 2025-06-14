@@ -1,4 +1,5 @@
 import AbstractView from './AbstractView.js';
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class NotFound extends AbstractView {
   constructor() {
@@ -8,7 +9,7 @@ export default class NotFound extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('build/frontend/static/html/404.html');
+      const response = await fetch('build/static/html/404.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -17,5 +18,12 @@ export default class NotFound extends AbstractView {
       console.error('Error loading template:', error);
       return '<h1 class="h-96 bg-amber-600">Error Loading 404</h1>';
     }
+  }
+
+  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+  }
+
+  async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+    return;
   }
 }

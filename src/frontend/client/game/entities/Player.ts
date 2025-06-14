@@ -1,4 +1,5 @@
 import { Player as PlayerInterface, GameConfig, Ball as BallInterface, Position, Velocity } from '../types.js';
+import User from './User.js';
 
 export class Player implements PlayerInterface {
     x: number;
@@ -6,6 +7,7 @@ export class Player implements PlayerInterface {
     width: number;
     height: number;
     velocityY: number;
+    user: User | null;
     private difficulty: number;
     private ball?: BallInterface;
     private lastDecisionTime: number = 0;

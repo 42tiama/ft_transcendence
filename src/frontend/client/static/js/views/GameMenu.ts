@@ -1,4 +1,7 @@
 import AbstractView from './AbstractView.js';
+import Game from '../../../game/entities/Game.js'
+import User from '../../../game/entities/User.js'
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class GameMenu extends AbstractView {
   selectedMode: { versus: boolean, tournament: boolean };
@@ -25,10 +28,11 @@ export default class GameMenu extends AbstractView {
     }
   }
 
-  moveCursor = (e: KeyboardEvent) => {
+  moveCursor = (e: KeyboardEvent, gameContext: TiamaPong) => {
     const versus = document.getElementById("versus");
     const tournament = document.getElementById("tournament");
-    if (!versus || !tournament) return; // Adicionado para evitar erro se os elementos não existirem
+    const versusLink = document.getElementById("versusLink");
+    const tournamentLink = document.getElementById("tournamentLink");
     if (e.code === "ArrowDown" || e.code === "ArrowUp") {
         e.preventDefault();
         if (e.type === "keydown") {
@@ -44,17 +48,25 @@ export default class GameMenu extends AbstractView {
           tournament.innerHTML = '&#x25b6;';
         else
           tournament.innerHTML = '';
-    } //else if (e.code === "enter") {
-      //if (this.selectedMode.versus) {
-        // startVersusMatch();
-      //}
-      //else if (this.selectedMode.tournament) {
-        // startNewTournament();
-      //}
-    //}
+    } else if (e.code === "Enter") {
+      if (this.selectedMode.versus) {
+        //  startVersusMatch();
+        versusLink.click();
+      }
+      else if (this.selectedMode.tournament) {
+        //  startNewTournament();
+        tournamentLink.click();
+      }
+    }
   } 
 
-  async onMount() {
-    document.addEventListener("keydown", this.moveCursor);
+  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+    document.addEventListener("keydown", (event: KeyboardEvent) => {
+      this.moveCursor(event, gameContext);
+    });
+  }
+  
+  async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+    return;
   }
 }

@@ -1,4 +1,4 @@
-
+import TiamaPong from 'game/entities/TiamaPong.js';
 import AbstractView from './AbstractView.js';
 
 // function to validate email
@@ -23,6 +23,7 @@ function isValidDisplayName(displayName: string): boolean {
 
 // this makes register a view that can be loaded by SPA router
 export default class Register extends AbstractView {
+
 	constructor() {
 		super();
 		// set the page title to "Register" when the view is constructed.
@@ -149,5 +150,9 @@ export default class Register extends AbstractView {
 			console.error('Registration failed:', error);
 			alert('An unexpected error occurred.');
 		}
+	}
+	
+	beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+		return;
 	}
 }
