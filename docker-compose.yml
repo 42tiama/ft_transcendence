@@ -65,8 +65,8 @@ services:
             - "9200:9200"
         depends_on:
             - certs-generator
-        networks:
-            - elk
+        # networks:
+        #     - elk
 
     logstash:
         restart: always
@@ -84,8 +84,8 @@ services:
             - "5044:5044"
         depends_on:
             - elasticsearch
-        networks:
-            - elk
+        # networks:
+        #     - elk
 
     kibana:
         restart: always
@@ -103,8 +103,8 @@ services:
             - "5601:5601"
         depends_on:
             - elasticsearch
-        networks:
-            - elk
+        # networks:
+        #     - elk
 
     filebeat:
         restart: always
@@ -119,8 +119,8 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock:ro
         depends_on:
             - logstash
-        networks:
-            - elk
+        # networks:
+        #     - elk
 
     certs-generator:
         build:
