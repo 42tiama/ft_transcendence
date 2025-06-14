@@ -55,6 +55,7 @@ services:
         container_name: elasticsearch
         volumes:
             - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
+            - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node

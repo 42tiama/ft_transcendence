@@ -9,8 +9,9 @@ all: setup
 # 3.Gera certificados para cada um dos servicos. Servicos acessam isso atraves de
 # volumes no docker-compose.yaml
 setup:
-	mkdir -p certs/client certs/api-gateway certs/auth certs/elk
+	mkdir -p certs/client certs/api-gateway certs/auth certs/elasticsearch certs/kibana certs/logstash certs/filebeat certs/ca
 	mkcert --install
+	cp "$$(mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem
 	mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
 	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
 	mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
