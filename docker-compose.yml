@@ -134,9 +134,9 @@ volumes:
   nvim-data:
   auth-data:
 
-networks:
-  elk:
-    driver: bridge
+# networks:
+#   elk:
+#     driver: bridge
 
 secrets:
     elastic_password:
