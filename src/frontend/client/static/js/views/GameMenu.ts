@@ -14,7 +14,7 @@ export default class GameMenu extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('build/frontend/static/html/game-menu.html');
+      const response = await fetch('build/static/html/game-menu.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

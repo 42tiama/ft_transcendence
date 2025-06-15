@@ -9,7 +9,7 @@ export default class Game extends AbstractView {
 
   async getHtml(): Promise<string> {
     try {
-      const response = await fetch('build/frontend/static/html/game.html');
+      const response = await fetch('build/static/html/game.html');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
