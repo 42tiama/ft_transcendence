@@ -12,7 +12,7 @@ done
 
 echo "$(date): Elasticsearch is ready. Setting passwords..."
 
-# Set kibana_system password via REST API (replace with your password)
+# Set kibana_system password via REST API
 curl -k -X POST "https://localhost:9200/_security/user/kibana_system/_password" \
   -u elastic:"${ELASTIC_PASSWORD}" \
   -H "Content-Type: application/json" \

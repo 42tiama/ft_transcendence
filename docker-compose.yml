@@ -59,15 +59,17 @@ services:
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node
-            - ELASTIC_PASSWORD=secret
-            - KIBANA_PASSWORD=secret
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+            - KIBANA_PASSWORD=${ELASTIC_PASSWORD}
         mem_limit: 1g
         ports:
             - "9200:9200"
-        # depends_on:
-        #     - certs-generator
-        # networks:
-        #     - elk
+        healthcheck:
+            test: ["CMD-SHELL", "curl -s -k -u elastic:${ELASTIC_PASSWORD} https://localhost:9200 >/dev/null || exit 1"]
+            interval: 20s
+            timeout: 10s
+            retries: 50
+            start_period: 20s
 
     logstash:
         restart: always
@@ -80,14 +82,12 @@ services:
             - ./certs/ca:/usr/share/logstash/config/certs/ca
         environment:
             - LS_JAVA_OPTS=-Xms256m -Xmx256m
-            - ELASTIC_PASSWORD=secret
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
         mem_limit: 512m
         ports:
             - "5044:5044"
         depends_on:
             - elasticsearch
-        # networks:
-        #     - elk
 
     kibana:
         restart: always
@@ -100,14 +100,13 @@ services:
             - ./certs/ca:/usr/share/kibana/config/certs/ca
         environment:
             - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
-            - KIBANA_PASSWORD=secret
-            - ELASTIC_PASSWORD=secret
+            - KIBANA_PASSWORD=${ELASTIC_PASSWORD}
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
         ports:
             - "5601:5601"
         depends_on:
-            - elasticsearch
-        # networks:
-        #     - elk
+            elasticsearch:
+                condition: service_healthy
 
     filebeat:
         restart: always
@@ -123,25 +122,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock:ro
         depends_on:
             - logstash
-        # networks:
-        #     - elk
-
-    # certs-generator:
-    #     build:
-    #         context: ./containers/elk-logs/certs-generator
-    #         dockerfile: Dockerfile
-    #     container_name: temp-certs-generator
-    #     volumes:
-    #         - ./certs/elk:/certs
 
 volumes:
   nvim-data:
   auth-data:
-
-# networks:
-#   elk:
-#     driver: bridge
-
-secrets:
-    elastic_password:
-        file: ./secrets/elastic_password.txt
