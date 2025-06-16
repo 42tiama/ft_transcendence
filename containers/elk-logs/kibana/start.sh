@@ -6,7 +6,7 @@
 # Wait until Kibana is up
 until curl -s --cacert /usr/share/kibana/config/certs/ca/rootCA.pem \
   -u elastic:$ELASTIC_PASSWORD https://localhost:5601/api/status | grep -q '"level":"available"'; do
-  echo "Waiting for Kibana..."
+  echo "$(date): Waiting for Kibana..."
   sleep 5
 done
 
