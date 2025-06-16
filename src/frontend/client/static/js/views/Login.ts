@@ -97,8 +97,10 @@ async function handleGoogleCredential(response: any) {
 			// on success: stores your app’s JWT in localStorage and shows a success alert
 			localStorage.setItem('jwt', data.token);
 			alert('Google login successful!');
-			// on failure: alerts the user
 			updateHeaderUserLink(true);
+			// === SPA Navigation to /home ===
+        	window.history.pushState({}, '', '/home');
+        	window.dispatchEvent(new PopStateEvent('popstate'));
 		} else {
 			alert(data.error || 'Google login failed.');
 		}
