@@ -7,13 +7,15 @@ export class Ball implements BallInterface {
     height: number;
     velocityX: number;
     velocityY: number;
+    initialVelocity: number;
 
     constructor(config: GameConfig) {
         this.x = config.boardWidth / 2;
         this.y = config.boardHeight / 2;
         this.width = config.ballWidth;
         this.height = config.ballHeight;
-        this.velocityX = Math.random() < 0.5 ? config.ballVelocity : -config.ballVelocity;
+        this.initialVelocity = config.ballVelocity;
+        this.velocityX = Math.random() < 0.5 ? this.initialVelocity : -this.initialVelocity;
         this.velocityY = config.ballVelocity;
     }
 
@@ -27,9 +29,19 @@ export class Ball implements BallInterface {
         context.fillRect(this.x, this.y, this.width, this.height);
     }
 
-    bounceVertical(speedFactor: number = 1.05): void {
-        this.velocityY = -this.velocityY * speedFactor; // Inverte e acelera
-        this.velocityX *= speedFactor; // Opcional: acelera também no eixo X
+    private limitSpeed(): void {
+        const maxSpeed = this.initialVelocity * 3;
+        const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
+        if (speed > maxSpeed) {
+            const factor = maxSpeed / speed;
+            this.velocityX *= factor;
+            this.velocityY *= factor;
+        }
+    }
+
+    bounceVertical(): void {
+        this.velocityY = -this.velocityY;
+        this.limitSpeed();
     }
 
     // Não utilizado, mas pode ser implementado se necessário e com as devidadas alterações para lógica de reset
@@ -41,7 +53,7 @@ export class Ball implements BallInterface {
     reset(direction: number, config: GameConfig): void {
         this.x = config.boardWidth / 2;
         this.y = config.boardHeight / 2;
-        this.velocityX = Math.random() < 0.5 ? config.ballVelocity : -config.ballVelocity;
+        this.velocityX = direction > 0 ? config.ballVelocity : -config.ballVelocity;
         this.velocityY = 0;
     }
 
@@ -63,7 +75,8 @@ export class Ball implements BallInterface {
         // Normaliza o vetor direção
         const norm = Math.sqrt(directionX ** 2 + directionY ** 2) || 1;
         // Aplica a nova direção mantendo a velocidade atual
-        this.velocityX = (directionX / norm) * currentSpeed;
-        this.velocityY = (directionY / norm) * currentSpeed;
+        this.velocityX = (directionX / norm) * (currentSpeed * 1.15);
+        this.velocityY = (directionY / norm) * (currentSpeed * 1.15);
+        this.limitSpeed();
     }
 }

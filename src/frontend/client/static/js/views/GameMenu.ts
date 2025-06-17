@@ -28,6 +28,7 @@ export default class GameMenu extends AbstractView {
   moveCursor = (e: KeyboardEvent) => {
     const versus = document.getElementById("versus");
     const tournament = document.getElementById("tournament");
+    if (!versus || !tournament) return; // Adicionado para evitar erro se os elementos não existirem
     if (e.code === "ArrowDown" || e.code === "ArrowUp") {
         e.preventDefault();
         if (e.type === "keydown") {
