@@ -11,7 +11,7 @@ ENV NODE_ENV=development
 RUN npm install -g pino-pretty@13.0.0
 
 #neovim rocks
-RUN apt-get update && apt-get install -y libfuse2 fuse lua5.4 tmux tree sqlite3
+RUN apt-get update && apt-get install -y libfuse2 fuse lua5.4 tmux tree sqlite3 lsof
 RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage &&\
 	chmod +x nvim-linux-x86_64.appimage &&\
 	mv nvim-linux-x86_64.appimage /usr/bin/nvim &&\
