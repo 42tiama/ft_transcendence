@@ -2,7 +2,7 @@ import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Game from './static/js/views/Game.js';
-import NotFound from './static/js/views/404.js';
+// import NotFound from './static/js/views/404.js';
 import GameMenu from './static/js/views/GameMenu.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
 import Profile from './static/js/views/Profile.js'; // to check the JWT
@@ -60,7 +60,7 @@ const navigateTo = (url: string) => {
 
 const router = async () => {
 	const routes = [
-    	{path: '/404,', view: NotFound},
+    	// {path: '/404,', view: NotFound},
 		{path: '/', view: Home},
 		{path: '/Home', view: Home},
 		{path: '/login', view: Login},

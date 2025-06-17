@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "npm run build --workspaces",
-    "start": "npm run build && node build/backend/server.js"
+    "start": "npm run build && node build/backend/api-gateway.js"
   },
   "keywords": [],
   "author": "",

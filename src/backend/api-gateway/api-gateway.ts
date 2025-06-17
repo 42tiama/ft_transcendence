@@ -14,8 +14,8 @@ const loggerOptions = {
 };
 
 const httpsOptions = {
-	key: readFileSync("/certs/key.pem"),
-	cert: readFileSync("/certs/cert.pem")
+	key: readFileSync("/fullbase/certs/api-gateway/key.pem"),
+	cert: readFileSync("/fullbase/certs/api-gateway/cert.pem")
 }
 
 const corsOptions = {
