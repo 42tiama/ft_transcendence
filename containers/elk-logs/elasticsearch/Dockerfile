@@ -4,9 +4,9 @@ USER root
 
 COPY elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
 
-COPY user_setup.sh /usr/share/elasticsearch/user_setup.sh
-RUN chmod +x /usr/share/elasticsearch/user_setup.sh
+COPY setup.sh /usr/share/elasticsearch/setup.sh
+RUN chmod +x /usr/share/elasticsearch/setup.sh
 
 USER elasticsearch
 
-ENTRYPOINT ["/usr/share/elasticsearch/user_setup.sh"]
+ENTRYPOINT ["/usr/share/elasticsearch/setup.sh"]
