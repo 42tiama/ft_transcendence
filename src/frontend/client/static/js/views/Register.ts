@@ -113,6 +113,11 @@ export default class Register extends AbstractView {
 			emailInput.value = '';
 			displayNameInput.value = '';
 			passwordInput.value = '';
+
+			// === SPA Navigation to /login ===
+			window.history.pushState({}, '', '/login');
+			window.dispatchEvent(new PopStateEvent('popstate'));
+
 		}
 		catch (error: any) {
 			// catches and logs any unexpected errors
