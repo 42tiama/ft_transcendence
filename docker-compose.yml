@@ -47,6 +47,82 @@ services:
         ports:
             - "8042:8042"
 
+    elasticsearch:
+        restart: always
+        build:
+            context: ./containers/elk-logs/elasticsearch
+            dockerfile: Dockerfile
+        container_name: elasticsearch
+        volumes:
+            - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
+            - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
+        environment:
+            - ES_JAVA_OPTS=-Xms512m -Xmx512m
+            - discovery.type=single-node
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+            - KIBANA_PASSWORD=${ELASTIC_PASSWORD}
+        mem_limit: 1g
+        ports:
+            - "9200:9200"
+        healthcheck:
+            test: ["CMD-SHELL", "curl -s -k -u elastic:${ELASTIC_PASSWORD} https://localhost:9200 >/dev/null || exit 1"]
+            interval: 20s
+            timeout: 10s
+            retries: 50
+            start_period: 20s
+
+    logstash:
+        restart: always
+        build:
+            context: ./containers/elk-logs/logstash
+            dockerfile: Dockerfile
+        container_name: logstash
+        volumes:
+            - ./certs/logstash:/usr/share/logstash/config/certs
+            - ./certs/ca:/usr/share/logstash/config/certs/ca
+        environment:
+            - LS_JAVA_OPTS=-Xms256m -Xmx256m
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+        mem_limit: 512m
+        ports:
+            - "5044:5044"
+        depends_on:
+            - elasticsearch
+
+    kibana:
+        restart: always
+        build:
+            context: ./containers/elk-logs/kibana
+            dockerfile: Dockerfile
+        container_name: kibana
+        volumes:
+            - ./certs/kibana:/usr/share/kibana/config/certs
+            - ./certs/ca:/usr/share/kibana/config/certs/ca
+        environment:
+            - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
+            - KIBANA_PASSWORD=${ELASTIC_PASSWORD}
+            - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+        ports:
+            - "5601:5601"
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+
+    filebeat:
+        restart: always
+        build:
+            context: ./containers/elk-logs/filebeat
+            dockerfile: Dockerfile
+        container_name: filebeat
+        user: root
+        volumes:
+            - ./certs/filebeat:/usr/share/filebeat/config/certs
+            - ./certs/ca:/usr/share/filebeat/config/certs/ca
+            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        depends_on:
+            - logstash
+
 volumes:
   nvim-data:
   auth-data:

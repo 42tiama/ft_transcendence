@@ -103,16 +103,6 @@ function isValidDisplayName(displayName: string): boolean {
 	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 9;
 }
 
-// sets up pretty-printing for logs
-const loggerOptions = {
-	transport: {
-		target: 'pino-pretty',
-		options: {
-			translateTime: 'HH:MM:ss Z'
-		}
-	}
-};
-
 // reads the SSL/TLS certificate and private key
 const httpsOptions = {
 	key: readFileSync("/certs/key.pem"),
@@ -121,7 +111,7 @@ const httpsOptions = {
 
 // creates a new Fastify server instance with logging and HTTPS enabled
 const app = fastify({
-	logger: loggerOptions,
+	logger: true,
 	https: httpsOptions
 });
 
@@ -190,7 +180,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 		reply.code(201).send({ id: result.lastInsertRowid, email, displayName, totpSecret });
 	} catch (err: any) {
 		// handles errors
-		let message = err.message; 
+		let message = err.message;
 		if (message && message.includes('UNIQUE constraint failed: users.email')) {
 			message = 'This email is already registered. Please use another email.';
 		}
@@ -210,7 +200,7 @@ app.post('/login', async (request: FastifyRequest<{ Body: LoginRequestBody }>, r
 		return;
 	}
 
-	// validates password format 
+	// validates password format
 	if (!password) {
 		reply.code(400).send({ error: "Password is required." });
 		return;
@@ -267,11 +257,11 @@ app.post('/login', async (request: FastifyRequest<{ Body: LoginRequestBody }>, r
 			displayName: user.displayName
 		}, { expiresIn: '12h' });
 
-		reply.code(200).send({ 
-			success: true, 
-			email: user.email, 
-			displayName: user.displayName, 
-			token 
+		reply.code(200).send({
+			success: true,
+			email: user.email,
+			displayName: user.displayName,
+			token
 		});
 	} catch (err: any) {
 		// handles errors: bad email, password, TOTP, etc.

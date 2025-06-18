@@ -1,0 +1,28 @@
+filebeat.inputs:
+  - type: filestream
+    enabled: true
+    id: "transcendence"
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    parsers:
+      - container:
+          stream: all
+          format: auto
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+  - decode_json_fields:
+      fields: ["message"]
+      target: ""
+      overwrite_keys: true
+
+output.elasticsearch:
+  enabled: false
+
+output.logstash:
+  hosts: ["logstash:5044"]
+  ssl.certificate: "/usr/share/filebeat/config/certs/cert.pem"
+  ssl.key: "/usr/share/filebeat/config/certs/key.pem"
+  ssl.certificate_authorities: ["/usr/share/filebeat/config/certs/ca/rootCA.pem"]
+  ssl.verification_mode: "full"

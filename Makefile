@@ -9,11 +9,16 @@ all: setup
 # 3.Gera certificados para cada um dos servicos. Servicos acessam isso atraves de
 # volumes no docker-compose.yaml
 setup:
-	mkdir -p certs/client certs/api-gateway certs/auth
+	mkdir -p certs/client certs/api-gateway certs/auth certs/elasticsearch certs/kibana certs/logstash certs/filebeat certs/ca
 	mkcert --install
+	cp "$$(mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem
 	mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
-	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost
+	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
 	mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
+	mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch
+	mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana
+	mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash
+	mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
 	if [ "$$(whoami)" = "cadete" ]; then \
 	  PROFILE=$$(find ~/snap/firefox/common/.mozilla/firefox -maxdepth 1 -type d -name "*.default*" | head -n 1) && \
 	  certutil -A -n "mkcert development CA" -t "CT,C,C" -i  ~/.local/share/mkcert/rootCA.pem -d sql:"$$PROFILE" ; \
@@ -40,8 +45,6 @@ prepare:
 	  sudo usermod -aG docker cadete; \
 	  sudo pkill -KILL -u cadete; \
 	fi
-
-
 
 clean:
 	docker compose down --volumes --remove-orphans
