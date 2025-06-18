@@ -56,6 +56,7 @@ services:
         volumes:
             - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
             - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
+            - elastic-data:/usr/share/elasticsearch/data
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node
@@ -126,3 +127,4 @@ services:
 volumes:
   nvim-data:
   auth-data:
+  elastic-data:
