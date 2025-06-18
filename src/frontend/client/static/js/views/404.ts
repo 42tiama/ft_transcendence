@@ -1,0 +1,21 @@
+import AbstractView from './AbstractView.js';
+
+export default class NotFound extends AbstractView {
+  constructor() {
+    super();
+    this.setTitle('404');
+  }
+
+  async getHtml(): Promise<string> {
+    try {
+      const response = await fetch('build/frontend/static/html/404.html');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.text();
+    } catch (error) {
+      console.error('Error loading template:', error);
+      return '<h1 class="h-96 bg-amber-600">Error Loading 404</h1>';
+    }
+  }
+}
