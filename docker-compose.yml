@@ -1,20 +1,20 @@
 services:
 
 # Serviço de desenvolvimento
-    dev:
-        restart: always
-        build:
-            context: .
-            dockerfile: .devcontainer/Dockerfile
-        volumes:
-            # - ./docker/dev/scripts:/start
-            - ./src:/src
-            - ./:/fullbase:cached
-            - nvim-data:/home/node/.local
-        ports:
-            - "8043:8043"
-        env_file:
-            - .env
+    # dev:
+    #     restart: always
+    #     build:
+    #         context: .
+    #         dockerfile: .devcontainer/Dockerfile
+    #     volumes:
+    #         # - ./docker/dev/scripts:/start
+    #         - ./src:/src
+    #         - ./:/fullbase:cached
+    #         - nvim-data:/home/node/.local
+    #     ports:
+    #         - "8043:8043"
+    #     env_file:
+    #         - .env
 
     api-gateway:
         restart: always
@@ -125,6 +125,5 @@ services:
             - logstash
 
 volumes:
-  nvim-data:
   auth-data:
   elastic-data:
