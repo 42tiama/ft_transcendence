@@ -13,6 +13,9 @@ import fetch from 'node-fetch'; // used for Google OAuth token verification
 // loads environment variables from .env
 dotenv.config();
 
+//captures if we're on devContainer
+const SINGLE_CONTAINER = process.env.SINGLE_CONTAINER;
+
 // reads secrets from env
 const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET;
 const ENCRYPTION_SALT = process.env.ENCRYPTION_SALT;
@@ -115,13 +118,19 @@ const app = fastify({
 	https: httpsOptions
 });
 
+// if in devContainer, creates database in relative path 
+if (SINGLE_CONTAINER === 'true'){
+	app.register(fastifyBetterSqlite3, {
+		"pathToDb": './data/users.db',
+		"verbose": console.log
+	});
+} else {
 // registers SQLite plugin with DB file /data/users.db.
-app.register(fastifyBetterSqlite3, {
-	//"pathToDb": '/data/users.db', CHANGE FOR PRODUCTION
-	"pathToDb": './data/users.db',
-
-	"verbose": console.log
-});
+	app.register(fastifyBetterSqlite3, {
+		"pathToDb": '/data/users.db',
+		"verbose": console.log
+	});
+}
 
 // registers JWT plugin with secret
 app.register(fastifyJwt, {
