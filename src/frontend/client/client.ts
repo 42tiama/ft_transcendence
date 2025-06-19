@@ -3,8 +3,8 @@ import fastifyStatic from "@fastify/static";
 import { readFileSync } from "node:fs";
 
 const httpsOptions = {
-	key: readFileSync("/certs/client/key.pem"),
-	cert: readFileSync("/certs/client/cert.pem")
+	key: readFileSync("certs/client/key.pem"),
+	cert: readFileSync("certs/client/cert.pem")
 }
 
 const server = fastify({
