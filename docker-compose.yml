@@ -23,8 +23,10 @@ services:
           dockerfile: containers/api-gateway/Dockerfile
         ports:
             - "8044:8044"
+        env_file:
+            - .env
         volumes:
-            - ./certs/api-gateway:/certs/api-gateway
+            - ./certs/api-gateway:/build/certs/api-gateway
 
     auth:
         restart: always
@@ -32,7 +34,7 @@ services:
           context: .
           dockerfile: containers/auth/Dockerfile
         volumes:
-          - ./certs/auth:/certs/auth
+          - ./certs/auth:/build/certs/auth
           - auth-data:/data
         env_file:
             - .env
@@ -43,7 +45,9 @@ services:
           context: .
           dockerfile: containers/client/Dockerfile
         volumes:
-            - ./certs/client:/certs/client
+            - ./certs/client:/build/certs/client
+        env_file:
+            - .env
         ports:
             - "8042:8042"
 
