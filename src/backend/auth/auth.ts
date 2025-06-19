@@ -105,8 +105,8 @@ function isValidDisplayName(displayName: string): boolean {
 
 // reads the SSL/TLS certificate and private key
 const httpsOptions = {
-	key: readFileSync("/certs/key.pem"),
-	cert: readFileSync("/certs/cert.pem")
+	key: readFileSync("/certs/auth/key.pem"),
+	cert: readFileSync("/certs/auth/cert.pem")
 };
 
 // creates a new Fastify server instance with logging and HTTPS enabled

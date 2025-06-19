@@ -24,7 +24,7 @@ services:
         ports:
             - "8044:8044"
         volumes:
-            - ./certs/api-gateway:/certs
+            - ./certs/api-gateway:/certs/api-gateway
 
     auth:
         restart: always
@@ -32,7 +32,7 @@ services:
           context: .
           dockerfile: containers/auth/Dockerfile
         volumes:
-          - ./certs/auth:/certs
+          - ./certs/auth:/certs/auth
           - auth-data:/data
         env_file:
             - .env
@@ -43,7 +43,7 @@ services:
           context: .
           dockerfile: containers/client/Dockerfile
         volumes:
-            - ./certs/client:/certs
+            - ./certs/client:/certs/client
         ports:
             - "8042:8042"
 
