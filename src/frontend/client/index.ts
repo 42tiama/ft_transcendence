@@ -8,6 +8,7 @@ import ChangePass from './static/js/views/ChangePass.js'; // to change the passw
 import Profile from './static/js/views/Profile.js'; // to check the JWT
 
 import { updateHeaderUserLink } from './static/js/views/Login.js';
+import Game3d from 'static/js/views/Game3d.js';
 
 function getJwtExpiration(token: string | null): number | null {
 	if (!token) return null;
@@ -66,6 +67,7 @@ const router = async () => {
 		{path: '/login', view: Login},
 		{path: '/register', view: Register},
 		{path: '/game', view: Game},
+		{path: '/game-3d', view: Game3d},
 		{path: '/changepass', view: ChangePass},
 		{path: '/profile', view: Profile},
 		{path: '/game-menu', view: GameMenu},
@@ -101,14 +103,17 @@ const router = async () => {
 				) {
 				await view.onMount();
       } 
-      else if (match.route.path === '/game') {
-        await view.renderGame();
+		else if (match.route.path === '/game') {
+        	await view.renderGame();
       }
-      else if (match.route.path === '/game-menu') {
-        view.onMount();
-			}
+		else if (match.route.path === '/game-3d') {
+        	await view.renderGame();
+      }
+      	else if (match.route.path === '/game-menu') {
+			view.onMount();
+				}
 		} else {
-			console.error('Could not find #app element');
+				console.error('Could not find #app element');
 		}
 	} catch (error) {
 		console.error('Error rendering view:', error);

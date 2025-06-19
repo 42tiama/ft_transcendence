@@ -1,5 +1,5 @@
 import AbstractView from './AbstractView.js';
-// import { run } from '../../../game_3d/main.js';
+import {Game} from '../../../game/entities/Game.js';
 
 export default class Game3d extends AbstractView {
   constructor() {
@@ -21,6 +21,11 @@ export default class Game3d extends AbstractView {
   }
 
   async renderGame() {
-    // run();
+    try {
+      const game = new Game("board");
+      game.start();
+    } catch (error) {
+      console.error("Failed to initialize game:", error);
+    }
   }
 }
