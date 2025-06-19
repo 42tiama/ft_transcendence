@@ -18,6 +18,9 @@ services:
 
     ports:
         - "8043:8043"
+    extra_hosts:
+        - "api-gateway:127.0.0.1"
+        - "auth:127.0.0.1"
     env_file:
         - ../.env
 
