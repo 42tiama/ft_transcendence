@@ -117,7 +117,9 @@ const app = fastify({
 
 // registers SQLite plugin with DB file /data/users.db.
 app.register(fastifyBetterSqlite3, {
-	"pathToDb": '/data/users.db',
+	//"pathToDb": '/data/users.db', CHANGE FOR PRODUCTION
+	"pathToDb": './data/users.db',
+
 	"verbose": console.log
 });
 
