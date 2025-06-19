@@ -6,9 +6,9 @@ import Game from './static/js/views/Game.js';
 import GameMenu from './static/js/views/GameMenu.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
 import Profile from './static/js/views/Profile.js'; // to check the JWT
+import Game3d from './static/js/views/Game3d.js';
 
 import { updateHeaderUserLink } from './static/js/views/Login.js';
-import Game3d from 'static/js/views/Game3d.js';
 
 function getJwtExpiration(token: string | null): number | null {
 	if (!token) return null;
@@ -96,17 +96,18 @@ const router = async () => {
 		if (appElement) {
 			const html = await view.getHtml();
 			appElement.innerHTML = html;
-			if (match.route.path === '/login' ||
-					match.route.path === '/register' ||
-					match.route.path === '/changepass' ||
-					match.route.path === '/profile'
-				) {
-				await view.onMount();
+
+		if (match.route.path === '/login' ||
+			match.route.path === '/register' ||
+			match.route.path === '/changepass' ||
+			match.route.path === '/profile') {
+			await view.onMount();
       } 
 		else if (match.route.path === '/game') {
         	await view.renderGame();
       }
 		else if (match.route.path === '/game-3d') {
+			console.log('Rendering 3D game view');
         	await view.renderGame();
       }
       	else if (match.route.path === '/game-menu') {
