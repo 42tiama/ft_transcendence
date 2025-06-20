@@ -4,7 +4,7 @@
 		"target": "ES2016" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
 		/* Modules */
 		"module": "NodeNext" /* Specify what module code is generated. */,
-		"outDir": "../../build/backend" /* Specify an output folder for all emitted files. */,
+		"outDir": "../../build" /* Specify an output folder for all emitted files. */,
 		"esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
 		"forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */,
 		/* Type Checking */

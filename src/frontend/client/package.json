@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && cp -r static/html ../../build/static && cp -r static/css ../../build/static",
-    "style": "npx @tailwindcss/cli -i ./static/css/style.in.css -o ./static/css/style.out.css --watch"
+    "build": "npx @tailwindcss/cli -i ./static/css/style.in.css -o ./static/css/style.out.css && tsc && cp -r static/html ../../build/static && cp -r static/css ../../build/static",
+    "style": "npx @tailwindcss/cli -i ./static/css/style.in.css -o ./static/css/style.out.css --watch",
+    "start": "node ../../build/client.js"
   },
   "keywords": [],
   "author": "",

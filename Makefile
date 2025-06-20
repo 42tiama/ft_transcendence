@@ -46,6 +46,14 @@ prepare:
 	  sudo pkill -KILL -u cadete; \
 	fi
 
+#Make certificates only for development build (used inside dev container)
+dev-certs:
+	bash -c 'mkdir -p src/build/certs/{api-gateway,auth,client} src/build/data'
+	mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost
+	mkcert -cert-file src/build/certs/auth/cert.pem -key-file src/build/certs/auth/key.pem localhost auth
+	mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost
+
+
 clean:
 	docker compose down --volumes --remove-orphans
 

@@ -7,13 +7,25 @@ services:
     # docker-compose.yml file (the first in the devcontainer.json "dockerComposeFile"
     # array). The sample below assumes your primary file is in the root of your project.
     #
-    # build:
-    #   context: .
-    #   dockerfile: .devcontainer/Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
 
     volumes:
       # Update this to wherever you want VS Code to mount the folder of your project
-      - ./src:/workspace:cached
+      - ..:/fullbase:cached
+      - nvim-data:/home/node/.local
+
+    ports:
+        - "8043:8043"
+    extra_hosts:
+        - "api-gateway:127.0.0.1"
+        - "auth:127.0.0.1"
+    env_file:
+        - ../.env
+
+volumes:
+  nvim-data:
 
     # Uncomment the next four lines if you will use a ptrace-based debugger like C++, Go, and Rust.
     # cap_add:
