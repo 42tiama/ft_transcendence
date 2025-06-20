@@ -4,6 +4,7 @@ import TiamaTournament from './Tournament.js';
 import TiamaMatch from './Match.js';
 import PlayerSelection from '../../static/js/views/PlayerSelection.js';
 import { Player } from './Player.js';
+import { get } from 'node:http';
 
 export default class TiamaPong {
     public tournamentHistory: TiamaTournament[] = [];

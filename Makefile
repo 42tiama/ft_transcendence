@@ -77,7 +77,7 @@ rebuild-auth:
 	docker compose up --detach --build auth
 
 rebuild-apigame:
-	docker compose up --detach --build api-game
+	docker compose up --detach --build game-service
 
 #clean entire build folder
 bclean:
