@@ -29,7 +29,7 @@ services:
             SINGLE_CONTAINER: "false"
         volumes:
             - ./certs/api-gateway:/build/certs/api-gateway
-    
+
     game-service:
         restart: always
         build:

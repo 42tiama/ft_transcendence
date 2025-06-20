@@ -57,7 +57,7 @@ dev-certs: install-mkcert
 			./mkcert -install; \
 		fi;
 	cp "$$(./mkcert -CAROOT)/rootCA.pem" src/build/certs/ca/rootCA.pem
-	./mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost 
+	./mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost
 	./mkcert -cert-file src/build/certs/auth/cert.pem -key-file src/build/certs/auth/key.pem localhost auth
 	./mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost
 	./mkcert -cert-file src/build/certs/game-service/cert.pem -key-file src/build/certs/game-service/key.pem localhost game-service
