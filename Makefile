@@ -49,11 +49,12 @@ install-mkcert:
 
 #Make certificates only for development build (used inside dev container)
 dev-certs: install-mkcert
-	bash -c 'mkdir -p src/build/certs/{api-gateway,auth,client} src/build/data'
+	bash -c 'mkdir -p src/build/certs/{api-gateway,auth,client,game-service} src/build/data'
 	./mkcert -install ||\
 	./mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost &&\
 	./mkcert -cert-file src/build/certs/auth/cert.pem -key-file src/build/certs/auth/key.pem localhost auth &&\
-	./mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost 
+	./mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost && \
+	./mkcert -cert-file src/build/certs/game-service/cert.pem -key-file src/build/certs/game-service/key.pem localhost
 
 
 clean:
@@ -74,6 +75,9 @@ rebuild-apigateway:
 
 rebuild-auth:
 	docker compose up --detach --build auth
+
+rebuild-apigame:
+	docker compose up --detach --build api-game
 
 #clean entire build folder
 bclean:
