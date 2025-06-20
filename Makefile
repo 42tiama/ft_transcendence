@@ -16,7 +16,9 @@ setup:
 	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
 	mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
 	mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch
+	chmod 664 ./certs/elasticsearch/cert.pem ./certs/elasticsearch/key.pem
 	mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana
+	chmod 664 ./certs/kibana/cert.pem ./certs/kibana/key.pem
 	mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash
 	mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
 	if [ "$$(whoami)" = "cadete" ]; then \
