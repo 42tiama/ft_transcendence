@@ -1,4 +1,4 @@
-import { Player as PlayerInterface, GameConfig } from '../types.js';
+import { Player as PlayerInterface, GameConfig, Ball as BallInterface } from '../types.js';
 
 export class Player implements PlayerInterface {
     x: number;
@@ -6,13 +6,16 @@ export class Player implements PlayerInterface {
     width: number;
     height: number;
     velocityY: number;
+    private dificulty: number = 0.5;
+    private ball?: BallInterface;
 
-    constructor(x: number, y: number, config: GameConfig) {
+    constructor(x: number, y: number, config: GameConfig, ballInfo?: BallInterface) {
         this.x = x;
         this.y = y;
         this.width = config.playerWidth;
         this.height = config.playerHeight;
         this.velocityY = 0;
+        this.ball = ballInfo;
     }
 
     update(config: GameConfig): void {
@@ -23,7 +26,7 @@ export class Player implements PlayerInterface {
     }
 
     private isOutOfBounds(yPosition: number, config: GameConfig): boolean {
-        return yPosition < 0 || yPosition + this.height > config.boardHeight;
+        return yPosition < 5 || yPosition + this.height > config.boardHeight - 5;
     }
 
     draw(context: CanvasRenderingContext2D, color: string = "skyblue"): void {
@@ -33,5 +36,43 @@ export class Player implements PlayerInterface {
 
     setVelocity(velocity: number): void {
         this.velocityY = velocity;
+    }
+
+    // Atualiza a posição do player IA com velocidade constante, igual ao update normal
+    aiMode(config: GameConfig): void {
+        
+        const reactionZone = this.dificulty ?? 0.5;
+
+        let limitX: number;
+        if (this.x > config.boardWidth / 2) {
+            // player (direita)
+            limitX = config.boardWidth * reactionZone;
+            if (this.ball.x < limitX) {
+                this.setVelocity(0);
+                return;
+            }
+        } else {
+            // player s(esquerda)
+            limitX = config.boardWidth * (1 - reactionZone);
+            if (this.ball.x > limitX) {
+                this.setVelocity(0);
+                return;
+            }
+        }
+
+        const centerY = this.y + this.height / 2;
+        if (this.ball.y < centerY - 2) {
+            this.setVelocity(-config.playerSpeed);
+        } else if (this.ball.y > centerY + 2) {
+            this.setVelocity(config.playerSpeed);
+        } else {
+            this.setVelocity(0);
+        }
+        this.update(config);
+
+    }
+
+    setDificulty(dificulty: number) {
+        this.dificulty = dificulty;
     }
 }

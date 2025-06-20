@@ -17,6 +17,7 @@ export class Game {
     private renderer: Renderer;
     private player1Score: number = 0;
     private player2Score: number = 0;
+    private updatePlayer2: (config: typeof gameConfig) => void;
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -37,19 +38,27 @@ export class Game {
     }
 
     private initializeGame(): void {
-        // Initialize players
-        this.player1 = new Player(10, gameConfig.boardHeight / 2, gameConfig);
-        this.player2 = new Player(
-            gameConfig.boardWidth - gameConfig.playerWidth - 10,
-            gameConfig.boardHeight / 2,
-            gameConfig
-        );
-
         // Initialize ball
         this.ball = new Ball(gameConfig);
 
+        // Initialize players
+        this.player1 = new Player(10, gameConfig.boardHeight / 2, gameConfig, this.ball);
+        this.player2 = new Player(
+            gameConfig.boardWidth - gameConfig.playerWidth - 10,
+            gameConfig.boardHeight / 2,
+            gameConfig, this.ball);
+
+        const currentRoute = window.location.pathname;
+        // Valida se o game está sendo jogado contra a IA ou outro jogador
+        if (currentRoute === "/game") {
+            this.inputHandler = new InputHandler(this.player1, this.player2);
+            this.updatePlayer2 = (config) => this.player2.update(config);
+        } else {
+            this.inputHandler = new InputHandler(this.player1);
+            this.updatePlayer2 = (config) => this.player2.aiMode(config);
+        }
+
         // Initialize input handler
-        this.inputHandler = new InputHandler(this.player1, this.player2);
 
         // Initialize renderer
         this.renderer = new Renderer(this.context, gameConfig);
@@ -67,14 +76,14 @@ export class Game {
 
         // Update players
         this.player1.update(gameConfig);
-        this.player2.update(gameConfig);
+        this.updatePlayer2(gameConfig);
 
         // Update ball
         this.ball.update();
 
         // Handle ball collisions with walls
         if (this.ball.isOutOfBoundsVertical(gameConfig)) {
-            this.ball.bounceVertical();
+            this.ball.bounceVertical(gameConfig);
         }
 
         // Handle ball collisions with players

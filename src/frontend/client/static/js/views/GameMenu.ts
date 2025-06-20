@@ -1,7 +1,7 @@
 import AbstractView from './AbstractView.js';
 
 export default class GameMenu extends AbstractView {
-  selectedMode: { versus: boolean, tournament: boolean};
+  selectedMode: { versus: boolean, tournament: boolean };
 
   constructor() {
     super();

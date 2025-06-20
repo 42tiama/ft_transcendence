@@ -6,8 +6,7 @@ import Game from './static/js/views/Game.js';
 import GameMenu from './static/js/views/GameMenu.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
 import Profile from './static/js/views/Profile.js'; // to check the JWT
-import Game3d from './static/js/views/Game3d.js';
-
+import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import { updateHeaderUserLink } from './static/js/views/Login.js';
 
 function getJwtExpiration(token: string | null): number | null {
@@ -67,7 +66,7 @@ const router = async () => {
 		{path: '/login', view: Login},
 		{path: '/register', view: Register},
 		{path: '/game', view: Game},
-		{path: '/game-3d', view: Game3d},
+		{path: '/game-ai', view: GameAi},
 		{path: '/changepass', view: ChangePass},
 		{path: '/profile', view: Profile},
 		{path: '/game-menu', view: GameMenu},
@@ -106,9 +105,8 @@ const router = async () => {
 		else if (match.route.path === '/game') {
         	await view.renderGame();
       }
-		else if (match.route.path === '/game-3d') {
-			console.log('Rendering 3D game view');
-        	await view.renderGame();
+		else if (match.route.path === '/game-ai') {
+        	await view.onMount();
       }
       	else if (match.route.path === '/game-menu') {
 			view.onMount();

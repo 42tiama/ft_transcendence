@@ -4,7 +4,7 @@ export const gameConfig: GameConfig = {
     boardWidth: 600,
     boardHeight: 360,
     playerWidth: 10,
-    playerHeight: 40,
+    playerHeight: 50,
     ballWidth: 10,
     ballHeight: 10,
     ballVelocity: 4,

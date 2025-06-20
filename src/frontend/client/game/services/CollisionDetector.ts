@@ -16,7 +16,7 @@ export class CollisionDetector {
             const normalizedRelativeIntersectionY = relativeIntersectY / (player1.height / 2);
             const bounceAngle = normalizedRelativeIntersectionY * (Math.PI / 4); // Máximo de 45 graus
 
-            ball.setDirection(Math.cos(bounceAngle), -Math.sin(bounceAngle)); // Ajuste conforme sua implementação
+            ball.setDirection(Math.cos(bounceAngle), -Math.sin(bounceAngle));
         } else if (this.detect(ball, player2)) {
             const relativeIntersectY = (player2.y + player2.height / 2) - (ball.y + ball.height / 2);
             const normalizedRelativeIntersectionY = relativeIntersectY / (player2.height / 2);
@@ -26,9 +26,9 @@ export class CollisionDetector {
         }
     }
 
-    static handleWallCollision(ball: Ball, fieldHeight: number): void {
-        if (ball.y <= 0 || ball.y + ball.height >= fieldHeight) {
-            ball.bounceVertical();
-        }
-    }
+    // static handleWallCollision(ball: Ball, fieldHeight: number): void {
+    //     if (ball.y <= -10 || ball.y + ball.height >= fieldHeight + 10) {
+    //         ball.bounceVertical();
+    //     }
+    // }
 }

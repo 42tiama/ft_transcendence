@@ -30,7 +30,7 @@ export class Ball implements BallInterface {
     }
 
     private limitSpeed(): void {
-        const maxSpeed = this.initialVelocity * 3;
+        const maxSpeed = this.initialVelocity * 2.5;
         const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
         if (speed > maxSpeed) {
             const factor = maxSpeed / speed;
@@ -39,8 +39,11 @@ export class Ball implements BallInterface {
         }
     }
 
-    bounceVertical(): void {
+    bounceVertical(config: GameConfig): void {
         this.velocityY = -this.velocityY;
+        // Corrige a posição para não ficar presa fora do campo
+        if (this.y <= 5) this.y = 5;
+        if (this.y + this.height >= config.boardHeight - 5) this.y = config.boardHeight - 5 - this.height;
         this.limitSpeed();
     }
 
@@ -58,7 +61,7 @@ export class Ball implements BallInterface {
     }
 
     isOutOfBoundsVertical(config: GameConfig): boolean {
-        return this.y <= 0 || this.y + this.height >= config.boardHeight;
+        return this.y <= 5 || this.y + this.height >= config.boardHeight - 5;
     }
 
     isOutOfBoundsLeft(): boolean {
