@@ -8,9 +8,9 @@
             </h1>
             <div class="bg-yellow-500 text-black p-6 rounded-lg flex flex-col items-center shadow-lg">
                 <div class="w-16 h-16 bg-white rounded-full mb-4"></div>
-                    <h2 class="text-xl font-bold">Allesson</h2>
-                    <p>Record: 120-45</p>
-                    <p>Points: 1500</p>
+                    <h2 id="p1-display-name" class="text-xl font-bold"></h2>
+                    <p id="p1-wins"></p>
+                    <p id="p1-losses"></p>
             </div>
         </div>
 
@@ -26,9 +26,9 @@
             </h1>
             <div class="bg-cyan-700 p-6 rounded-lg flex flex-col items-center shadow-lg">
                 <div class="w-16 h-16 bg-white rounded-full mb-4"></div>
-                <h2 class="text-xl font-bold">Thais</h2>
-                <p>Record: 85-40</p>
-                <p>Points: 1100</p>
+                <h2 id="p2-display-name" class="text-xl font-bold"></h2>
+                <p id="p2-wins"></p>
+                <p id="p2-losses"></p>
             </div>
         </div>
 
@@ -40,12 +40,12 @@
             <div class="flex items-center gap-6">
                 <div class="flex flex-col bg-yellow-500 text-black p-4 rounded-xl items-center w-40">
                     <div class="w-12 h-12 bg-white rounded-full mb-2"></div>
-                    <h3 class="font-bold">Allesson</h3>
+                    <h3 id="player1" class="font-bold"></h3>
                 </div>
                 <div class="text-white text-4xl font-extrabold">VS</div>
                 <div class="flex flex-col bg-cyan-700 text-white p-4 rounded-xl items-center w-40">
                     <div class="w-12 h-12 bg-white rounded-full mb-2"></div>
-                    <h3 class="font-bold">Thais</h3>
+                    <h3 id="player2" class="font-bold"></h3>
                 </div>
             </div>
             <button id="start-button"
@@ -58,10 +58,10 @@
     <!-- rodapé FINAL || next match  -->
 
     <div class="flex flex-col items-center">
-        <p class="text-amber-400 text-lg font-semibold mb-2 animate-pulse">Next Match</p>
-        <div class="flex flex-row items-center gap-4">
+        <p id="match-title" class="text-amber-400 text-lg font-semibold mb-2 animate-pulse"></p>
+        <div id="next-match-info" class="flex flex-row items-center gap-4">
             <div class="bottom-player-info flex flex-row items-center gap-4">
-                <span class="font-semibold text-white">André</span>
+                <span id="next-match-p1" class="font-semibold text-white"></span>
                 <div class="bg-cyan-700 w-8 h-8 px-4 py-2 rounded-lg flex items-center gap-2">
                     <div class="w-4 h-4 bg-white rounded-full"></div>
                 </div>
@@ -73,7 +73,7 @@
                 <div class="bg-orange-500 w-8 h-8 px-4 py-2 rounded-lg flex items-center gap-2">
                     <div class="w-4 h-4 bg-white rounded-full"></div>
                 </div>
-                <span class="font-semibold text-white">Iury</span>
+                <span id="next-match-p2" class="font-semibold text-white"></span>
             </div>
         </div>
     </div>

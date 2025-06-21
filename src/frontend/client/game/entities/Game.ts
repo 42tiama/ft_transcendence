@@ -11,7 +11,6 @@ import TiamaMatch from './Match.js';
 import TiamaPong from './TiamaPong.js';
 
 export default class Game {
-    private gameContext: TiamaPong;
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
     private player1: Player;
@@ -26,8 +25,7 @@ export default class Game {
     private matchTitle: string | null = null;
         private updatePlayer2: (config: typeof gameConfig) => void;
 
-    constructor(game: TiamaPong, canvasId: string) {
-        this.gameContext = game;
+    constructor(currentMatch: TiamaMatch, canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
         if (!this.canvas) {
             throw new Error(`Canvas with id "${canvasId}" not found`);
@@ -44,7 +42,7 @@ export default class Game {
 
         this.initializeGame();
     }
-
+    
     private initializeGame(): void {
         // Initialize ball
         this.ball = new Ball(gameConfig);
@@ -69,32 +67,9 @@ export default class Game {
         // Initialize renderer
         this.renderer = new Renderer(this.context, gameConfig);
     }
-
-    start(): void {
-        this.gameLoop();
-    }
     
-    public createTournament(participants: User[]) {
-        let size: number = this.gameContext.tournamentHistory.push(new TiamaTournament(this.gameContext));
-        this.gameContext.tournamentHistory[size - 1].tournamentId = (size - 1).toString();
-        this.gameContext.tournamentHistory[size - 1].debugPrintRoundArray();
-        this.runTournament(this.gameContext.tournamentHistory[size - 1]);
-    }
-    
-    private runTournament(tournament: TiamaTournament) {
-        // while(tournament.totalRounds != 0) {
-        //     if (tournament.currentRound.length == 1) {
-        //         this.matchTitle = 'FINAL';
-        //     } else if (tournament.currentRound.length == 2) {
-        //         this.matchTitle = 'SEMI-FINALS';
-        //     }
-        //     for (let i : number = 0; i < tournament.currentRound.length; i++) {
-        //         await this.startMatch(tournament.currentRound[i]);
-        //     }
-        //     tournament.currentRound = tournament.createNextRound(tournament.currentRound) // pega os vencedores do round corrente antes de reduzir o numero de rounds
-        //     tournament.totalRounds--;
-        // }
-        // tournament.tournamentFinished = true;
+    start(match : TiamaMatch): void {
+        this.gameLoop(match);
     }
 
     private createVersusMatch(participants: User[]) {
@@ -102,15 +77,11 @@ export default class Game {
         // this.versusMatchHistory[size - 1].matchId = (size - 1).toString();
     }
 
-    public async startMatch(match : Match) {
+    public async startMatch(match : TiamaMatch): Promise<void> {
         this.player1.user = match.player1;
         this.player2.user = match.player2;
-        await this.startGame();
-    }
-
-    public async startGame() {
         this.isGameRunning = true;
-        this.gameLoop();
+        this.gameLoop(match);
     }
 
     public endGame(): void {
@@ -121,8 +92,8 @@ export default class Game {
         }
     }
 
-    private gameLoop(): void {
-        this.animationId = requestAnimationFrame(() => this.gameLoop());
+    private gameLoop(match : TiamaMatch) {
+        this.animationId = requestAnimationFrame(() => this.gameLoop(match));
 
         // Clear canvas
         this.renderer.clear();
@@ -151,24 +122,26 @@ export default class Game {
     
     private checkScore(): void {
         if (this.ball.isOutOfBoundsLeft()) {
-            this.player2Score++;
+            match.player2Score++;
             this.ball.reset(1, gameConfig);
         } else if (this.ball.isOutOfBoundsRight(gameConfig)) {
-            this.player1Score++;
+            match.player1Score++;
             this.ball.reset(-1, gameConfig);
         }
         
-        if (this.player1Score - this.player2Score > 3 || this.player2Score - this.player1Score > 3) {
+        if (match.player1Score - match.player2Score > 3 
+            || match.player2Score - match.player1Score > 3)
+        {
+            match.winner =  match.player1Score > match.player2Score ? match.player1 : match.player2;
             this.endGame();
-            
-            return; // Exit the game loop
+            return;
         }
 
     private drawGameElements(): void {
         this.player1.draw(this.context);
         this.player2.draw(this.context);
         this.ball.draw(this.context);
-        this.renderer.drawScore(this.player1Score, this.player2Score);
+        this.renderer.drawScore(match.player1Score, match.player2Score);
         this.renderer.drawCenterLine();
     }
 

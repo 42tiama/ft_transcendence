@@ -23,8 +23,11 @@ export default class Tournament extends AbstractView {
   }
 
   async beforeMount(gameContext: TiamaPong | null) : Promise<boolean> {
-    if (gameContext.preTournamentSelection.length > 2) 
-        return true;
+    if (gameContext.preTournamentSelection.length > 2) {
+      gameContext.createTournament();
+      return true;
+    }
+
     else {
         alert('You have to choose at least 3 players to play a tournament.');
         return false;
@@ -32,27 +35,7 @@ export default class Tournament extends AbstractView {
   }
 
   async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
-    const startButton = appElement.querySelector('#start-button') as HTMLButtonElement ;
-    const modal = appElement.querySelector('#freeze-time-modal') as HTMLElement;
-    // loadMatchData(gameContext);
-    let countDown: number = 3;
-    
-    if (startButton) {
-      startButton.addEventListener('click', (event: MouseEvent) => {
-        startButton.disabled = true;
-        startButton.style.backgroundColor = "#002c16";
-        
-        const countdownInterval = setInterval(() => {
-          startButton.innerHTML = `Starting in... ${countDown}`;
-          if (countDown < 0) {
-            clearInterval(countdownInterval);
-            modal.style.display = 'none';
-          }
-          countDown--;
-        }, 1000)
-      })
-    }
-    gameContext.createTournament();
+    gameContext.tournamentHistory[0].runTournament(appElement);
   }
 
   // private createVersusMatch(participants: User[]) {

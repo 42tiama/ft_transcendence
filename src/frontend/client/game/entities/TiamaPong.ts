@@ -33,7 +33,7 @@ export default class TiamaPong {
         this.tournamentHistory[size - 1].tournamentId = (size - 1).toString();
         // this.tournamentHistory[size - 1].debugPrintRoundArray();
         // gameContext.runTournament(gameContext.tournamentHistory[size - 1]);
-        console.log(`Tournaments: ${this.tournamentHistory[size - 1].tournamentId}`);
+        // console.log(`Tournaments: ${this.tournamentHistory[size - 1].tournamentId}`);
         // return this.tournamentHistory[size - 1];
     }
 }

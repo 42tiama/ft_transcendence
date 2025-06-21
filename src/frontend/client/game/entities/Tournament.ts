@@ -1,6 +1,6 @@
 import Match from "./Match.js";
-import  User  from "./User.js";
-import  TiamaPong  from "./TiamaPong.js";
+import User from "./User.js";
+import TiamaPong  from "./TiamaPong.js";
 import Game from "./Game.js";
 
 export default class Tournament {
@@ -14,6 +14,7 @@ export default class Tournament {
   firstRoundTotalParticipants: number;
   totalRounds: number;
   tournamentFinished: boolean = false;
+  matchTitle: string = '';
 
   constructor(gameContext: TiamaPong) {
     this.tournamentInit(gameContext);
@@ -69,23 +70,92 @@ export default class Tournament {
     return participants;
   }
 
-  private runTournament() {
-    // while(this.tournament.totalRounds != 0) {
-    //     if (this.tournament.currentRound.length == 1) {
-    //         this.matchTitle = 'FINAL';
-    //     } else if (this.tournament.currentRound.length == 2) {
-    //         this.matchTitle = 'SEMI-FINALS';
-    //     }
-    //     for (let i : number = 0; i < this.tournament.currentRound.length; i++) {
-    //         renderBottomInfo() // sees this.obj and look for a message at matchtTitle or currentRound length to determine if the the front will display a message advertising the stage of the tournament or the next round  
-    //         const currentGame = new Game(this.tournament.currentRound[i], 'canvas');
-            
-    //         //setWinner(tournament.currentRound[i].winner); // api method
-    //     }
-    //     tournament.currentRound = tournament.createNextRound(tournament.currentRound) // pega os vencedores do round corrente antes de reduzir o numero de rounds
-    //     tournament.totalRounds--;
-    // }
-    // tournament.tournamentFinished = true;
+  renderPageInfo(appElement: Element | null, currentMatch: Match, nextMatch: Match | null) {
+    const displayNameP1 = appElement.querySelector('#p1-display-name');
+    const displayNameP2 = appElement.querySelector('#p2-display-name');
+    const p1Wins = appElement.querySelector('#p1-wins');
+    const p1Losses = appElement.querySelector('#p1-losses');
+    const p2Wins = appElement.querySelector('#p2-wins');
+    const p2Losses = appElement.querySelector('#p2-losses');
+
+    const matchTitle = appElement.querySelector('#match-title');
+    const nextMatchInfo = appElement.querySelector('#next-match-info') as HTMLElement;
+    const nextMatchP1 = appElement.querySelector('#next-match-p1');
+    const nextMatchP2 = appElement.querySelector('#next-match-p2');
+
+    displayNameP1.innerHTML = currentMatch.player1.displayName ;
+    displayNameP2.innerHTML = currentMatch.player2.displayName;
+    p1Wins.innerHTML = `Wins: ${currentMatch.player1.wins.toString()}`;
+    p1Losses.innerHTML = `Losses: ${currentMatch.player1.losses.toString()}`;
+    p2Wins.innerHTML = `Wins: ${currentMatch.player2.wins.toString()}`;
+    p2Losses.innerHTML = `Losses: ${currentMatch.player2.losses.toString()}`;
+
+    this.matchTitle != 'Next Match' ? nextMatchInfo.style.display = 'none' : this.matchTitle;
+    matchTitle.innerHTML = this.matchTitle.length === 0 ? 'Next Match' : this.matchTitle;
+
+    nextMatchP1.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
+    nextMatchP2.innerHTML = nextMatch ? nextMatch.player2.displayName : '';
+  }
+
+  private async renderFreezeTimeModalInfo(appElement: Element | null): Promise<void> {
+    const displayNameP1 = appElement.querySelector('#player1');
+    const displayNameP2 = appElement.querySelector('#player2');
+    displayNameP1.textContent = this.currentRound[0].player1.displayName;
+    displayNameP2.textContent = this.currentRound[0].player2.displayName;
+
+    const startButton = appElement.querySelector('#start-button') as HTMLButtonElement ;
+    const modal = appElement.querySelector('#freeze-time-modal') as HTMLElement;
+    let countDown: number = 3;
+
+    if (modal.style.display == 'none') {
+      modal.style.display = 'block';
+    }
+    
+    if (startButton) {
+      return new Promise<void>((resolve) => {
+        startButton.addEventListener('click', (event: MouseEvent) => {
+          startButton.disabled = true;
+          startButton.style.backgroundColor = "#002c16";
+
+          let countDown: number = 3;
+          const countdownInterval = setInterval(() => {
+            startButton.innerHTML = `Starting in... ${countDown}`;
+            if (countDown < 0) {
+              clearInterval(countdownInterval);
+              modal.style.display = 'none';
+              resolve();
+            }
+            countDown--;
+          }, 1000);
+        });
+      });
+  }
+}
+
+  private async renderTournamentInfo(appElement: Element | null, currentMatch: Match, nextMatch: Match | null) {
+    this.renderPageInfo(appElement, currentMatch, nextMatch);
+    await this.renderFreezeTimeModalInfo(appElement);
+  }
+
+  public async runTournament(appElement: Element | null) {
+    while(this.totalRounds != 0) {
+      if (this.totalRounds == 1) {
+        this.matchTitle = 'FINAL';
+      } else if (this.totalRounds == 2) {
+        this.matchTitle = 'SEMI-FINALS';
+      } else if (this.currentRound.length == 1) {
+        this.matchTitle = 'LAST ROUND MATCH!';
+      }
+      for (let i : number = 0; i < this.currentRound.length; i++) {
+        const currentGame = new Game(this.currentRound[i], 'board');
+        await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
+        await currentGame.startMatch(this.currentRound[i]);
+        //setWinner(this.currentRound[i].winner); // api method
+      }
+        this.currentRound = this.createNextRound(this.currentRound) // pega os vencedores do round corrente antes de reduzir o numero de rounds
+        this.totalRounds--;
+      }
+    this.tournamentFinished = true;
   }
 
   private createFirstRound(gameContext: TiamaPong) {
@@ -93,22 +163,30 @@ export default class Tournament {
     this.byes = shuffled.splice(0, this.totalByes);
     // let nextRoundBracketSize : number = this.numberOfWinners1stRound + this.totalByes;
     for (let i = 0; i < this.firstRoundTotalParticipants; i = i + 2) {
-        this.currentRound.push(new Match(gameContext, 'tournament', shuffled[i], shuffled[i + 1], this));
+        this.currentRound.push(new Match('tournament', shuffled[i], shuffled[i + 1]));
     }
     // every time a round finishes we create a new array with the winners of that round;
     // then we match n vs n + 1 -> n = n + 2 until n < than next round bracket
   }
 
-  // public createNextRound(finishedRound: Match[]) : Match[] {
-  //     let nextRound : Match[];
-  //     let winners : User[];
+  public createNextRound(finishedRound: Match[]) : Match[] {
+    let winners : User[] = [];
+    let nextRoundPlayers: User[] = [];
+    let nextRound : Match[] = [];
 
-  //     for (let i : number = 0; i <= finishedRound.length; i++) {
-  //         winners.push(finishedRound[i].winner);
-  //     }
-  //     for (let i : number = 0; i <= winners.length; i+2) {
-  //         nextRound.push(new Match(game, 'tournament', winners[i], winners[i + 1], this));
-  //     }
-  //     return nextRound;
-  // }
+
+      for (let i : number = 0; i <= finishedRound.length; i++) {
+          winners.push(finishedRound[i].winner);
+      }
+      nextRoundPlayers.push(...winners);
+      if (this.totalByes > 0) {
+        this.byes.forEach(byer => {
+          nextRoundPlayers.push(byer);
+        });
+      }
+      for (let i : number = 0; i <= nextRoundPlayers.length; i+2) {
+          nextRound.push(new Match('tournament', nextRoundPlayers[i], nextRoundPlayers[i + 1]));
+      }
+      return nextRound;
+  }
 }
