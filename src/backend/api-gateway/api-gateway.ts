@@ -54,6 +54,12 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/google-login'
 });
 
+server.register(fastifyHttpProxy, {
+	upstream: 'https://game-service:8045',
+	prefix: '/users',
+	rewritePrefix: '/users'
+});
+
 server.get('/', (req, reply)=> {
     req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});

@@ -7,6 +7,7 @@
     "restart:client": "pm2 restart client",
     "restart:auth": "pm2 restart auth",
     "restart:gateway": "pm2 restart api-gateway",
+    "restart:game-service": "pm2 restart game-service",
     "status": "pm2 list",
     "stop": "pm2 stop all",
     "dev": "npm run build && npm run start"

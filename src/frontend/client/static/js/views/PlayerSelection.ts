@@ -65,7 +65,7 @@ export default class PlayerSelection extends AbstractView {
       // Create the name h3 element
       const nameH3 = document.createElement('h3');
       nameH3.className = 'font-bold';
-      nameH3.textContent = player.displayName; // or player.name depending on your User interface
+      nameH3.textContent = player.displayName;
       
       // Append avatar and name to the player card
       playerCard.appendChild(avatarDiv);
@@ -87,7 +87,7 @@ export default class PlayerSelection extends AbstractView {
       // Create the name h3 element
       const nameH3 = document.createElement('h3');
       nameH3.className = 'font-bold';
-      nameH3.textContent = player.displayName; // or player.name depending on your User interface
+      nameH3.textContent = player.displayName;
       
       // Append avatar and name to the player card
       playerCard.appendChild(avatarDiv);

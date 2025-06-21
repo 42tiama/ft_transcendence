@@ -1,3 +1,5 @@
+import UserService from "services/UserService";
+
 export interface Position {
     x: number;
     y: number;
@@ -20,11 +22,8 @@ export interface Player extends Position, Size {
 export interface User {
     id: number;
     displayName: string;
-    userName: string;
-    email: string;
-    record: {wins : number, losses: number};
-    level: number;
-    cardColor: number;
+    wins : number;
+    losses: number;
 }
 
 export interface Match extends User, Tournament {
@@ -56,4 +55,14 @@ export interface GameConfig {
     ballHeight: number;
     ballVelocity: number;
     playerSpeed: number
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export interface GameServices {
+    user: UserService;
 }
