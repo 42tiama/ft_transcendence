@@ -1,5 +1,5 @@
 #builda e inicia todos os containers (inclusive o devcontainer)
-all: install_mkcert setup
+all: install-mkcert setup
 	docker compose up -d
 
 ### HTTPS (mTLS) -> Todo mundo usa https para falar com todo mundo, a.k.a. zero trust
@@ -24,39 +24,20 @@ setup:
 	  certutil -A -n "mkcert development CA" -t "CT,C,C" -i  ~/.local/share/mkcert/rootCA.pem -d sql:"$$PROFILE" ; \
 	fi
 
-install_mkcert:
-	curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-	chmod +x mkcert-v*-linux-amd64
-	mv mkcert-v*-linux-amd64 mkcert
-
-prepare:
-	@echo "We'll need your sudo password to install two packages: mkcert and libnss3-tools..."
-	if [ "$$(uname)" = "Darwin" ]; then \
-	brew list mkcert >/dev/null 2>&1 || brew install mkcert; \
-	brew list nss >/dev/null 2>&1 || brew install nss; \
-	else \
-	sudo apt update && sudo apt install -y mkcert libnss3-tools; \
-	fi
-	if [ "$$(whoami)" = "cadete" ]; then \
-	  sudo apt-get install -y ca-certificates curl && \
-	  sudo install -m 0755 -d /etc/apt/keyrings && \
-	  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
-	  sudo chmod a+r /etc/apt/keyrings/docker.asc && \
-	  echo "deb [arch=$$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-	  $$(. /etc/os-release && echo "$${UBUNTU_CODENAME:-$$VERSION_CODENAME}") stable" | \
-	  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-	  sudo apt-get update && \
-	  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; \
-	  sudo usermod -aG docker cadete; \
-	  sudo pkill -KILL -u cadete; \
+install-mkcert:
+	if [ ! -f "mkcert" ]; then \
+		curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" &&\
+		chmod +x mkcert-v*-linux-amd64 &&\
+		mv mkcert-v*-linux-amd64 mkcert;\
 	fi
 
 #Make certificates only for development build (used inside dev container)
-dev-certs:
+dev-certs: install-mkcert
 	bash -c 'mkdir -p src/build/certs/{api-gateway,auth,client} src/build/data'
-	mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost
-	mkcert -cert-file src/build/certs/auth/cert.pem -key-file src/build/certs/auth/key.pem localhost auth
-	mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost
+	./mkcert -install ||\
+	./mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost &&\
+	./mkcert -cert-file src/build/certs/auth/cert.pem -key-file src/build/certs/auth/key.pem localhost auth &&\
+	./mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost 
 
 
 clean:
