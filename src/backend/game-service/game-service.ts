@@ -81,19 +81,19 @@ app.get('/users/:id', async (request, reply) => {
 
 app.post('/users', async (request, reply) => {
     try {
-        const { display_name, email } = request.body as any;
+        const {displayName} = request.body as any;
         
-        if (!display_name || !email) {
+        if (!displayName) {
             reply.status(400);
-            return { success: false, error: 'The display name and email are required' };
+            return { success: false, error: 'The display name is required' };
         }
 
         const insertUser = db.prepare(`
-            INSERT INTO users (display_name, email) 
-            VALUES (?, ?)
+            INSERT INTO users (displayName) 
+            VALUES (?)
         `);
         
-        const result = insertUser.run(display_name, email);
+        const result = insertUser.run(displayName);
         
         // Get the created user
         const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);

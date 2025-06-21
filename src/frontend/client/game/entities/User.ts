@@ -4,19 +4,14 @@ import TiamaPong from '../entities/TiamaPong.js'
 export default class User implements UserInterface {
     id: number;
     displayName: string;
-    userName: string;
-    email: string;
-    record: {wins : number, losses: number};
-    level: number;
-    cardColor: number;
+    wins : number; 
+    losses: number;
 
     constructor(game: TiamaPong, displayName: string, email: string) {
-        // this.id = this.getId(game);
+        this.id = null;
         this.displayName = displayName;
-        this.email = email;
-        this.record = {wins : 0, losses : 0};
-        this.level = null;
-        this.cardColor = null;
+        this.wins = 0;
+        this.losses = 0;
     }
 
     // getId(game: TiamaPong) : number {
