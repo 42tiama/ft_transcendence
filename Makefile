@@ -1,5 +1,5 @@
 #builda e inicia todos os containers (inclusive o devcontainer)
-all: setup
+all: install_mkcert setup
 	docker compose up -d
 
 ### HTTPS (mTLS) -> Todo mundo usa https para falar com todo mundo, a.k.a. zero trust
@@ -10,19 +10,24 @@ all: setup
 # volumes no docker-compose.yaml
 setup:
 	mkdir -p certs/client certs/api-gateway certs/auth certs/elasticsearch certs/kibana certs/logstash certs/filebeat certs/ca
-	mkcert --install
-	cp "$$(mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem
-	mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
-	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
-	mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
-	mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch
-	mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana
-	mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash
-	mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
+	./mkcert -install ||\
+	cp "$$(./mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem && \
+	./mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost && \
+	./mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth && \
+	./mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost && \
+	./mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch && \
+	./mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana && \
+	./mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash && \
+	./mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
 	if [ "$$(whoami)" = "cadete" ]; then \
 	  PROFILE=$$(find ~/snap/firefox/common/.mozilla/firefox -maxdepth 1 -type d -name "*.default*" | head -n 1) && \
 	  certutil -A -n "mkcert development CA" -t "CT,C,C" -i  ~/.local/share/mkcert/rootCA.pem -d sql:"$$PROFILE" ; \
 	fi
+
+install_mkcert:
+	curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+	chmod +x mkcert-v*-linux-amd64
+	mv mkcert-v*-linux-amd64 mkcert
 
 prepare:
 	@echo "We'll need your sudo password to install two packages: mkcert and libnss3-tools..."
