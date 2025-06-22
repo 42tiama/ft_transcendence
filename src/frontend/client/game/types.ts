@@ -22,6 +22,7 @@ export interface Player extends Position, Size {
 export interface User {
     id: number;
     displayName: string;
+    points: number;
     wins : number;
     losses: number;
 }
@@ -42,6 +43,7 @@ export interface Tournament {
     firstRoundBracketSize: number;
     totalRounds: number;
     tournamentFinished: boolean;
+    tournamentWinner: User;
 }
 
 export interface Ball extends Position, Size, Velocity {}

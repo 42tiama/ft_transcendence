@@ -4,7 +4,8 @@ import User from '../../../game/entities/User.js'
 import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class GameMenu extends AbstractView {
-  selectedMode: { versus: boolean, tournament: boolean};
+  private selectedMode: { versus: boolean, tournament: boolean};
+  private keyHandler?: (event: KeyboardEvent) => void;
 
   constructor() {
     super();
@@ -50,23 +51,35 @@ export default class GameMenu extends AbstractView {
           tournament.innerHTML = '';
     } else if (e.code === "Enter") {
       if (this.selectedMode.versus) {
-        //  startVersusMatch();
+        this.onUnmount()
         versusLink.click();
       }
       else if (this.selectedMode.tournament) {
-        //  startNewTournament();
+        this.onUnmount()
         tournamentLink.click();
       }
     }
   } 
 
   async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
-    document.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (this.keyHandler) {
+      document.removeEventListener("keydown", this.keyHandler);
+    }
+    
+    this.keyHandler = (event: KeyboardEvent) => {
       this.moveCursor(event, gameContext);
-    });
+    };
+    document.addEventListener("keydown", this.keyHandler);
   }
   
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
     return;
+  }
+
+  async onUnmount() {
+    if (this.keyHandler) {
+      document.removeEventListener("keydown", this.keyHandler);
+      this.keyHandler = undefined;
+    }
   }
 }

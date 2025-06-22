@@ -1,5 +1,6 @@
 import { Server } from 'http';
 import { User, ApiResponse } from '../game/types';
+import Match from '../game/entities/Match'
 
 export default class UserService {
   private API_GATEWAY = 'https://localhost:8044';
@@ -38,6 +39,11 @@ export default class UserService {
     //    Server.log.error(result.error || 'Error within updateUserScore callstack');
     }
   }
+
+  public async updateTournamentHistory(matchs: Match[], winner: User): Promise<void> {
+    
+  }
+
 }
 
 // server.log.info(msg)

@@ -14,7 +14,9 @@ export default class Tournament {
   firstRoundTotalParticipants: number;
   totalRounds: number;
   tournamentFinished: boolean = false;
+  tournamentWinner: User;
   matchTitle: string = '';
+  matchLog: Match[] = [];
 
   constructor(gameContext: TiamaPong) {
     this.tournamentInit(gameContext);
@@ -48,13 +50,11 @@ export default class Tournament {
   public debugPrintRoundArray(): void {
     for (let i = 0; i < this.currentRound.length; i++) {
       console.log(`Match ${i}\n`);
-      console.log(`player 1: ${this.currentRound[i].player1.displayName}\n VS `);
-      console.log(`player 2: ${this.currentRound[i].player2.displayName}\n`);
+      console.log(`player 1 - ${this.currentRound[i].player1.displayName} VS ${this.currentRound[i].player2.displayName} - Player 2\n`);
     }
     console.log(`Byers: \n`);
-    for (let i = 0; i <= this.byes.length; i++) {
-      console.log(`Byer ${i}: `);
-      console.log(`${this.byes[i].displayName}`);
+    for (let i = 0; i < this.byes.length; i++) {
+      console.log(`Byer ${i}: ${this.byes[i].displayName}`);
     }
   }
 
@@ -108,9 +108,10 @@ export default class Tournament {
     const modal = appElement.querySelector('#freeze-time-modal') as HTMLElement;
     let countDown: number = 3;
 
-    if (modal.style.display == 'none') {
-      modal.style.display = 'block';
+    if (modal.classList.contains('hidden')) {
+      modal.classList.replace('hidden', 'flex');
     }
+
     if (startButton.disabled == true) {
       startButton.disabled = false;
       startButton.style.backgroundColor = "#00bc7d";
@@ -127,9 +128,10 @@ export default class Tournament {
             startButton.innerHTML = `Starting in... ${countDown}`;
             if (countDown < 0) {
               clearInterval(countdownInterval);
-              modal.style.display = 'none';
+              modal.classList.replace('flex', 'hidden');
               startButton.removeEventListener('click', clickHandler);
               resolve();
+              return;
             }
             countDown--;
           }, 1000);
@@ -160,6 +162,22 @@ export default class Tournament {
     })
   }
 
+  private async renderChampionModal(appElement: Element | null, match: Match): Promise<void> {
+    const championModal = appElement.querySelector('#tournament-winner-modal') as HTMLElement;
+    const winner = appElement.querySelector('#champion-display-name') as HTMLElement;
+    const transcendButton = appElement.querySelector('#transcend-button') as HTMLButtonElement;
+
+    championModal.classList.replace('hidden', 'flex');
+    winner.innerHTML = match.winner.displayName;
+
+    return new Promise<void>((resolve) => {
+      transcendButton.addEventListener('click', (event: MouseEvent) => {
+        championModal.classList.replace('flex', 'hidden');
+        resolve();
+      })
+    })
+  }
+
   public async runTournament(appElement: Element | null) {
     while(!this.tournamentFinished) {
       if (this.totalRounds == 1) {
@@ -172,17 +190,22 @@ export default class Tournament {
       for (let i : number = 0; i < this.currentRound.length; i++) {
         const currentGame = new Game(this.currentRound[i], 'board');
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
+        this.debugPrintRoundArray();
         await currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
+          this.matchLog.push(...this.currentRound);
+          this.tournamentWinner = this.currentRound[i].winner;
           await this.renderMatchWinner(appElement, this.currentRound[i]);
         }
       }
-      if (this.totalRounds == 0)
+      this.matchLog.push(...this.currentRound);
+      this.totalRounds--;
+      if (this.totalRounds == 0) {
         this.tournamentFinished = true;
-      // render champion modal
+        await this.renderChampionModal(appElement, this.currentRound[0]);
+      }
       else {
         this.currentRound = this.createNextRound(this.currentRound);
-        this.totalRounds--;
       }
     }
      // api method
