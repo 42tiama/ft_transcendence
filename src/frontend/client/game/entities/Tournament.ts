@@ -108,20 +108,18 @@ export default class Tournament {
     const modal = appElement.querySelector('#freeze-time-modal') as HTMLElement;
     let countDown: number = 3;
 
-    
-    // console.log(`Counter: ${Tournament.counter}`);
-
     if (modal.style.display == 'none') {
       modal.style.display = 'block';
     }
     if (startButton.disabled == true) {
       startButton.disabled = false;
       startButton.style.backgroundColor = "#00bc7d";
+      startButton.innerHTML = 'Press Start to Play';
     }
     
     if (startButton) {
       return new Promise<void>((resolve) => {
-        startButton.addEventListener('click', (event: MouseEvent) => {
+        const clickHandler = (event: MouseEvent) => {
           startButton.disabled = true;
           startButton.style.backgroundColor = "#002c16";
 
@@ -130,18 +128,36 @@ export default class Tournament {
             if (countDown < 0) {
               clearInterval(countdownInterval);
               modal.style.display = 'none';
+              startButton.removeEventListener('click', clickHandler);
               resolve();
             }
             countDown--;
           }, 1000);
-        });
+        };
+        startButton.addEventListener('click', clickHandler);
       });
+    };
   }
-}
 
   private async renderTournamentInfo(appElement: Element | null, currentMatch: Match, nextMatch: Match | null) {
     this.renderPageInfo(appElement, currentMatch, nextMatch);
     await this.renderFreezeTimeModalInfo(appElement);
+  }
+
+  private async renderMatchWinner(appElement: Element | null, match: Match): Promise<void> {
+    const matchWinnerModal = appElement.querySelector('#match-winner-modal') as HTMLElement;
+    const winner = appElement.querySelector('#winner-display-name') as HTMLElement;
+    const nextMatchButton = appElement.querySelector('#next-match-button') as HTMLButtonElement;
+
+    matchWinnerModal.classList.replace('hidden', 'flex');
+    winner.innerHTML = match.winner.displayName;
+
+    return new Promise<void>((resolve) => {
+      nextMatchButton.addEventListener('click', (event: MouseEvent) => {
+        matchWinnerModal.classList.replace('flex', 'hidden');
+        resolve();
+      })
+    })
   }
 
   public async runTournament(appElement: Element | null) {
@@ -157,26 +173,27 @@ export default class Tournament {
         const currentGame = new Game(this.currentRound[i], 'board');
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
         await currentGame.startMatch(this.currentRound[i]);
-        //setWinner(this.currentRound[i].winner); // api method
+        if (this.matchTitle != 'FINAL') {
+          await this.renderMatchWinner(appElement, this.currentRound[i]);
+        }
       }
       if (this.totalRounds == 0)
         this.tournamentFinished = true;
+      // render champion modal
       else {
         this.currentRound = this.createNextRound(this.currentRound);
         this.totalRounds--;
       }
     }
+     // api method
   }
 
   private createFirstRound(gameContext: TiamaPong) {
     let shuffled : User[] = this.shuffleParticipants(gameContext.preTournamentSelection);
     this.byes = shuffled.splice(0, this.totalByes);
-    // let nextRoundBracketSize : number = this.numberOfWinners1stRound + this.totalByes;
     for (let i = 0; i < this.firstRoundTotalParticipants; i = i + 2) {
         this.currentRound.push(new Match('tournament', shuffled[i], shuffled[i + 1]));
     }
-    // every time a round finishes we create a new array with the winners of that round;
-    // then we match n vs n + 1 -> n = n + 2 until n < than next round bracket
   }
 
   public createNextRound(finishedRound: Match[]) : Match[] {
