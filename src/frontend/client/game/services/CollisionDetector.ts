@@ -1,3 +1,4 @@
+import { GameConfig } from 'game/types';
 import { Ball } from '../entities/Ball';
 import { Player } from '../entities/Player';
 
@@ -26,9 +27,13 @@ export class CollisionDetector {
         }
     }
 
-    // static handleWallCollision(ball: Ball, fieldHeight: number): void {
-    //     if (ball.y <= -10 || ball.y + ball.height >= fieldHeight + 10) {
-    //         ball.bounceVertical();
-    //     }
-    // }
+    static handleWallCollision(ball: Ball, config: GameConfig): void {
+        ball.bounceVertical();
+         // Corrige a posição para não ficar presa fora do campo
+        if (ball.y <= 5) {
+            ball.y = 5;
+        } else if (ball.y + ball.height >= config.boardHeight - 5) { 
+            ball.y = config.boardHeight - 5 - ball.height;
+        }
+    }
 }

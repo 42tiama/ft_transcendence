@@ -8,5 +8,5 @@ export const gameConfig: GameConfig = {
     ballWidth: 10,
     ballHeight: 10,
     ballVelocity: 4,
-    playerSpeed: 4
+    playerSpeed: 5
 };

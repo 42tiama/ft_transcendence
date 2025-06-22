@@ -39,11 +39,8 @@ export class Ball implements BallInterface {
         }
     }
 
-    bounceVertical(config: GameConfig): void {
+    bounceVertical(): void {
         this.velocityY = -this.velocityY;
-        // Corrige a posição para não ficar presa fora do campo
-        if (this.y <= 5) this.y = 5;
-        if (this.y + this.height >= config.boardHeight - 5) this.y = config.boardHeight - 5 - this.height;
         this.limitSpeed();
     }
 
@@ -61,7 +58,7 @@ export class Ball implements BallInterface {
     }
 
     isOutOfBoundsVertical(config: GameConfig): boolean {
-        return this.y <= 5 || this.y + this.height >= config.boardHeight - 5;
+        return this.y <= 0 || this.y + this.height >= config.boardHeight;
     }
 
     isOutOfBoundsLeft(): boolean {

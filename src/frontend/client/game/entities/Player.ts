@@ -6,7 +6,7 @@ export class Player implements PlayerInterface {
     width: number;
     height: number;
     velocityY: number;
-    private dificulty: number = 0.5;
+    private difficulty: number;
     private ball?: BallInterface;
 
     constructor(x: number, y: number, config: GameConfig, ballInfo?: BallInterface) {
@@ -38,22 +38,17 @@ export class Player implements PlayerInterface {
         this.velocityY = velocity;
     }
 
-    // Atualiza a posição do player IA com velocidade constante, igual ao update normal
     aiMode(config: GameConfig): void {
-        
-        const reactionZone = this.dificulty ?? 0.5;
-
         let limitX: number;
+
         if (this.x > config.boardWidth / 2) {
-            // player (direita)
-            limitX = config.boardWidth * reactionZone;
+            limitX = config.boardWidth * this.difficulty;
             if (this.ball.x < limitX) {
                 this.setVelocity(0);
                 return;
             }
         } else {
-            // player s(esquerda)
-            limitX = config.boardWidth * (1 - reactionZone);
+            limitX = config.boardWidth * (1 - this.difficulty);
             if (this.ball.x > limitX) {
                 this.setVelocity(0);
                 return;
@@ -72,7 +67,7 @@ export class Player implements PlayerInterface {
 
     }
 
-    setDificulty(dificulty: number) {
-        this.dificulty = dificulty;
+    setDifficulty(difficultyAi: number) {
+        this.difficulty = difficultyAi;
     }
 }

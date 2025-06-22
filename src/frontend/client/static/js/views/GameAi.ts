@@ -2,6 +2,10 @@ import AbstractView from './AbstractView.js';
 import {Game} from '../../../game/entities/Game.js';
 
 export default class GameAi extends AbstractView {
+
+  private selectedDifficulty: number = 0.5;
+  private game: Game;
+
   constructor() {
     super();
     this.setTitle('Game-AI');
@@ -20,20 +24,74 @@ export default class GameAi extends AbstractView {
     }
   }
 
-  async onMount() {
+  private onClickStartButton() {
     const btn = document.getElementById('start');
+
     if (btn) {
-      btn.addEventListener('click', () => this.renderGame());
+      btn.addEventListener('click', () => {
+
+        if (btn) {
+          this.showElement('start', false);
+          this.onClickDifficultyButton();
+        }
+      });
     }
+  }
+
+  private onClickDifficultyButton() {
+
+    const difficulties = [
+      { id: 'easy', value: 0.7 },
+      { id: 'medium', value: 0.5 },
+      { id: 'hard', value: 0.3 }
+    ];
+
+    const groupButtons = document.getElementById('difficulty-group');
+
+    if (groupButtons) {
+      this.showElement('ai-player');
+      this.showElement('human-player');
+      this.showElement('difficulty-group');
+
+      difficulties.forEach(diff => {
+        const diffButton = document.getElementById(diff.id);
+
+        if (diffButton) {
+          diffButton.addEventListener('click', () => {
+            this.showElement('difficulty-group', false);
+            this.showElement('board');
+
+            this.selectedDifficulty = diff.value;
+
+            this.game = new Game('board');
+            this.game.setSelectedDifficulty(this.selectedDifficulty);
+            this.renderGame();
+          });
+        }
+      });
+    }
+  }
+
+  private showElement(name: string, on_off: boolean = true): void {
+    const displayStyle = on_off ? 'flex' : 'none';
+    const element = document.getElementById(name);
+
+    if (element) {
+      element.style.display = displayStyle;
+    }
+  }
+
+  async onMount() {
+    this.showElement('ai-player', false);
+    this.showElement('human-player', false);
+    this.showElement('difficulty-group', false);
+    this.showElement('board', false);
+    this.onClickStartButton();
   }
 
   async renderGame() {
     try {
-      const btn = document.getElementById('start');
-      if (btn) btn.style.display = 'none'; // Esconde o botão
-      
-      const game = new Game("board");
-      game.start();
+      this.game.start();
     } catch (error) {
       console.error("Failed to initialize game:", error);
     }

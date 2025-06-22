@@ -2,29 +2,44 @@
 
     <div class="flex flex-row items-center justify-between gap-8 px-10 m-4">
 
-        <div class="flex flex-col items-center space-y-4">
+        <div id="human-player" class="flex flex-col items-center space-y-4">
             <h1 class="text-2xl font-bold text-white tracking-wider">
                 Player 1
             </h1>
         </div>
 
-        <!-- Board e botão juntos -->
         <div class="w-[600px] h-[360px] bg-[#1e2124] border-4 border-dashed border-white rounded-lg flex items-center justify-center shadow-lg shadow-white/20 relative">
-            <button id="start"
-                class="text-yellow-500 text-5xl font-extrabold px-10 py-4 hover:text-yellow-500 cursor-pointer animate-pulse hover:animate-none min-h-full">
-                CLICK TO PLAY
-            </button>
+            <div class="flex flex-col items-center justify-center z-10 space-y-4">
+                <button id="start"
+                    class="text-yellow-500 text-5xl font-extrabold px-10 py-4 hover:text-yellow-500 cursor-pointer animate-pulse hover:animate-none">
+                    CLICK TO PLAY
+                </button>
+                <div id="difficulty-group" class="flex flex-col items-start gap-6">
+                    <button id="easy" class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-500">
+                        Easy
+                    </button>
+                    <button id="medium" class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-500">
+                        Medium
+                    </button>
+                    <button id="hard" class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-500">
+                        Hard
+                    </button>
+                </div>
+            </div>
             <canvas id="board" class="text-white text-xl font-semibold">
                 Loading...
             </canvas>
         </div>
 
-        <div class="flex flex-col items-center space-y-4">
+        <div id="ai-player" class="flex flex-col items-center space-y-4">
             <h1 class="text-2xl font-bold text-white tracking-wider">
                 AI Player
             </h1>
         </div>
 
     </div>
+
+    <!-- Botões de dificuldade -->
+   
 
 </div>

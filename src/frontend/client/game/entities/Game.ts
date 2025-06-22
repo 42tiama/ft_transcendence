@@ -83,13 +83,20 @@ export class Game {
 
         // Handle ball collisions with walls
         if (this.ball.isOutOfBoundsVertical(gameConfig)) {
-            this.ball.bounceVertical(gameConfig);
+            CollisionDetector.handleWallCollision(this.ball, gameConfig);
         }
 
         // Handle ball collisions with players
         CollisionDetector.handlePlayerCollision(this.ball, this.player1, this.player2);
 
         // Check for scoring
+        this.checkScore();
+
+        // Draw everything
+        this.drawGameElements();
+    }
+    
+    private checkScore(): void {
         if (this.ball.isOutOfBoundsLeft()) {
             this.player2Score++;
             this.ball.reset(1, gameConfig);
@@ -97,12 +104,19 @@ export class Game {
             this.player1Score++;
             this.ball.reset(-1, gameConfig);
         }
+    }
 
-        // Draw everything
+    private drawGameElements(): void {
         this.player1.draw(this.context);
         this.player2.draw(this.context);
         this.ball.draw(this.context);
         this.renderer.drawScore(this.player1Score, this.player2Score);
         this.renderer.drawCenterLine();
+    }
+
+    setSelectedDifficulty(difficulty: number): void {
+        if (this.player2) {
+            this.player2.setDifficulty(difficulty);
+        }
     }
 }
