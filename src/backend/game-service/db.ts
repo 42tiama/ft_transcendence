@@ -13,8 +13,36 @@ function initializeDatabase() {
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             displayName TEXT NOT NULL,
+            points INTEGER DEFAULT 0,
             wins INTEGER DEFAULT 0,
             losses INTEGER DEFAULT 0
+        )
+    `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS tournaments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            totalPlayers INTEGER DEFAULT 0,
+            totalMatches INTEGER DEFAULT 0,
+            winner TEXT NOT NULL,
+            FOREIGN KEY (winner) REFERENCES users(displayName)
+            )
+        `);
+
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS matches (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            matchType TEXT NOT NULL,
+            tournamentId INTEGER,
+            player1 TEXT NOT NULL,
+            player2 TEXT NOT NULL,
+            player1Score INTEGER DEFAULT 0,
+            player2Score INTEGER DEFAULT 0,
+            winner TEXT NOT NULL,
+            FOREIGN KEY (tournamentId) REFERENCES tournaments(id),
+            FOREIGN KEY (player1) REFERENCES users(displayName),
+            FOREIGN KEY (player2) REFERENCES users(displayName),
+            FOREIGN KEY (winner) REFERENCES users(displayName)
         )
     `);
 
@@ -25,33 +53,38 @@ function seedUsers() {
 
     if (checkUsers.count === 0) {
         const insertUser = db.prepare(`
-            INSERT INTO users (displayName, wins, losses) 
-            VALUES (?, ?, ?)
+            INSERT INTO users (displayName, points, wins, losses) 
+            VALUES (?, ?, ?, ?)
         `);
 
         const users = [
             {
                 displayName: 'Allesson',
+                points: 0,
                 wins: 0,
                 losses: 0
             },
             {
                 displayName: 'Thais',
+                points: 0,
                 wins: 0,
                 losses: 0
             },
             {
                 displayName: 'Iury',
+                points: 0,
                 wins: 0,
                 losses: 0
             },
             {
                 displayName: 'Andre',
+                points: 0,
                 wins: 0,
                 losses: 0
             },
             {
                 displayName: 'Marcio',
+                points: 0,
                 wins: 0,
                 losses: 0
             },

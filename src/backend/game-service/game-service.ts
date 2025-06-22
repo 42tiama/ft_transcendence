@@ -113,6 +113,70 @@ app.post('/users', async (request, reply) => {
     }
 });
 
+app.post('/tournament-history', async (request, reply) => {
+    try {
+        const {
+            totalPlayers,
+            totalMatches,
+            winner,
+        } = request.body as any;
+        
+        if (!totalPlayers || !totalMatches || !winner) {
+            reply.status(400);
+            return { success: false, error: 'Missing data to insert in tournament history' };
+        }
+
+        const insertTournament = db.prepare(`
+            INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
+            VALUES (?, ?, ?)
+        `);
+        
+        const result = insertTournament.run(totalPlayers, totalMatches, winner);
+
+        
+        return { success: true };
+    } catch (error) {
+        // Server.log.error(error);
+        
+        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+            reply.status(409);
+            return { success: false, error: error.message };
+        }
+   }
+});
+
+app.post('/match-history', async (request, reply) => {
+    try {
+        const {
+            totalPlayers,
+            totalMatches,
+            winner,
+        } = request.body as any;
+        
+        if (!totalPlayers || !totalMatches || !winner) {
+            reply.status(400);
+            return { success: false, error: 'Missing data to insert in tournament history' };
+        }
+
+        const insertTournament = db.prepare(`
+            INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
+            VALUES (?, ?, ?)
+        `);
+        
+        const result = insertTournament.run(totalPlayers, totalMatches, winner);
+
+        
+        return { success: true };
+    } catch (error) {
+        // Server.log.error(error);
+        
+        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
+            reply.status(409);
+            return { success: false, error: error.message };
+        }
+   }
+});
+
 app.get('/', (request, reply) => {
     reply.send("Hello from game service");
 });
