@@ -78,7 +78,7 @@ export default class Tournament {
     const p2Wins = appElement.querySelector('#p2-wins');
     const p2Losses = appElement.querySelector('#p2-losses');
 
-    const matchTitle = appElement.querySelector('#match-title');
+    const matchTitle = appElement.querySelector('#match-title') as HTMLElement;
     const nextMatchInfo = appElement.querySelector('#next-match-info') as HTMLElement;
     const nextMatchP1 = appElement.querySelector('#next-match-p1');
     const nextMatchP2 = appElement.querySelector('#next-match-p2');
@@ -90,8 +90,9 @@ export default class Tournament {
     p2Wins.innerHTML = `Wins: ${currentMatch.player2.wins.toString()}`;
     p2Losses.innerHTML = `Losses: ${currentMatch.player2.losses.toString()}`;
 
-    this.matchTitle != 'Next Match' ? nextMatchInfo.style.display = 'none' : this.matchTitle;
     matchTitle.innerHTML = this.matchTitle.length === 0 ? 'Next Match' : this.matchTitle;
+    matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
+    this.matchTitle = matchTitle.innerHTML;
 
     nextMatchP1.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
     nextMatchP2.innerHTML = nextMatch ? nextMatch.player2.displayName : '';
@@ -107,8 +108,15 @@ export default class Tournament {
     const modal = appElement.querySelector('#freeze-time-modal') as HTMLElement;
     let countDown: number = 3;
 
+    
+    // console.log(`Counter: ${Tournament.counter}`);
+
     if (modal.style.display == 'none') {
       modal.style.display = 'block';
+    }
+    if (startButton.disabled == true) {
+      startButton.disabled = false;
+      startButton.style.backgroundColor = "#00bc7d";
     }
     
     if (startButton) {
@@ -117,7 +125,6 @@ export default class Tournament {
           startButton.disabled = true;
           startButton.style.backgroundColor = "#002c16";
 
-          let countDown: number = 3;
           const countdownInterval = setInterval(() => {
             startButton.innerHTML = `Starting in... ${countDown}`;
             if (countDown < 0) {
@@ -138,7 +145,7 @@ export default class Tournament {
   }
 
   public async runTournament(appElement: Element | null) {
-    while(this.totalRounds != 0) {
+    while(!this.tournamentFinished) {
       if (this.totalRounds == 1) {
         this.matchTitle = 'FINAL';
       } else if (this.totalRounds == 2) {
@@ -152,10 +159,13 @@ export default class Tournament {
         await currentGame.startMatch(this.currentRound[i]);
         //setWinner(this.currentRound[i].winner); // api method
       }
-        this.currentRound = this.createNextRound(this.currentRound) // pega os vencedores do round corrente antes de reduzir o numero de rounds
+      if (this.totalRounds == 0)
+        this.tournamentFinished = true;
+      else {
+        this.currentRound = this.createNextRound(this.currentRound);
         this.totalRounds--;
       }
-    this.tournamentFinished = true;
+    }
   }
 
   private createFirstRound(gameContext: TiamaPong) {
@@ -174,19 +184,19 @@ export default class Tournament {
     let nextRoundPlayers: User[] = [];
     let nextRound : Match[] = [];
 
-
-      for (let i : number = 0; i <= finishedRound.length; i++) {
-          winners.push(finishedRound[i].winner);
-      }
-      nextRoundPlayers.push(...winners);
-      if (this.totalByes > 0) {
-        this.byes.forEach(byer => {
-          nextRoundPlayers.push(byer);
-        });
-      }
-      for (let i : number = 0; i <= nextRoundPlayers.length; i+2) {
-          nextRound.push(new Match('tournament', nextRoundPlayers[i], nextRoundPlayers[i + 1]));
-      }
-      return nextRound;
+    for (let i : number = 0; i < finishedRound.length; i++) {
+        winners.push(finishedRound[i].winner);
+    }
+    nextRoundPlayers.push(...winners);
+    if (this.totalByes > 0) {
+      this.byes.forEach(byer => {
+        nextRoundPlayers.push(byer);
+      });
+      this.totalByes = 0;
+    }
+    for (let i : number = 0; i < nextRoundPlayers.length; i+=2) {
+        nextRound.push(new Match('tournament', nextRoundPlayers[i], nextRoundPlayers[i + 1]));
+    }
+    return nextRound;
   }
 }
