@@ -9,6 +9,7 @@ import { Match, Tournament } from 'game/types.js';
 import TiamaTournament from './Tournament.js';
 import TiamaMatch from './Match.js';
 import TiamaPong from './TiamaPong.js';
+import { resolve } from 'path';
 
 export default class Game {
     private canvas: HTMLCanvasElement;
@@ -68,9 +69,9 @@ export default class Game {
         this.renderer = new Renderer(this.context, gameConfig);
     }
     
-    start(match : TiamaMatch): void {
-        this.gameLoop(match);
-    }
+    // start(match : TiamaMatch): void {
+    //     this.gameLoop(match);
+    // }
 
     private createVersusMatch(participants: User[]) {
         // let size: number = this.versusMatchHistory.push(new TiamaMatch(this, 'versus', participants[0], participants[1], null);
@@ -81,7 +82,9 @@ export default class Game {
         this.player1.user = match.player1;
         this.player2.user = match.player2;
         this.isGameRunning = true;
-        this.gameLoop(match);
+        return new Promise<void>((resolve) => {
+            this.gameLoop(match, resolve);
+        })
     }
 
     public endGame(): void {
@@ -92,8 +95,8 @@ export default class Game {
         }
     }
 
-    private gameLoop(match : TiamaMatch) {
-        this.animationId = requestAnimationFrame(() => this.gameLoop(match));
+    private gameLoop(match : TiamaMatch, resolve: (()=> void)) {
+        this.animationId = requestAnimationFrame(() => this.gameLoop(match, resolve));
 
         // Clear canvas
         this.renderer.clear();
@@ -129,11 +132,12 @@ export default class Game {
             this.ball.reset(-1, gameConfig);
         }
         
-        if (match.player1Score - match.player2Score > 3 
-            || match.player2Score - match.player1Score > 3)
+        if (match.player1Score - match.player2Score > 1 
+            || match.player2Score - match.player1Score > 1)
         {
             match.winner =  match.player1Score > match.player2Score ? match.player1 : match.player2;
             this.endGame();
+            resolve();
             return;
         }
 
