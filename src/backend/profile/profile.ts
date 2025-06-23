@@ -7,7 +7,6 @@ import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify p
 
 dotenv.config();
 
-// Adds betterSqlite3 (DB) and authenticate (JWT middleware) to Fastify.
 declare module 'fastify' {
 	interface FastifyInstance {
 		betterSqlite3: Database;

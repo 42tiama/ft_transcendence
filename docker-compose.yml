@@ -91,7 +91,7 @@ services:
         restart: always
         build:
             context: .
-            dockerfile: containers/client/Dockerfile
+            dockerfile: containers/profile/Dockerfile
         volumes:
             - ./certs/profile:/build/certs/profile
         env_file:

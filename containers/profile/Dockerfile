@@ -9,7 +9,7 @@ FROM node:22.14
 RUN apt update && apt install vim -y #for development purposes
 WORKDIR /build
 COPY --from=builder /src/build/profile.js .
-COPY --from=builder /src/backend/auth/package.json .
+COPY --from=builder /src/backend/profile/package.json .
 COPY --from=builder /src/node_modules ./node_modules
 
 #install sqlite3
