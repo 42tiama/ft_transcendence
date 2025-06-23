@@ -24,6 +24,7 @@ services:
         - "api-gateway:127.0.0.1"
         - "auth:127.0.0.1"
         - "game-service:127.0.0.1"
+        - "profile:127.0.0.1"
     env_file:
         - ../.env
 

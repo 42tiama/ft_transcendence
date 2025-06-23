@@ -233,7 +233,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 			//Insert user into profile-service DB
 			try {
-				const profileResponse = await fetch('https://localhost:8046/register', {
+				const profileResponse = await fetch('https://profile:8046/register', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(profilePayload)
