@@ -5,8 +5,8 @@ import cors from "@fastify/cors";
 import { readFileSync } from "node:fs";
 
 const httpsOptions = {
-	key: readFileSync("/certs/key.pem"),
-	cert: readFileSync("/certs/cert.pem")
+	key: readFileSync("certs/api-gateway/key.pem"),
+	cert: readFileSync("certs/api-gateway/cert.pem")
 }
 
 const corsOptions = {

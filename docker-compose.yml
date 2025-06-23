@@ -1,20 +1,20 @@
 services:
 
 # Serviço de desenvolvimento
-    dev:
-        restart: always
-        build:
-            context: .
-            dockerfile: .devcontainer/Dockerfile
-        volumes:
-            # - ./docker/dev/scripts:/start
-            - ./src:/src
-            - ./:/fullbase:cached
-            - nvim-data:/home/node/.local
-        ports:
-            - "8043:8043"
-        env_file:
-            - .env
+    # dev:
+    #     restart: always
+    #     build:
+    #         context: .
+    #         dockerfile: .devcontainer/Dockerfile
+    #     volumes:
+    #         # - ./docker/dev/scripts:/start
+    #         - ./src:/src
+    #         - ./:/fullbase:cached
+    #         - nvim-data:/home/node/.local
+    #     ports:
+    #         - "8043:8043"
+    #     env_file:
+    #         - .env
 
     api-gateway:
         restart: always
@@ -23,8 +23,10 @@ services:
           dockerfile: containers/api-gateway/Dockerfile
         ports:
             - "8044:8044"
+        env_file:
+            - .env
         volumes:
-            - ./certs/api-gateway:/certs
+            - ./certs/api-gateway:/build/certs/api-gateway
 
     auth:
         restart: always
@@ -32,7 +34,7 @@ services:
           context: .
           dockerfile: containers/auth/Dockerfile
         volumes:
-          - ./certs/auth:/certs
+          - ./certs/auth:/build/certs/auth
           - auth-data:/data
         env_file:
             - .env
@@ -43,7 +45,9 @@ services:
           context: .
           dockerfile: containers/client/Dockerfile
         volumes:
-            - ./certs/client:/certs
+            - ./certs/client:/build/certs/client
+        env_file:
+            - .env
         ports:
             - "8042:8042"
 
@@ -56,6 +60,7 @@ services:
         volumes:
             - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
             - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
+            - elastic-data:/usr/share/elasticsearch/data
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
             - discovery.type=single-node
@@ -81,13 +86,14 @@ services:
             - ./certs/logstash:/usr/share/logstash/config/certs
             - ./certs/ca:/usr/share/logstash/config/certs/ca
         environment:
-            - LS_JAVA_OPTS=-Xms256m -Xmx256m
+            - LS_JAVA_OPTS=-Xms512m -Xmx512m
             - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
-        mem_limit: 512m
+        mem_limit: 1g
         ports:
             - "5044:5044"
         depends_on:
-            - elasticsearch
+            elasticsearch:
+                condition: service_healthy
 
     kibana:
         restart: always
@@ -124,5 +130,5 @@ services:
             - logstash
 
 volumes:
-  nvim-data:
   auth-data:
+  elastic-data:

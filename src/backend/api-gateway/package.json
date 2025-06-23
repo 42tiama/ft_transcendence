@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"scripts": {
 		"build": "tsc",
-		"dev": "tsx api-gateway.ts"
+		"dev": "tsx api-gateway.ts",
+		"start": "node ../../build/api-gateway.js"
 	},
 	"keywords": [],
 	"author": "",

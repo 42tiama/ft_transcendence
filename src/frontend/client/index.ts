@@ -1,3 +1,4 @@
+
 import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
@@ -46,11 +47,29 @@ function autoLogoutOnJwtExpiry() {
 				alert('Session expired. Please log in again.');
 				window.sessionStorage.setItem('jwt_expired_alerted', '1');
 			}
+			// Hide links when logged out
+			hideLinksIfNotLoggedIn();
 		} else if (jwt && isJwtValid(jwt)) {
 			// Reset alert flag if user logs in again
 			window.sessionStorage.removeItem('jwt_expired_alerted');
+			// Show links when logged in
+			hideLinksIfNotLoggedIn();
 		}
 	}, 1000); // check every second
+}
+
+function hideLinksIfNotLoggedIn() {
+	const jwt = localStorage.getItem('jwt');
+	const isLoggedIn = isJwtValid(jwt);
+	const navLinks = document.querySelectorAll('header nav a');
+	navLinks.forEach(link => {
+		if (link instanceof HTMLElement) {
+			const text = link.textContent?.trim().toLowerCase();
+			if (["home", "leaderboard", "game"].includes(text || "")) {
+				link.style.display = isLoggedIn ? "" : "none";
+			}
+		}
+	});
 }
 
 const navigateTo = (url: string) => {
@@ -71,6 +90,18 @@ const router = async () => {
 		{path: '/profile', view: Profile},
 		{path: '/game-menu', view: GameMenu},
 	];
+
+	const protectedRoutes = [
+		'/', '/Home', '/game', '/game-menu', '/profile', '/changepass'
+	];
+
+	const jwt = localStorage.getItem('jwt');
+	const isLoggedIn = isJwtValid(jwt);
+
+	// If not logged in and trying to visit a protected route, redirect to /login
+	if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+		history.replaceState({}, '', '/login');
+	}
 
 	const potentialMatches = routes.map(route => {
 		return {
@@ -117,9 +148,14 @@ const router = async () => {
 	} catch (error) {
 		console.error('Error rendering view:', error);
 	}
+
+	hideLinksIfNotLoggedIn();
 };
 
-window.addEventListener('popstate', router);
+window.addEventListener('popstate', () => {
+	router();
+	hideLinksIfNotLoggedIn();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
 	document.body.addEventListener('click', (e: MouseEvent) => {
@@ -131,7 +167,13 @@ document.addEventListener('DOMContentLoaded', () => {
 			navigateTo(e.target.href);
 		}
 	});
+	// On first load, if not logged in and not already at /login or /register, redirect to /login
+	const jwt = localStorage.getItem('jwt');
+	if (!isJwtValid(jwt) && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+		history.replaceState({}, '', '/login');
+	}
 	void router();
+	hideLinksIfNotLoggedIn();
 	if (typeof window !== "undefined" && typeof document !== "undefined") {
 		autoLogoutOnJwtExpiry();
 	}

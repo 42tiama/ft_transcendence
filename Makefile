@@ -1,5 +1,5 @@
 #builda e inicia todos os containers (inclusive o devcontainer)
-all: setup
+all: install-mkcert setup
 	docker compose up -d
 
 ### HTTPS (mTLS) -> Todo mundo usa https para falar com todo mundo, a.k.a. zero trust
@@ -10,41 +10,35 @@ all: setup
 # volumes no docker-compose.yaml
 setup:
 	mkdir -p certs/client certs/api-gateway certs/auth certs/elasticsearch certs/kibana certs/logstash certs/filebeat certs/ca
-	mkcert --install
-	cp "$$(mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem
-	mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
-	mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
-	mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
-	mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch
-	mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana
-	mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash
-	mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
+	./mkcert -install ||\
+	cp "$$(./mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem && \
+	./mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost && \
+	./mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth && \
+	./mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost && \
+	./mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch && \
+	./mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana && \
+	./mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash && \
+	./mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
 	if [ "$$(whoami)" = "cadete" ]; then \
 	  PROFILE=$$(find ~/snap/firefox/common/.mozilla/firefox -maxdepth 1 -type d -name "*.default*" | head -n 1) && \
 	  certutil -A -n "mkcert development CA" -t "CT,C,C" -i  ~/.local/share/mkcert/rootCA.pem -d sql:"$$PROFILE" ; \
 	fi
 
-prepare:
-	@echo "We'll need your sudo password to install two packages: mkcert and libnss3-tools..."
-	if [ "$$(uname)" = "Darwin" ]; then \
-	brew list mkcert >/dev/null 2>&1 || brew install mkcert; \
-	brew list nss >/dev/null 2>&1 || brew install nss; \
-	else \
-	sudo apt update && sudo apt install -y mkcert libnss3-tools; \
+install-mkcert:
+	if [ ! -f "mkcert" ]; then \
+		curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" &&\
+		chmod +x mkcert-v*-linux-amd64 &&\
+		mv mkcert-v*-linux-amd64 mkcert;\
 	fi
-	if [ "$$(whoami)" = "cadete" ]; then \
-	  sudo apt-get install -y ca-certificates curl && \
-	  sudo install -m 0755 -d /etc/apt/keyrings && \
-	  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc && \
-	  sudo chmod a+r /etc/apt/keyrings/docker.asc && \
-	  echo "deb [arch=$$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-	  $$(. /etc/os-release && echo "$${UBUNTU_CODENAME:-$$VERSION_CODENAME}") stable" | \
-	  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
-	  sudo apt-get update && \
-	  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin; \
-	  sudo usermod -aG docker cadete; \
-	  sudo pkill -KILL -u cadete; \
-	fi
+
+#Make certificates only for development build (used inside dev container)
+dev-certs: install-mkcert
+	bash -c 'mkdir -p src/build/certs/{api-gateway,auth,client} src/build/data'
+	./mkcert -install ||\
+	./mkcert -cert-file src/build/certs/api-gateway/cert.pem -key-file src/build/certs/api-gateway/key.pem localhost &&\
+	./mkcert -cert-file src/build/certs/auth/cert.pem -key-file src/build/certs/auth/key.pem localhost auth &&\
+	./mkcert -cert-file src/build/certs/client/cert.pem -key-file src/build/certs/client/key.pem localhost 
+
 
 clean:
 	docker compose down --volumes --remove-orphans
