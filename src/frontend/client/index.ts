@@ -65,8 +65,8 @@ function hideLinksIfNotLoggedIn() {
 	navLinks.forEach(link => {
 		if (link instanceof HTMLElement) {
 			const text = link.textContent?.trim().toLowerCase();
-			if (["home", "leaderboard", "game"].includes(text || "")) {
-				link.style.display = isLoggedIn ? "" : "none";
+			if (["home", "leaderboard", "game", "vs ai"].includes(text || "")) {
+				link.style.display = isLoggedIn ? "flex" : "none";
 			}
 		}
 	});
@@ -92,7 +92,7 @@ const router = async () => {
 	];
 
 	const protectedRoutes = [
-		'/', '/Home', '/game', '/game-menu', '/profile', '/changepass'
+		'/', '/Home', '/game', '/game-menu', '/profile', '/changepass', '/game-ai'
 	];
 
 	const jwt = localStorage.getItem('jwt');
