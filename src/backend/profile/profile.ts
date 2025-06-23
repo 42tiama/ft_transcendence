@@ -1,6 +1,6 @@
 import fastify, { FastifyRequest } from "fastify";
 import { readFileSync } from "node:fs"; // function to read files with SSL certificates
-import { db } from "./db"
+import { db } from "./profile_db"
 import dotenv from 'dotenv'; // loads environment variables from .env
 import { Database } from 'better-sqlite3'; // type for SQLite database
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify plugin for SQLite

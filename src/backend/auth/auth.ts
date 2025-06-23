@@ -208,7 +208,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 		);
 		const result = stmt.run(email, displayName, hashedPassword, encryptedTotp, use2fa ? 1 : 0);
 
-		//if insertion was OK, send POST to game-service so that it can add to its own database
+		//if insertion was OK, send POST to game-service and profile so that they can add to their own database
 		if (result.changes === 1){
 			const profilePayload = {
 				id: result.lastInsertRowid,
@@ -241,6 +241,9 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 				if (!profileResponse.ok) {
 					app.log.warn(`Profile service failed for user ID ${profilePayload.id}`);
+				}
+				else {
+					app.log.info(`Profile service registered user ID ${profilePayload.id}`)
 				}
 			} catch (err) {
 				app.log.error('Could not reach profile service:', err);
