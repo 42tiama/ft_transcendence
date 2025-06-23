@@ -42,14 +42,14 @@ export class Game {
         this.ball = new Ball(gameConfig);
 
         // Initialize players
-        this.player1 = new Player(10, gameConfig.boardHeight / 2, gameConfig, this.ball);
+        this.player1 = new Player(gameConfig.playerWidth, gameConfig.boardHeight / 2, gameConfig, this.ball);
         this.player2 = new Player(
             gameConfig.boardWidth - gameConfig.playerWidth - 10,
             gameConfig.boardHeight / 2,
             gameConfig, this.ball);
 
         const currentRoute = window.location.pathname;
-        // Valida se o game está sendo jogado contra a IA ou outro jogador
+    
         if (currentRoute === "/game") {
             this.inputHandler = new InputHandler(this.player1, this.player2);
             this.updatePlayer2 = (config) => this.player2.update(config);
@@ -57,8 +57,6 @@ export class Game {
             this.inputHandler = new InputHandler(this.player1);
             this.updatePlayer2 = (config) => this.player2.aiMode(config);
         }
-
-        // Initialize input handler
 
         // Initialize renderer
         this.renderer = new Renderer(this.context, gameConfig);

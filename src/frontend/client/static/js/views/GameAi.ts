@@ -41,9 +41,9 @@ export default class GameAi extends AbstractView {
   private onClickDifficultyButton() {
 
     const difficulties = [
-      { id: 'easy', value: 0.7 },
-      { id: 'medium', value: 0.5 },
-      { id: 'hard', value: 0.3 }
+      { id: 'easy', value: 0.6 },
+      { id: 'medium', value: 0.4 },
+      { id: 'hard', value: 0.1 }
     ];
 
     const groupButtons = document.getElementById('difficulty-group');

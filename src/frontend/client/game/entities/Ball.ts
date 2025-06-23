@@ -1,8 +1,8 @@
 import { Ball as BallInterface, GameConfig } from '../types.js';
 
 export class Ball implements BallInterface {
-    x: number;
-    y: number;
+    x: number = 0;
+    y: number = 0;
     width: number;
     height: number;
     velocityX: number;
@@ -30,10 +30,10 @@ export class Ball implements BallInterface {
     }
 
     private limitSpeed(): void {
-        const maxSpeed = this.initialVelocity * 2.5;
-        const speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
+        let maxSpeed = this.initialVelocity * 2.5;
+        let speed = Math.sqrt(this.velocityX ** 2 + this.velocityY ** 2);
         if (speed > maxSpeed) {
-            const factor = maxSpeed / speed;
+            let factor = maxSpeed / speed;
             this.velocityX *= factor;
             this.velocityY *= factor;
         }
@@ -75,8 +75,8 @@ export class Ball implements BallInterface {
         // Normaliza o vetor direção
         const norm = Math.sqrt(directionX ** 2 + directionY ** 2) || 1;
         // Aplica a nova direção mantendo a velocidade atual
-        this.velocityX = (directionX / norm) * (currentSpeed * 1.15);
-        this.velocityY = (directionY / norm) * (currentSpeed * 1.15);
+        this.velocityX = (directionX / norm) * (currentSpeed * 1.25);
+        this.velocityY = (directionY / norm) * (currentSpeed * 1.25);
         this.limitSpeed();
     }
 }
