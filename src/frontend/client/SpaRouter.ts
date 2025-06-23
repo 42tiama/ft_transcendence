@@ -203,6 +203,9 @@ export default class SpaRouter {
         else if (match.route.path === '/tournament-player-selection') {
           await view.onMount(this.gameContext);
         }
+        else if (match.route.path === '/changepass') {
+          await view.onMount();
+        }
       } else {
         console.error('Could not find #app element');
       }
