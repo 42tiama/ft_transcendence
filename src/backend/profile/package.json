@@ -1,10 +1,10 @@
 {
-  "name": "game-service",
+  "name": "profile",
   "version": "1.0.0",
   "scripts": {
-    "build": "mkdir -p ../../node_modules/@types/fastify-better-sqlite3 ../../data && echo \"declare module '@punkish/fastify-better-sqlite3';\" > ../../node_modules/@types/fastify-better-sqlite3/index.d.ts && tsc",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ../../build/api-game.js"
+    "start": "node ../../build/profile.js"
   },
   "keywords": [],
   "author": "",

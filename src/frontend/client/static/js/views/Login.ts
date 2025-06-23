@@ -69,7 +69,6 @@ export function updateHeaderUserLink(isLoggedIn: boolean) {
 	});
 }
 
-
 // handle sign-in with Google
 async function handleGoogleCredential(response: any) {
 
@@ -166,7 +165,7 @@ export default class Login extends AbstractView {
 			// format JWT for 4-line display
 			const formattedJwt = formatJwtForDisplay(existingJwt);
 
-			// renders logout and change password button
+			// renders user profile
 			if (appDiv) {
 				appDiv.innerHTML = `
 					<div class="flex flex-col items-center py-6">

@@ -54,6 +54,12 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/google-login'
 });
 
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/register-profile',
+	rewritePrefix: '/register'
+});
+
 server.get('/', (req, reply)=> {
     req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});

@@ -121,7 +121,8 @@ const app = fastify({
 	https: httpsOptions
 });
 
-// if in devContainer, create database in relative path 
+// if in devContainer, creates database in relative path
+// if in devContainer, create database in relative path
 if (SINGLE_CONTAINER === 'true'){
 	app.register(fastifyBetterSqlite3, {
 		"pathToDb": './data/users.db',
@@ -178,14 +179,14 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 	const db = app.betterSqlite3;
 	try {
-		
+
 		// check for duplicate displayName before insert
 		const existingDisplayName = db.prepare('SELECT 1 FROM users WHERE displayName = ?').get(displayName);
 		if (existingDisplayName) {
 			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
 			return;
 		}
-		
+
 		// hashe the password with bcrypt
 		const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -228,7 +229,23 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 			})
 			.catch((err) => {
 				app.log.error('Could not reach game-service:', err);
-				})
+			})
+
+			//Insert user into profile-service DB
+			try {
+				const profileResponse = await fetch('https://localhost:8046/register', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(profilePayload)
+				});
+
+				if (!profileResponse.ok) {
+					app.log.warn(`Profile service failed for user ID ${profilePayload.id}`);
+				}
+			} catch (err) {
+				app.log.error('Could not reach profile service:', err);
+			}
+		}
 		}
 
 		// only return totpSecret if 2FA is enabled
@@ -455,8 +472,8 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 			}, { expiresIn: '12h' });
 		}
 
-		reply.code(200).send({ 
-			success: true, 
+		reply.code(200).send({
+			success: true,
 			message: "Change successful.",
 			token: newToken // will be undefined if only password changed
 		});

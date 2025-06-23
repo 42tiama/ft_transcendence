@@ -20,6 +20,11 @@ module.exports = {
       name: "game-service",
       script: "game-service.js",
       cwd: "./build"
+    },
+    {
+      name: "profile",
+      script: "profile.js",
+      cwd: "./build"
     }
   ]
 };

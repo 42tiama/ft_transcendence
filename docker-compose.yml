@@ -87,6 +87,16 @@ services:
         ports:
             - "8042:8042"
 
+    profile:
+        restart: always
+        build:
+            context: .
+            dockerfile: containers/client/Dockerfile
+        volumes:
+            - ./certs/profile:/build/certs/profile
+        env_file:
+            - .env
+
     elasticsearch:
         restart: always
         build:

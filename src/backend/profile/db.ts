@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { join } from "node:path";
 
-const dbPath = join(__dirname, '../data/tiama-pong.db');
+const dbPath = join(__dirname, './data/profile.db');
 export const db = new Database(dbPath);
 
 db.pragma('foreign_keys = ON');
@@ -11,7 +11,7 @@ function initializeDatabase() {
     // Users table
     db.exec(`
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY,
             display_name TEXT NOT NULL,
             email TEXT NOT NULL UNIQUE,
             avatar_url TEXT,
@@ -21,6 +21,19 @@ function initializeDatabase() {
         )
     `);
 
+
+    // Friends table (one-way friendship)
+    db.exec(`
+    CREATE TABLE IF NOT EXISTS friends (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        friend_id INTEGER NOT NULL,
+        UNIQUE(user_id, friend_id),
+        FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY(friend_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+    `);
+
 }
 
 function seedUsers() {
@@ -28,8 +41,8 @@ function seedUsers() {
 
     if (checkUsers.count === 0) {
         const insertUser = db.prepare(`
-            INSERT INTO users (display_name, email, avatar_url, wins, losses, card_color) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (display_name, email, avatar_url, wins, losses, card_color)
+            VALUES (?, ?, ?, ?, ?, ?)
         `);
 
         const users = [
@@ -70,7 +83,7 @@ function seedUsers() {
                 losses: 0,
                 card_color: '#ffba00'
             },
-            
+
         ];
 
         const insertMany = db.transaction((users: any[]) => {
