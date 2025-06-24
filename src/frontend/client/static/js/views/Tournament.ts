@@ -22,7 +22,7 @@ export default class Tournament extends AbstractView {
     }
   }
 
-  async beforeMount(gameContext: TiamaPong | null) : Promise<boolean> {
+  async beforeMount(gameContext: TiamaPong) : Promise<boolean> {
     if (gameContext.preTournamentSelection.length > 2) {
       gameContext.createTournament();
       return true;
@@ -34,7 +34,7 @@ export default class Tournament extends AbstractView {
     }
   }
 
-  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+  async onMount(gameContext: TiamaPong, appElement: Element) {
     gameContext.tournamentHistory[0].runTournament(appElement);
   }
 

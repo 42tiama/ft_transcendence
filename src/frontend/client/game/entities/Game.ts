@@ -5,7 +5,7 @@ import { CollisionDetector } from '../services/CollisionDetector.js';
 import { InputHandler } from '../services/InputHandler.js';
 import { Renderer } from '../services/Renderer.js';
 import { gameConfig } from '../gameConfig.js';
-import { Match, Tournament } from 'game/types.js';
+// import { Match, Tournament } from 'game/types.js';
 import TiamaTournament from './Tournament.js';
 import TiamaMatch from './Match.js';
 import TiamaPong from './TiamaPong.js';

@@ -7,7 +7,7 @@ export class Player implements PlayerInterface {
     width: number;
     height: number;
     velocityY: number;
-    user: User | null;
+    user: User | null = null;
     private difficulty: number;
     private ball?: BallInterface;
     private lastDecisionTime: number = 0;

@@ -152,7 +152,7 @@ export default class Register extends AbstractView {
 		}
 	}
 	
-	beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
-		return;
+	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+		return true;
 	}
 }

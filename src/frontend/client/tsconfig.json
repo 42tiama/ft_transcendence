@@ -2,6 +2,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "outDir": "../../build",
+    "strict": true,
     "lib": [
       "ESNext",
       "dom"

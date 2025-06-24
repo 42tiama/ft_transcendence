@@ -24,6 +24,6 @@ export default class NotFound extends AbstractView {
   }
 
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
-    return;
+    return true;
   }
 }

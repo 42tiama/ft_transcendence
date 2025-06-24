@@ -24,7 +24,7 @@ export default class Game extends AbstractView {
   }
 
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
-    return;
+    return true;
   }
   
 }

@@ -18,7 +18,7 @@ module.exports = {
     },
     {
       name: "game-service",
-      script: "game-service.js",
+      script: "backend/game-service/game-service.js",
       cwd: "./build"
     }
   ]

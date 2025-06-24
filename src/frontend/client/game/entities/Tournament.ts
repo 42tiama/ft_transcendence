@@ -2,24 +2,35 @@ import Match from "./Match.js";
 import User from "./User.js";
 import TiamaPong  from "./TiamaPong.js";
 import Game from "./Game.js";
+import { TournamentInfo, GameServices } from "../types.js";
+import TournamentService from '../../services/TournamentService.js'
+import MatchService from '../../services/MatchService.js'
+import { Server } from "http";
 
 export default class Tournament {
-  tournamentId: string;
+  tournamentId: string = '';
   currentRound: Match[] = [];
-  totalPlayers: number;
-  totalMatches: number;
-  nextPowerOf2: number;
-  totalByes: number;
+  totalPlayers: number = 0;
+  totalMatches: number = 0;
+  nextPowerOf2: number = 0;
+  totalByes: number = 0;
   byes: User[] = [];
-  firstRoundTotalParticipants: number;
-  totalRounds: number;
+  firstRoundTotalParticipants: number = 0;
+  totalRounds: number = 0;
   tournamentFinished: boolean = false;
-  tournamentWinner: User;
+  tournamentWinner: User | null = null;
   matchTitle: string = '';
   matchLog: Match[] = [];
+  gameServices: Partial<GameServices> = { tournament: undefined, match: undefined };
 
   constructor(gameContext: TiamaPong) {
     this.tournamentInit(gameContext);
+    this.initGameServices();
+  }
+
+  initGameServices() {
+    this.gameServices.tournament = new TournamentService();
+    this.gameServices.match = new MatchService();
   }
 
   private tournamentInit(gameContext: TiamaPong) {
@@ -70,7 +81,7 @@ export default class Tournament {
     return participants;
   }
 
-  renderPageInfo(appElement: Element | null, currentMatch: Match, nextMatch: Match | null) {
+  renderPageInfo(appElement: Element, currentMatch: Match, nextMatch: Match | null) {
     const displayNameP1 = appElement.querySelector('#p1-display-name');
     const displayNameP2 = appElement.querySelector('#p2-display-name');
     const p1Wins = appElement.querySelector('#p1-wins');
@@ -83,29 +94,29 @@ export default class Tournament {
     const nextMatchP1 = appElement.querySelector('#next-match-p1');
     const nextMatchP2 = appElement.querySelector('#next-match-p2');
 
-    displayNameP1.innerHTML = currentMatch.player1.displayName ;
-    displayNameP2.innerHTML = currentMatch.player2.displayName;
-    p1Wins.innerHTML = `Wins: ${currentMatch.player1.wins.toString()}`;
-    p1Losses.innerHTML = `Losses: ${currentMatch.player1.losses.toString()}`;
-    p2Wins.innerHTML = `Wins: ${currentMatch.player2.wins.toString()}`;
-    p2Losses.innerHTML = `Losses: ${currentMatch.player2.losses.toString()}`;
+    displayNameP1!.innerHTML = currentMatch.player1.displayName;
+    displayNameP2!.innerHTML = currentMatch.player2.displayName;
+    p1Wins!.innerHTML = `Wins: ${currentMatch.player1.wins.toString()}`;
+    p1Losses!.innerHTML = `Losses: ${currentMatch.player1.losses.toString()}`;
+    p2Wins!.innerHTML = `Wins: ${currentMatch.player2.wins.toString()}`;
+    p2Losses!.innerHTML = `Losses: ${currentMatch.player2.losses.toString()}`;
 
     matchTitle.innerHTML = this.matchTitle.length === 0 ? 'Next Match' : this.matchTitle;
     matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
     this.matchTitle = matchTitle.innerHTML;
 
-    nextMatchP1.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
-    nextMatchP2.innerHTML = nextMatch ? nextMatch.player2.displayName : '';
+    nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
+    nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2.displayName : '';
   }
 
-  private async renderFreezeTimeModalInfo(appElement: Element | null): Promise<void> {
-    const displayNameP1 = appElement.querySelector('#player1');
-    const displayNameP2 = appElement.querySelector('#player2');
+  private async renderFreezeTimeModalInfo(appElement: Element): Promise<void> {
+    const displayNameP1 = appElement.querySelector('#player1')!;
+    const displayNameP2 = appElement.querySelector('#player2')!;
     displayNameP1.textContent = this.currentRound[0].player1.displayName;
     displayNameP2.textContent = this.currentRound[0].player2.displayName;
 
-    const startButton = appElement.querySelector('#start-button') as HTMLButtonElement ;
-    const modal = appElement.querySelector('#freeze-time-modal') as HTMLElement;
+    const startButton = appElement.querySelector('#start-button')! as HTMLButtonElement;
+    const modal = appElement.querySelector('#freeze-time-modal')! as HTMLElement;
     let countDown: number = 3;
 
     if (modal.classList.contains('hidden')) {
@@ -141,18 +152,18 @@ export default class Tournament {
     };
   }
 
-  private async renderTournamentInfo(appElement: Element | null, currentMatch: Match, nextMatch: Match | null) {
+  private async renderTournamentInfo(appElement: Element, currentMatch: Match, nextMatch: Match | null) {
     this.renderPageInfo(appElement, currentMatch, nextMatch);
     await this.renderFreezeTimeModalInfo(appElement);
   }
 
-  private async renderMatchWinner(appElement: Element | null, match: Match): Promise<void> {
-    const matchWinnerModal = appElement.querySelector('#match-winner-modal') as HTMLElement;
-    const winner = appElement.querySelector('#winner-display-name') as HTMLElement;
-    const nextMatchButton = appElement.querySelector('#next-match-button') as HTMLButtonElement;
+  private async renderMatchWinner(appElement: Element, match: Match): Promise<void> {
+    const matchWinnerModal = appElement.querySelector('#match-winner-modal')! as HTMLElement;
+    const winner = appElement.querySelector('#winner-display-name')! as HTMLElement;
+    const nextMatchButton = appElement.querySelector('#next-match-button')! as HTMLButtonElement;
 
     matchWinnerModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner.displayName;
+    winner.innerHTML = match.winner!.displayName;
 
     return new Promise<void>((resolve) => {
       nextMatchButton.addEventListener('click', (event: MouseEvent) => {
@@ -162,13 +173,13 @@ export default class Tournament {
     })
   }
 
-  private async renderChampionModal(appElement: Element | null, match: Match): Promise<void> {
-    const championModal = appElement.querySelector('#tournament-winner-modal') as HTMLElement;
-    const winner = appElement.querySelector('#champion-display-name') as HTMLElement;
-    const transcendButton = appElement.querySelector('#transcend-button') as HTMLButtonElement;
+  private async renderChampionModal(appElement: Element, match: Match): Promise<void> {
+    const championModal = appElement.querySelector('#tournament-winner-modal')! as HTMLElement;
+    const winner = appElement.querySelector('#champion-display-name')! as HTMLElement;
+    const transcendButton = appElement.querySelector('#transcend-button')! as HTMLButtonElement;
 
     championModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner.displayName;
+    winner.innerHTML = match.winner!.displayName;
 
     return new Promise<void>((resolve) => {
       transcendButton.addEventListener('click', (event: MouseEvent) => {
@@ -178,7 +189,7 @@ export default class Tournament {
     })
   }
 
-  public async runTournament(appElement: Element | null) {
+  public async runTournament(appElement: Element) {
     while(!this.tournamentFinished) {
       if (this.totalRounds == 1) {
         this.matchTitle = 'FINAL';
@@ -208,24 +219,25 @@ export default class Tournament {
         this.currentRound = this.createNextRound(this.currentRound);
       }
     }
-     // api method
+    await this.createTournamentLog();
   }
 
   private createFirstRound(gameContext: TiamaPong) {
-    let shuffled : User[] = this.shuffleParticipants(gameContext.preTournamentSelection);
-    this.byes = shuffled.splice(0, this.totalByes);
+    this.shuffleParticipants(gameContext.preTournamentSelection);
+    this.byes = gameContext.preTournamentSelection.splice(0, this.totalByes);
     for (let i = 0; i < this.firstRoundTotalParticipants; i = i + 2) {
-        this.currentRound.push(new Match('tournament', shuffled[i], shuffled[i + 1]));
+        this.currentRound.push(new Match('tournament', gameContext.preTournamentSelection[i], gameContext.preTournamentSelection[i + 1]));
+        gameContext.preTournamentSelection.splice(i, 2);
     }
   }
 
   public createNextRound(finishedRound: Match[]) : Match[] {
-    let winners : User[] = [];
+    let winners : User[] | null = [];
     let nextRoundPlayers: User[] = [];
     let nextRound : Match[] = [];
 
     for (let i : number = 0; i < finishedRound.length; i++) {
-        winners.push(finishedRound[i].winner);
+        winners.push(finishedRound[i].winner!);
     }
     nextRoundPlayers.push(...winners);
     if (this.totalByes > 0) {
@@ -238,5 +250,27 @@ export default class Tournament {
         nextRound.push(new Match('tournament', nextRoundPlayers[i], nextRoundPlayers[i + 1]));
     }
     return nextRound;
+  }
+
+  public async createTournamentLog(): Promise<void> {
+    const tournamentInfo: TournamentInfo = {
+      totalPlayers: this.totalPlayers,
+      totalMatches: this.totalMatches,
+      winner: this.tournamentWinner
+    }
+    
+    const tournamentServiceResponse = await this.gameServices.tournament!.updateTournamentHistory(tournamentInfo);
+    if (tournamentServiceResponse.success) {
+      // server.log.info('Tournament history saved successfully!');
+    } else {
+      // server.log.error('Failed to save the tournament log');
+    }
+    
+    const matchServiceResponse = await this.gameServices.match!.updateMatchHistory(this.matchLog);
+    if (matchServiceResponse.success) {
+      // server.log.info('Matches saved successfully!');
+    } else {
+      // server.log.error('Failed to save matches');
+    }
   }
 }

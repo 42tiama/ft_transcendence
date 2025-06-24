@@ -3,9 +3,9 @@ import User from '../../../game/entities/User.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class PlayerSelection extends AbstractView {
-  public gameContext: TiamaPong;
-  private static availablePlayers: User[] = [];
-  public static selectedPlayers: User[] = [];
+  public gameContext: TiamaPong | null = null;
+  private availablePlayers: User[] = [];
+  // public  selectedPlayers: User[] = [];
 
   constructor() {
     super();
@@ -32,13 +32,13 @@ export default class PlayerSelection extends AbstractView {
       const h3 = e.target.closest(".player")?.querySelector("h3");
 
       if (h3) {
-        PlayerSelection.selectedPlayers.push(
-          this.gameContext.users.find(
-            (user) => user.displayName === h3.textContent?.trim()
-          )
+        this.gameContext!.preTournamentSelection.push(
+          this.gameContext!.users.find(
+            (user) => user.displayName === h3.textContent!.trim()
+          )!
         );
-        const index = PlayerSelection.availablePlayers.findIndex(player => player.displayName === h3.textContent?.trim())
-        PlayerSelection.availablePlayers.splice(index, 1);
+        const index = this.availablePlayers.findIndex(player => player.displayName === h3.textContent?.trim())
+        this.availablePlayers.splice(index, 1);
         this.renderPlayerCard();
         console.log("player inside playerSelection function: ", h3.textContent?.trim());
       }
@@ -46,14 +46,14 @@ export default class PlayerSelection extends AbstractView {
   }
 
   renderPlayerCard() {
-    const availablePlayersContainer = document.getElementById('available-players');
-    const selectedPlayersContainer = document.getElementById('selected-players');
+    const availablePlayersContainer = document.getElementById('available-players')!;
+    const selectedPlayersContainer = document.getElementById('selected-players')!;
 
     availablePlayersContainer.innerHTML = '';
     selectedPlayersContainer.innerHTML = '';
 
     // Render each player
-    PlayerSelection.availablePlayers.forEach(player => {
+    this.availablePlayers.forEach(player => {
       // Create the main player card div
       const playerCard = document.createElement('div');
       playerCard.className = 'player bg-yellow-500 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
@@ -75,7 +75,7 @@ export default class PlayerSelection extends AbstractView {
       availablePlayersContainer.appendChild(playerCard);
     });
 
-    PlayerSelection.selectedPlayers.forEach(player => {
+    this.gameContext!.preTournamentSelection.forEach(player => {
       // Create the main player card div
       const playerCard = document.createElement('div');
       playerCard.className = 'player bg-yellow-500 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
@@ -98,14 +98,14 @@ export default class PlayerSelection extends AbstractView {
     });
   }
 
-  async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
-    return;
+  async beforeMount(gameContext: TiamaPong): Promise<boolean> {
+    return true;
   }
 
-  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+  async onMount(gameContext: TiamaPong, appElement: Element | null) {
     document.body.addEventListener("click", (e: MouseEvent) => this.playerSelection(e));
     this.gameContext = gameContext;
-    PlayerSelection.availablePlayers = gameContext.users;
+    this.availablePlayers = gameContext.users;
     this.renderPlayerCard();
   }
 }

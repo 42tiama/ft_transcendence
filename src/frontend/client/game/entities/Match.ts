@@ -1,9 +1,10 @@
-import { User, Tournament } from '../types'
 import TiamaPong from './TiamaPong';
 import TiamaTournament from './Tournament'
+import User from './User';
 
 export default class Match {
     matchType: string;
+    tournamentId: number | null = null;
     player1: User;
     player2: User;
     player1Score: number = 0;

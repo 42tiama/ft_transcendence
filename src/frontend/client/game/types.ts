@@ -1,4 +1,6 @@
-import UserService from "services/UserService";
+import UserService from "../services/UserService";
+import TournamentService from "../services/TournamentService";
+import MatchService from "../services/MatchService";
 
 export interface Position {
     x: number;
@@ -46,6 +48,12 @@ export interface Tournament {
     tournamentWinner: User;
 }
 
+export interface TournamentInfo {
+    totalPlayers: number;
+    totalMatches: number;
+    winner: User | null;
+}
+
 export interface Ball extends Position, Size, Velocity {}
 
 export interface GameConfig {
@@ -67,4 +75,6 @@ export interface ApiResponse<T> {
 
 export interface GameServices {
     user: UserService;
+    tournament: TournamentService;
+    match: MatchService;
 }

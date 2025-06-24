@@ -16,7 +16,9 @@ export default class UserService {
         }
     } catch (error) {
     //    Server.log.error(result.error || 'Failed to fetch users');
+      return [];
     }
+    return [];
   }
 
   public async updateUserScore(userData: Partial<User>): Promise<void> {
@@ -39,11 +41,6 @@ export default class UserService {
     //    Server.log.error(result.error || 'Error within updateUserScore callstack');
     }
   }
-
-  public async updateTournamentHistory(matchs: Match[], winner: User): Promise<void> {
-    
-  }
-
 }
 
 // server.log.info(msg)
