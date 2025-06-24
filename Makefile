@@ -19,10 +19,6 @@ setup:
 	./mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana && \
 	./mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash && \
 	./mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
-	if [ "$$(whoami)" = "cadete" ]; then \
-	  PROFILE=$$(find ~/snap/firefox/common/.mozilla/firefox -maxdepth 1 -type d -name "*.default*" | head -n 1) && \
-	  certutil -A -n "mkcert development CA" -t "CT,C,C" -i  ~/.local/share/mkcert/rootCA.pem -d sql:"$$PROFILE" ; \
-	fi
 
 install-mkcert:
 	if [ ! -f "mkcert" ]; then \
