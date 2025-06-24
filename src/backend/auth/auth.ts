@@ -233,7 +233,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 			//Insert user into profile-service DB
 			try {
-				const profileResponse = await fetch('https://profile:8046/register', {
+				const profileResponse = await fetch('https://profile:8046/register-profile', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(profilePayload)
@@ -558,9 +558,9 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 });
 
 
-// --- GET /profile (Protected Route) ---
-app.get('/profile', { preValidation: [app.authenticate] }, async (request, reply) => {
-	// extract JWT from Authorization header
+// --- GET /token (Protected Route) ---
+app.get('/token', { preValidation: [app.authenticate] }, async (request, reply) => {
+	// Extracts JWT from Authorization header
 	const authHeader = request.headers['authorization'] || request.headers['Authorization'];
 	let jwt = '';
 	if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {

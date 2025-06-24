@@ -45,7 +45,7 @@ interface RegisterRequestBody {
 }
 
 //Adds new user to users table
-app.post('/register', async (request: FastifyRequest<{ Body: RegisterRequestBody }>, reply) => {
+app.post('/register-profile', async (request: FastifyRequest<{ Body: RegisterRequestBody }>, reply) => {
 	const { id, email, displayName } = request.body;
 	app.log.info(`Received register request for user id=${id} email=${email}`);
 

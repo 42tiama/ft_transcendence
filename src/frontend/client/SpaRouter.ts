@@ -12,6 +12,7 @@ import ChangePass from './static/js/views/ChangePass.js'; // to change the passw
 import Profile from './static/js/views/Profile.js'; // to check the JWT
 import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import { updateHeaderUserLink } from './static/js/views/Login.js';
+import Profile from './static/js/views/Profile.js';
 
 export default class SpaRouter {
   public gameContext: TiamaPong;
@@ -132,6 +133,7 @@ export default class SpaRouter {
       { path: '/tournament-player-selection', view: PlayerSelection },
       { path: '/versus-player-selection', view: VersusPlayerSelection },
       { path: '/tournament', view: Tournament },
+      { path: '/profile', view: Profile},
     ];
 
     const protectedRoutes = [
@@ -160,6 +162,15 @@ export default class SpaRouter {
         route: routes[0],
         isMatch: true,
       };
+    }
+
+	  const jwt = localStorage.getItem('jwt');
+	  const isLoggedIn = this.isJwtValid(jwt);
+    if (isLoggedIn) {
+      updateHeaderUserLink(true); // <-- update header to "User"
+    }
+    else {
+      updateHeaderUserLink(false); // <-- update header to "Log In"
     }
 
     try {
@@ -204,6 +215,9 @@ export default class SpaRouter {
           await view.onMount(this.gameContext);
         }
         else if (match.route.path === '/changepass') {
+          await view.onMount();
+        }
+        else if (match.route.path === '/profile') {
           await view.onMount();
         }
       } else {

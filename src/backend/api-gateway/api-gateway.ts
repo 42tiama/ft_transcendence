@@ -40,11 +40,11 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/changepass'
 });
 
-server.register(fastifyHttpProxy, {
-	upstream: 'https://auth:8043',
-	prefix: '/profile',
-	rewritePrefix: '/profile'
-});
+// server.register(fastifyHttpProxy, {
+// 	upstream: 'https://auth:8043',
+// 	prefix: '/token',
+// 	rewritePrefix: '/token'
+// });
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://auth:8043',
@@ -52,11 +52,11 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/google-login'
 });
 
-// server.register(fastifyHttpProxy, {
-// 	upstream: 'https://profile:8046',
-// 	prefix: '/profile',
-// 	rewritePrefix: '/profile'
-// });
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/profile',
+	rewritePrefix: '/profile'
+});
 
 server.get('/', (req, reply)=> {
     req.log.info('Handling root route');
