@@ -9,9 +9,7 @@ import VersusPlayerSelection from './static/js/views/versusPlayerSelection.js';
 import Tournament from './static/js/views/Tournament.js';
 import TiamaPong from './game/entities/TiamaPong.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
-import Profile from './static/js/views/Profile.js'; // to check the JWT
 import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
-import { updateHeaderUserLink } from './static/js/views/Login.js';
 import Profile from './static/js/views/Profile.js';
 
 export default class SpaRouter {
@@ -76,8 +74,6 @@ export default class SpaRouter {
         localStorage.removeItem('jwt');
         localStorage.removeItem('google_jwt');
 
-        updateHeaderUserLink(false); // <-- update header to "Log In"
-
         // Redirect to login page (SPA navigation)
         if (window.location.pathname !== '/login') {
           history.pushState({}, '', '/login');
@@ -97,20 +93,6 @@ export default class SpaRouter {
         this.hideLinksIfNotLoggedIn();
       }
     }, 1000); // check every second
-  }
-
-  hideLinksIfNotLoggedIn() {
-    const jwt = localStorage.getItem('jwt');
-    const isLoggedIn = this.isJwtValid(jwt);
-    const navLinks = document.querySelectorAll('header nav a');
-    navLinks.forEach(link => {
-      if (link instanceof HTMLElement) {
-        const text = link.textContent?.trim().toLowerCase();
-        if (["home", "leaderboard", "game", "vs ai"].includes(text || "")) {
-          link.style.display = isLoggedIn ? "flex" : "none";
-        }
-      }
-    });
   }
 
   navigateTo = (url: string) => {
@@ -167,10 +149,10 @@ export default class SpaRouter {
 	  const jwt = localStorage.getItem('jwt');
 	  const isLoggedIn = this.isJwtValid(jwt);
     if (isLoggedIn) {
-      updateHeaderUserLink(true); // <-- update header to "User"
+      this.updateHeaderUserLink(true); // <-- update header to "User"
     }
     else {
-      updateHeaderUserLink(false); // <-- update header to "Log In"
+      this.updateHeaderUserLink(false); // <-- update header to "Log In"
     }
 
     try {
@@ -214,18 +196,11 @@ export default class SpaRouter {
         else if (match.route.path === '/tournament-player-selection') {
           await view.onMount(this.gameContext);
         }
-        else if (match.route.path === '/changepass') {
-          await view.onMount();
-        }
-        else if (match.route.path === '/profile') {
-          await view.onMount();
-        }
       } else {
         console.error('Could not find #app element');
       }
     } catch (error) {
       console.error('Error rendering view:', error);
     }
-    this.hideLinksIfNotLoggedIn();
   };
 }

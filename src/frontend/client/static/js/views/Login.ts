@@ -19,20 +19,6 @@ function isJwtValid(token: string | null): boolean {
 	}
 }
 
-// update the header when loggedIn (true = User || false = Log In)
-export function updateHeaderUserLink(isLoggedIn: boolean) {
-	const loginLink = document.querySelector('a[href="/login"]');
-	const profileLink = document.querySelector('a[href="/profile"]');
-
-	if (isLoggedIn) {
-		if (loginLink) loginLink.classList.add('hidden');
-		if (profileLink) profileLink.classList.remove('hidden');
-	} else {
-		if (loginLink) loginLink.classList.remove('hidden');
-		if (profileLink) profileLink.classList.add('hidden');
-	}
-}
-
 // handles sign-in with Google
 async function handleGoogleCredential(response: any) {
 
@@ -62,7 +48,6 @@ async function handleGoogleCredential(response: any) {
 			// on success: store app’s JWT in localStorage and show a success alert
 			localStorage.setItem('jwt', data.token);
 			alert('Google login successful!');
-			updateHeaderUserLink(true);
 			// SPA navigation to /home
         	window.history.pushState({}, '', '/');
         	window.dispatchEvent(new PopStateEvent('popstate'));
@@ -218,8 +203,7 @@ export default class Login extends AbstractView {
 					// on success: store the JWT in localStorage and alerts success
 					if (data.token) {
 						localStorage.setItem('jwt', data.token);
-						localStorage.removeItem('google_jwt'); // invalidate previous Google ID token
-						updateHeaderUserLink(true);
+						localStorage.removeItem('google_jwt'); // Invalidate previous Google ID token
 					}
 
 					alert('Login successful!');
