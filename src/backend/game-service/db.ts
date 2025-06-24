@@ -2,7 +2,6 @@ import Database from 'better-sqlite3';
 import { join } from "node:path";
 
 const dbPath = join(__dirname, '../../data/tiama-pong.db');
-console.log("PAAAAAAAAATH: ", dbPath);
 export const db = new Database(dbPath);
 
 db.pragma('foreign_keys = ON');
@@ -12,8 +11,8 @@ function initializeDatabase() {
     // Users table
     db.exec(`
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            displayName TEXT NOT NULL,
+            id INTEGER DEFAULT 0,
+            displayName TEXT PRIMARY KEY NOT NULL,
             points INTEGER DEFAULT 0,
             wins INTEGER DEFAULT 0,
             losses INTEGER DEFAULT 0
@@ -110,5 +109,62 @@ function seedUsers() {
     }
 }
 
+function seedTournament() {
+    const checkTournaments = db.prepare('SELECT COUNT(*) as count FROM tournaments').get() as { count: number };
+
+    if (checkTournaments.count === 0) {
+        const insertTournament = db.prepare(`
+            INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
+            VALUES (?, ?, ?)
+        `);
+
+        const tournament = [
+            {
+                totalPlayers: 3,
+                totalMatches: 2,
+                winner: 'Allesson',
+            },
+            {
+                totalPlayers: 4,
+                totalMatches: 3,
+                winner: 'Allesson',
+            },
+            {
+                totalPlayers: 20,
+                totalMatches: 19,
+                winner: 'Allesson',
+            },
+            {
+                totalPlayers: 8,
+                totalMatches: 7,
+                winner: 'Allesson',
+            },
+            {
+                totalPlayers: 6,
+                totalMatches: 5,
+                winner: 'Allesson',
+            },
+ 
+            
+        ];
+
+        const insertMany = db.transaction((tournaments: any[]) => {
+            for (const tournament of tournaments) {
+                insertTournament.run(
+                    tournament.totalPlayers,
+                    tournament.totalMatches,
+                    tournament.winner
+                );
+            }
+        });
+
+        insertMany(tournament);
+        // server.log.info(`Seeded ${users.length} users`); // descomment after get to import the logstash
+    } else {
+        // server.log.info(`Users table already has ${checkUsers.count} users, skipping seed`); // descomment after get to import the logstash
+    }
+}
+
 initializeDatabase();
 seedUsers();
+seedTournament();
