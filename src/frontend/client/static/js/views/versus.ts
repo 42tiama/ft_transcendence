@@ -21,7 +21,7 @@ export default class Versus extends AbstractView {
   }
 
   async beforeMount(gameContext: TiamaPong | null) : Promise<boolean> {
-    return;
+    return true;
   }
 
   async onMount(gameContext: TiamaPong | null, appElement: Element | null) {

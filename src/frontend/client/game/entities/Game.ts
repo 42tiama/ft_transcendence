@@ -5,7 +5,7 @@ import { CollisionDetector } from '../services/CollisionDetector.js';
 import { InputHandler } from '../services/InputHandler.js';
 import { Renderer } from '../services/Renderer.js';
 import { gameConfig } from '../gameConfig.js';
-import { Match, Tournament } from 'game/types.js';
+// import { Match, Tournament } from 'game/types.js';
 import TiamaTournament from './Tournament.js';
 import TiamaMatch from './Match.js';
 import TiamaPong from './TiamaPong.js';
@@ -40,25 +40,16 @@ export default class Game {
         }
         this.context = context;
 
-        this.initializeGame();
-    }
-    
-    private initializeGame(): void {
-        // Initialize players
         this.player1 = new Player(10, gameConfig.boardHeight / 2, gameConfig);
         this.player2 = new Player(
             gameConfig.boardWidth - gameConfig.playerWidth - 10,
             gameConfig.boardHeight / 2,
             gameConfig
         );
-        
-        // Initialize ball
         this.ball = new Ball(gameConfig);
         
-        // Initialize input handler
         this.inputHandler = new InputHandler(this.player1, this.player2);
         
-        // Initialize renderer
         this.renderer = new Renderer(this.context, gameConfig);
     }
     

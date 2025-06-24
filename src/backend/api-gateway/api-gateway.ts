@@ -1,7 +1,6 @@
 import fastify from "fastify";
 import fastifyHttpProxy from "@fastify/http-proxy";
 import cors from "@fastify/cors";
-
 import { readFileSync } from "node:fs";
 
 const httpsOptions = {
@@ -18,7 +17,6 @@ const server = fastify({
 	logger: true,
 	https: httpsOptions
 });
-
 
 //enabling cors
 server.register(cors, corsOptions);
@@ -60,7 +58,19 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/users'
 });
 
-server.get('/', (req, reply)=> {
+server.register(fastifyHttpProxy, {
+	upstream: 'https://game-service:8045',
+	prefix: '/tournament-history',
+	rewritePrefix: '/tournament-history'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://game-service:8045',
+	prefix: '/match-history',
+	rewritePrefix: '/match-history'
+});
+
+server.get('/', (req: any, reply: any)=> {
     req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});
 })
@@ -68,7 +78,7 @@ server.get('/', (req, reply)=> {
 //business logic
 
 //start listening
-server.listen({ host: "0.0.0.0", port: 8044 }, (err, address) => {
+server.listen({ host: "0.0.0.0", port: 8044 }, (err: any, address: any) => {
     if (err) {
         server.log.error(err);
         process.exit(1);

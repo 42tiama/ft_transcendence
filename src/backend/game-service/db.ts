@@ -1,7 +1,8 @@
 import Database from 'better-sqlite3';
 import { join } from "node:path";
 
-const dbPath = join(__dirname, '../data/tiama-pong.db');
+const dbPath = join(__dirname, '../../data/tiama-pong.db');
+console.log("PAAAAAAAAATH: ", dbPath);
 export const db = new Database(dbPath);
 
 db.pragma('foreign_keys = ON');
@@ -95,6 +96,7 @@ function seedUsers() {
             for (const user of users) {
                 insertUser.run(
                     user.displayName,
+                    user.points,
                     user.wins,
                     user.losses
                 );

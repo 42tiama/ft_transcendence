@@ -1,5 +1,5 @@
 import User  from './User.js';
-import { GameServices, Match, Tournament } from 'game/types.js';
+import { GameServices, Match, Tournament } from '../types.js';
 import TiamaTournament from './Tournament.js';
 import TiamaMatch from './Match.js';
 import PlayerSelection from '../../static/js/views/PlayerSelection.js';
@@ -11,8 +11,8 @@ export default class TiamaPong {
     public tournamentHistory: TiamaTournament[] = [];
     public versusMatchHistory: Match[] = [];
     public users: User[] = [];
-    public preTournamentSelection: User[] = PlayerSelection.selectedPlayers;
-    public gameServices: GameServices = { user: null };
+    public preTournamentSelection: User[] = [];
+    public gameServices: Partial<GameServices> = { user: undefined };
     
     constructor() {
         this.initGameServices();
@@ -24,7 +24,7 @@ export default class TiamaPong {
     }
     
     private async loadUsers() {
-        this.users = await this.gameServices.user.getUsers();
+        this.users = await this.gameServices.user!.getUsers();
     }
 
     public createTournament() {

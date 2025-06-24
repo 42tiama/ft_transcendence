@@ -352,7 +352,7 @@ export default class Login extends AbstractView {
 
 		// renders the Google sign-in button in the DOM element with ID google-signin-button.
 		window.google.accounts.id.renderButton(
-			document.getElementById("google-signin-button"),
+			document.getElementById("google-signin-button")!,
 			{
 				type: "standard",
 				theme: "filled_black",
@@ -365,6 +365,6 @@ export default class Login extends AbstractView {
 	}
 
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
-		return;
+		return true;
 	}
 }

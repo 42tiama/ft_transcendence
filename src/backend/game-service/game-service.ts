@@ -1,9 +1,11 @@
 import fastify from "fastify";
 import { readFileSync } from "node:fs"; // function to read files with SSL certificates
-import { db } from "./db"
+import { db } from "./db";
 import dotenv from 'dotenv'; // loads environment variables from .env
 import { Database } from 'better-sqlite3'; // type for SQLite database
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify plugin for SQLite
+import Match from '../../frontend/client/game/entities/Match'
+import { TournamentInfo } from "../../frontend/client/game/types";
 
 dotenv.config();
 
@@ -49,8 +51,9 @@ if (SINGLE_CONTAINER === 'true'){
 	});
 }
 
-// API Routes
-app.get('/users', async (request, reply) => {
+// users routes
+
+app.get('/users', async (request: any, reply: any) => {
     try {
         const users = db.prepare('SELECT * FROM users ORDER BY id DESC').all();
         return { success: true, data: users };
@@ -61,7 +64,7 @@ app.get('/users', async (request, reply) => {
     }
 });
 
-app.get('/users/:id', async (request, reply) => {
+app.get('/users/:id', async (request: any, reply: any) => {
     try {
         const { id } = request.params as { id: string };
         const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
@@ -79,7 +82,7 @@ app.get('/users/:id', async (request, reply) => {
     }
 });
 
-app.post('/users', async (request, reply) => {
+app.post('/users', async (request: any, reply: any) => {
     try {
         const {displayName} = request.body as any;
         
@@ -113,76 +116,136 @@ app.post('/users', async (request, reply) => {
     }
 });
 
-app.post('/tournament-history', async (request, reply) => {
+// tournament routes
+app.get('/tournament-history', async (request: any, reply: any) => {
     try {
-        const {
-            totalPlayers,
-            totalMatches,
-            winner,
-        } = request.body as any;
-        
-        if (!totalPlayers || !totalMatches || !winner) {
-            reply.status(400);
-            return { success: false, error: 'Missing data to insert in tournament history' };
-        }
-
-        const insertTournament = db.prepare(`
-            INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
-            VALUES (?, ?, ?)
-        `);
-        
-        const result = insertTournament.run(totalPlayers, totalMatches, winner);
-
-        
-        return { success: true };
+        const tournaments = db.prepare('SELECT * FROM tournaments ORDER BY id DESC').all();
+        return { success: true, data: tournaments };
     } catch (error) {
-        // Server.log.error(error);
-        
-        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
-            reply.status(409);
-            return { success: false, error: error.message };
-        }
-   }
+        // server.log.error(error); //uncomment after import log stash
+        reply.status(500);
+        return { success: false, error: 'Failed to fetch tournaments' };
+    }
 });
 
-app.post('/match-history', async (request, reply) => {
-    try {
-        const {
-            totalPlayers,
-            totalMatches,
-            winner,
-        } = request.body as any;
-        
-        if (!totalPlayers || !totalMatches || !winner) {
-            reply.status(400);
-            return { success: false, error: 'Missing data to insert in tournament history' };
-        }
+app.post('/tournament-history', async (request: any, reply: any) => {
+  try {
+    const tournamentInfo = request.body as TournamentInfo;
+    
+    if (!tournamentInfo.totalPlayers || !tournamentInfo.totalMatches || !tournamentInfo.winner) {
+        reply.status(400);
+        return { success: false, error: 'Missing data to insert in tournament history' };
+    }
 
-        const insertTournament = db.prepare(`
-            INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
-            VALUES (?, ?, ?)
-        `);
-        
-        const result = insertTournament.run(totalPlayers, totalMatches, winner);
-
-        
-        return { success: true };
-    } catch (error) {
-        // Server.log.error(error);
-        
-        if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
-            reply.status(409);
-            return { success: false, error: error.message };
-        }
-   }
+    const insertTournament = db.prepare(`
+        INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
+        VALUES (?, ?, ?)
+    `);
+    
+    insertTournament.run(tournamentInfo.totalPlayers, tournamentInfo.totalMatches, tournamentInfo.winner);
+    
+    // server.log.info('Data inserted at tournaments table'); // descomentar qdo importar logstash
+    
+    return { success: true };
+    
+  } catch (error) {
+    // server.log.error('Error inserting tournament data:', error); // descomentar qdo importar logstash
+    
+    if (error instanceof Error) {
+      if (error.message.includes('UNIQUE constraint failed')) {
+        reply.status(409);
+        return { success: false, error: 'Duplicate tournament data' };
+      }
+      
+      if (error.message.includes('FOREIGN KEY constraint failed')) {
+        reply.status(400);
+        return { success: false, error: 'Invalid player/winner reference' };
+      }
+    }
+    
+    reply.status(500);
+    return { success: false, error: 'Internal server error' };
+  }
 });
 
-app.get('/', (request, reply) => {
+//match routes
+
+app.get('/match-history', async (request: any, reply: any) => {
+    try {
+        const matches = db.prepare('SELECT * FROM matches ORDER BY id DESC').all();
+        return { success: true, data: matches };
+    } catch (error) {
+        // server.log.error(error); // uncomments when import logstash
+        reply.status(500);
+        return { success: false, error: 'Failed to fetch matches' };
+    }
+});
+
+app.post('/match-history', async (request: any, reply: any) => {
+  try {
+    const matches = request.body as Match[];
+    
+    if (!matches || !Array.isArray(matches) || matches.length === 0) {
+      reply.status(400);
+      return { success: false, error: 'Missing or invalid match data' };
+    }
+
+    for (const match of matches) {
+      if (!match.matchType || !match.player1 || !match.player2 || !match.winner) {
+        reply.status(400);
+        return { success: false, error: 'Invalid match data: missing required fields' };
+      }
+    }
+
+    const insertMatch = db.prepare(`
+      INSERT INTO matches (matchType, tournamentId, player1, player2, player1Score, player2Score, winner)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const insertTransaction = db.transaction((matchesToInsert: Match[]) => {
+      for (const match of matchesToInsert) {
+        insertMatch.run(
+          match.matchType,
+          match.tournamentId || null,
+          match.player1,
+          match.player2,
+          match.player1Score,
+          match.player2Score,
+          match.winner
+        );
+      }
+    });
+
+    insertTransaction(matches);
+    // server.log.info('Data inserted at matches table'); // descomentar qdo importar logstash
+    return { success: true, data: { insertedCount: matches.length } };
+    
+  } catch (error) {
+    // server.log.error('Error inserting match history:', error); // descomentar qdo importar logstash
+    
+    if (error instanceof Error) {
+      if (error.message.includes('UNIQUE constraint failed')) {
+        reply.status(409);
+        return { success: false, error: 'Duplicate match data' };
+      }
+      
+      if (error.message.includes('FOREIGN KEY constraint failed')) {
+        reply.status(400);
+        return { success: false, error: 'Invalid player or tournament reference' };
+      }
+    }
+    
+    reply.status(500);
+    return { success: false, error: 'Internal server error' };
+  }
+});
+
+app.get('/', (request: any, reply: any) => {
     reply.send("Hello from game service");
 });
 
 // Start app
-app.listen({ host: "0.0.0.0", port: 8045 }, (err, address) => {
+app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
     if (err) {
         app.log.error(err);
         process.exit(1);

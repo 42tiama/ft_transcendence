@@ -7,7 +7,7 @@ export class Player implements PlayerInterface {
     width: number;
     height: number;
     velocityY: number;
-    user: User | null;
+    user: User | null = null;
 
     constructor(x: number, y: number, config: GameConfig) {
         this.x = x;
