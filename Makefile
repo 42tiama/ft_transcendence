@@ -10,22 +10,38 @@ all: install-mkcert setup
 # volumes no docker-compose.yaml
 setup:
 	mkdir -p certs/client certs/api-gateway certs/auth certs/elasticsearch certs/kibana certs/logstash certs/filebeat certs/ca
-	./mkcert -install ||\
-	cp "$$(./mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem && \
-	./mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost && \
-	./mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth && \
-	./mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost && \
-	./mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch && \
-	./mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana && \
-	./mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash && \
+	CAROOT=$$(./mkcert -CAROOT);\
+	if [ ! -f "$$CAROOT/rootCA.pem" ] || [ ! -f "$$CAROOT/rootCA-key.pem" ]; then \
+		echo "\033[;32mDid not detect Certificate Authority files. Installing...\033[0m";\
+		./mkcert -install; \
+	fi; \
+	echo "\033[;32mGenerating certificate files and copying CA files...\033[0m";\
+	cp "$$(./mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem
+	./mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
+	./mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
+	./mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
+	./mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch
+	./mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana
+	./mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash
 	./mkcert -client -cert-file ./certs/filebeat/cert.pem -key-file ./certs/filebeat/key.pem localhost filebeat
-	if [ "$$(whoami)" = "cadete" ]; then \
-	  PROFILE=$$(find ~/snap/firefox/common/.mozilla/firefox -maxdepth 1 -type d -name "*.default*" | head -n 1) && \
-	  certutil -A -n "mkcert development CA" -t "CT,C,C" -i  ~/.local/share/mkcert/rootCA.pem -d sql:"$$PROFILE" ; \
-	fi
 
 install-mkcert:
 	if [ ! -f "mkcert" ]; then \
+		echo "\033[;32mmkcert not detected... Downloading and installing\033[0m";\
+		ARCH=$$(uname -m); \
+        OS=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
+        case "$$OS" in \
+            darwin) \
+                case "$$ARCH" in \
+                    arm64) URL="https://dl.filippo.io/mkcert/latest?for=darwin/arm64";; \
+                    x86_64) URL="https://dl.filippo.io/mkcert/latest?for=darwin/amd64";; \
+                esac ;; \
+            linux) \
+                case "$$ARCH" in \
+                    x86_64) URL="https://dl.filippo.io/mkcert/latest?for=linux/amd64";; \
+                    aarch64) URL="https://dl.filippo.io/mkcert/latest?for=linux/arm64";; \
+                esac ;; \
+        esac; \
 		curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" &&\
 		chmod +x mkcert-v*-linux-amd64 &&\
 		mv mkcert-v*-linux-amd64 mkcert;\
