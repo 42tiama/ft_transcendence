@@ -15,7 +15,7 @@ setup:
 		echo "\033[;32mDid not detect Certificate Authority files. Installing...\033[0m";\
 		./mkcert -install; \
 	fi; \
-	echo -e "\033[;32mGenerating certificate files and copying CA files...\033[0m";\
+	echo "\033[;32mGenerating certificate files and copying CA files...\033[0m";\
 	cp "$$(./mkcert -CAROOT)/rootCA.pem" certs/ca/rootCA.pem
 	./mkcert -cert-file ./certs/api-gateway/cert.pem -key-file ./certs/api-gateway/key.pem localhost
 	./mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
@@ -27,7 +27,21 @@ setup:
 
 install-mkcert:
 	if [ ! -f "mkcert" ]; then \
-		@echo \033[;32mmkcert not detected... Downloading and installing\033[0m;\
+		echo "\033[;32mmkcert not detected... Downloading and installing\033[0m";\
+		ARCH=$$(uname -m); \
+        OS=$$(uname -s | tr '[:upper:]' '[:lower:]'); \
+        case "$$OS" in \
+            darwin) \
+                case "$$ARCH" in \
+                    arm64) URL="https://dl.filippo.io/mkcert/latest?for=darwin/arm64";; \
+                    x86_64) URL="https://dl.filippo.io/mkcert/latest?for=darwin/amd64";; \
+                esac ;; \
+            linux) \
+                case "$$ARCH" in \
+                    x86_64) URL="https://dl.filippo.io/mkcert/latest?for=linux/amd64";; \
+                    aarch64) URL="https://dl.filippo.io/mkcert/latest?for=linux/arm64";; \
+                esac ;; \
+        esac; \
 		curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" &&\
 		chmod +x mkcert-v*-linux-amd64 &&\
 		mv mkcert-v*-linux-amd64 mkcert;\
