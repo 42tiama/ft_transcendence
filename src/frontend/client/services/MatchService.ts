@@ -3,7 +3,7 @@ import { User, ApiResponse } from '../game/types';
 import Match from '../game/entities/Match'
 import { TournamentInfo } from '../game/types';
 
-export default class UserService {
+export default class MatchService {
     private API_GATEWAY = 'https://localhost:8044';
 
     public async getMatches(): Promise<Match[]> {
