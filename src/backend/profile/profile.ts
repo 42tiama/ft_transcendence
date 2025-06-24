@@ -79,6 +79,37 @@ app.get('/', (request, reply) => {
 	reply.send("Hello from profile service");
 });
 
+// Get user profile by ID
+app.get('/user/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+	const { id } = request.params;
+
+	try {
+		const db = app.betterSqlite3;
+		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+
+		if (!user) {
+			reply.code(404).send({ error: "User not found." });
+			return;
+		}
+
+		reply.send({
+			success: true,
+			data: {
+				id: user.id,
+				display_name: user.display_name,
+				email: user.email,
+				avatar_url: user.avatar_url,
+				wins: user.wins,
+				losses: user.losses,
+				card_color: user.card_color
+			}
+		});
+	} catch (err: any) {
+		app.log.error('Error fetching user profile:', err);
+		reply.code(500).send({ error: "Failed to fetch user profile." });
+	}
+});
+
 app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
 	if (err) {
 		app.log.error(err);
