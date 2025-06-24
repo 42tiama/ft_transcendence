@@ -1,9 +1,9 @@
 import AbstractView from './AbstractView.js';
 
-// sets the API base URL to the API gateway for all authentication requests.
+// set the API base URL to the API gateway for all authentication requests
 const API_BASE = 'https://localhost:8044';
 
-// checks if login JWT is valid 
+// check if login JWT is valid 
 function isJwtValid(token: string | null): boolean {
 	if (!token) return false;
 	try {
@@ -18,7 +18,7 @@ function isJwtValid(token: string | null): boolean {
 	}
 }
 
-// parses JWT and returns its payload or null
+// parse JWT and return its payload or null
 function parseJwt(token: string | null): any | null {
 	if (!token) return null;
 	try {
@@ -29,7 +29,7 @@ function parseJwt(token: string | null): any | null {
 	}
 }
 
-// returns time remaining (as string) until JWT expiration
+// return time remaining (as string) until JWT expiration
 function getJwtTimeRemaining(token: string | null): string {
 	const payload = parseJwt(token);
 	if (!payload || !payload.exp) return "N/A";
@@ -41,7 +41,7 @@ function getJwtTimeRemaining(token: string | null): string {
 	return `${min}m ${sec}s`;
 }
 
-// breaks a long JWT string into 4 lines
+// break a long JWT string into 4 lines
 function formatJwtForDisplay(jwt: string | null): string {
 	if (!jwt) return "";
 	const partLength = Math.ceil(jwt.length / 4);
@@ -52,7 +52,7 @@ function formatJwtForDisplay(jwt: string | null): string {
 	return lines.join('\n');
 }
 
-// updates the header after login (true = User || false = Log In)
+// update the header after login (true = User || false = Log In)
 export function updateHeaderUserLink(isLoggedIn: boolean) {
     const navLinks = document.querySelectorAll('header nav a');
     navLinks.forEach(link => {
@@ -68,24 +68,24 @@ export function updateHeaderUserLink(isLoggedIn: boolean) {
 }
 
 
-// handles sign-in with Google
+// handle sign-in with Google
 async function handleGoogleCredential(response: any) {
 	
-	// prevents login if already logged in
+	// prevent login if already logged in
 	const existingJwt = localStorage.getItem('jwt');
 	if (isJwtValid(existingJwt)) {
 		alert('You are already logged in. Please log out first to switch accounts.');
 		return;
 	}
 	
-	// receives the Google credential (JWT) from the Google sign-in button
+	// receive the Google credential (JWT) from the Google sign-in button
 	const credential = response.credential; // The JWT
 
-	// stores the Google ID token in localStorage for later inspection
+	// store the Google ID token in localStorage for later inspection
 	localStorage.setItem('google_jwt', credential);
 
 	try {
-		// sends Google credential (JWT) to the backend at /google-login (via API gateway).
+		// send Google credential (JWT) to the backend at /google-login (via API gateway).
 		const res = await fetch(`${API_BASE}/google-login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -94,7 +94,7 @@ async function handleGoogleCredential(response: any) {
 		const data = await res.json();
 
 		if (res.ok) {
-			// on success: stores your app’s JWT in localStorage and shows a success alert
+			// on success: store app’s JWT in localStorage and show a success alert
 			localStorage.setItem('jwt', data.token);
 			alert('Google login successful!');
 			updateHeaderUserLink(true);
@@ -109,25 +109,25 @@ async function handleGoogleCredential(response: any) {
 	}
 }
 
-// this makes Login a view that can be loaded by SPA router
+// this make Login a view that can be loaded by SPA router
 export default class Login extends AbstractView {
 	constructor() {
 		super();
-		// sets the page title to "Login" when the view is constructed.
+		// set the page title to "Login" when the view is constructed.
 		this.setTitle('Login');
 	}
 
 	async getHtml(): Promise<string> {
 		try {
-			// fetches the HTML template from build/static/html/login.html
+			// fetch the HTML template from build/static/html/login.html
 			const response = await fetch('build/static/html/login.html');
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
 			}
-			// returns the HTML content as a string to be rendered in the view
+			// return the HTML content as a string to be rendered in the view
 			return await response.text();
 		} catch (error) {
-			// handles errors by logging and returning an error message as HTML
+			// handle errors by logging and returning an error message as HTML
 			console.error('Error loading template:', error);
 			return '<h1 class="h-96 bg-amber-600">Error Loading login</h1>';
 		}
@@ -135,23 +135,21 @@ export default class Login extends AbstractView {
 
 	async onMount() {
 		
-	const existingJwt = localStorage.getItem('jwt');
-	const appDiv = document.getElementById('app');
+		const existingJwt = localStorage.getItem('jwt');
+		const appDiv = document.getElementById('app');
 
-	if (isJwtValid(existingJwt)) {
+		if (isJwtValid(existingJwt)) {
 
 			// try to find the header element that says "Login" and change it
 			const navLinks = document.querySelectorAll('header nav a');
 			navLinks.forEach(link => {
-				// Compare link text ignoring case and whitespace
+				// compare link text ignoring case and whitespace
 				if (link.textContent?.trim().toLowerCase() === "log in") {
 					link.textContent = "User";
-					// link.classList.remove("text-white", "hover:text-yellow-400");
-					// link.classList.add("text-green-400", "font-bold");
 				}
 			});
 
-			// hides login form and Google button
+			// hide login form and Google button
 			const loginForm = document.getElementById('login-form');
 			const googleBtn = document.getElementById('google-signin-button');
 			if (loginForm) loginForm.style.display = 'none';
@@ -163,11 +161,11 @@ export default class Login extends AbstractView {
 			const email = payload?.email || 'N/A';
 			const name = payload?.name || payload?.displayName || payload?.preferred_username || 'N/A';
 
-			// Format JWT for 4-line display
+			// format JWT for 4-line display
 			const formattedJwt = formatJwtForDisplay(existingJwt);
 
-			// renders logout and change password button
-			if (appDiv) {			
+			// render logout and change password button
+			if (appDiv) {		
 				appDiv.innerHTML = `
 					<div class="flex flex-col items-center py-6">
 						<!-- 1cm (~38px) below header. Adjust as needed for your header height. -->
@@ -198,48 +196,68 @@ export default class Login extends AbstractView {
 					</div>
 				`;
 
-			// add event listener for change password
-			const changepassBtn = document.getElementById('changepass-btn');
-			if (changepassBtn) {
-				changepassBtn.addEventListener('click', () => {
-					// SPA navigation - you may need to trigger your router here
-					window.history.pushState({}, '', '/changepass');
-					// If you have a SPA router, trigger it to load the view
-					window.dispatchEvent(new PopStateEvent('popstate'));
-				});
-			}
+				// add event listener for change password
+				const changepassBtn = document.getElementById('changepass-btn');
+				if (changepassBtn) {
+					changepassBtn.addEventListener('click', () => {
+						// SPA navigation - you may need to trigger your router here
+						window.history.pushState({}, '', '/changepass');
+						window.dispatchEvent(new PopStateEvent('popstate'));
+					});
+				}
 			
-			// add event listener for logout
-			const logoutBtn = document.getElementById('logout-btn');
-			if (logoutBtn) {
-				logoutBtn.addEventListener('click', () => {
-					localStorage.removeItem('jwt');
-					localStorage.removeItem('google_jwt');
-					updateHeaderUserLink(false);
-					window.location.reload();
-				});
-			}
+				// add event listener for logout
+				const logoutBtn = document.getElementById('logout-btn');
+				if (logoutBtn) {
+					logoutBtn.addEventListener('click', () => {
+						localStorage.removeItem('jwt');
+						localStorage.removeItem('google_jwt');
+						updateHeaderUserLink(false);
+						window.location.reload();
+					});
+				}
 
-			// live update the JWT expiration countdown
-			const expiresSpan = document.getElementById('jwt-expires');
-			if (expiresSpan && payload?.exp) {
-				const interval = setInterval(() => {
-					const time = getJwtTimeRemaining(existingJwt);
-					expiresSpan.textContent = time;
-					if (time === "Expired") clearInterval(interval);
-				}, 1000);
+				// live update the JWT expiration countdown
+				const expiresSpan = document.getElementById('jwt-expires');
+				if (expiresSpan && payload?.exp) {
+					const interval = setInterval(() => {
+						const time = getJwtTimeRemaining(existingJwt);
+						expiresSpan.textContent = time;
+						if (time === "Expired") clearInterval(interval);
+					}, 1000);
+				}
 			}
+			return;
 		}
-		return;
-	}
 
+		// add 2FA toggle if not present in the HTML template
+		let twofaToggle = document.getElementById('use2fa-login') as HTMLInputElement | null;
+		if (!twofaToggle) {
+			const totpDiv = document.getElementById('totp')?.parentElement;
+			const toggleDiv = document.createElement('div');
+			toggleDiv.innerHTML = `
+				<label>
+					<input type="checkbox" id="use2fa-login" checked />
+					I am using 2FA for this account
+				</label>
+			`;
+			if (totpDiv && totpDiv.parentElement) {
+				totpDiv.parentElement.insertBefore(toggleDiv, totpDiv);
+			}
+			twofaToggle = document.getElementById('use2fa-login') as HTMLInputElement | null;
+		}
 
+		// hide/show TOTP input based on toggle
+		const totpField = document.getElementById('totp') as HTMLInputElement | null;
+		if (twofaToggle && totpField) {
+			const toggleTOTPVisibility = () => {
+				totpField.parentElement!.style.display = twofaToggle.checked ? '' : 'none';
+			};
+			twofaToggle.addEventListener('change', toggleTOTPVisibility);
+			toggleTOTPVisibility();
+		}
 
-
-
-
-
-		// Finds the password field and toggle button
+		// find the password field and toggle button
 		const pwd = document.getElementById('password') as HTMLInputElement | null;
 		const toggle = document.getElementById('togglePassword') as HTMLButtonElement | null;
 		if (pwd && toggle) {
@@ -256,41 +274,49 @@ export default class Login extends AbstractView {
 			console.log("Password field or toggle button not found in DOM.");
 		}
 
-
-		// finds the login form with ID login-form
+		// find the login form with ID login-form
 		const form = document.getElementById('login-form') as HTMLFormElement | null;
 		if (form) {
-			
-			// adds a submit event listener
+		
+			// add a submit event listener
 			form.addEventListener('submit', async (e) => {
-				
-				// prevents default form submission
+			
+				// prevent default form submission
 				e.preventDefault();
-				
-				// prevents new login if already logged in
+			
+				// prevent new login if already logged in
 				const existingJwt = localStorage.getItem('jwt');
 				if (isJwtValid(existingJwt)) {
 					alert('You are already logged in. Please log out first to switch accounts.');
 					e.preventDefault();
 					return;
 				}
-				
-				// grabs input values for email, TOTP code, and new password
+			
+				// grab input values for email, TOTP code, and new password
 				const emailInput = document.getElementById('email') as HTMLInputElement;
 				const passwordInput = document.getElementById('password') as HTMLInputElement;
 				const totpInput = document.getElementById('totp') as HTMLInputElement;
+				const use2fa = twofaToggle ? twofaToggle.checked : true;
 
 				const email = emailInput?.value;
 				const password = passwordInput?.value;
 				const totp = totpInput?.value;
 
-				// validates all fields are filled
-				if (!email || !password || !totp) {
-					alert('Please enter email, password and TOTP code.');
+				// validate all fields are filled
+				if (!email || !password || (use2fa && !totp)) {
+					alert(use2fa
+						? 'Please enter email, password and TOTP code.'
+						: 'Please enter email and password.');
 					return;
 				}
 
-				// sends a POST request to /login on the API gateway with the credentials
+				// build the request body
+				const body: any = { email, password };
+				if (use2fa) body.totp = totp;
+				body.twofa_enabled = use2fa;
+
+
+				// send a POST request to /login on the API gateway with the credentials
 				try {
 					const response = await fetch(`${API_BASE}/login`, {
 						method: 'POST',
@@ -299,7 +325,7 @@ export default class Login extends AbstractView {
 					});
 					const data = await response.json();
 
-					// on error: shows alert with error message
+					// on error: show alert with error message
 					if (!response.ok) {
 						if (data && data.error) {
 							alert(data.error);
@@ -309,32 +335,32 @@ export default class Login extends AbstractView {
 						return;
 					}
 
-					// on success: stores the JWT in localStorage and alerts success
+					// on success: store the JWT in localStorage and alerts success
 					if (data.token) {
 						localStorage.setItem('jwt', data.token);
-						localStorage.removeItem('google_jwt'); // Invalidate previous Google ID token
+						localStorage.removeItem('google_jwt'); // invalidate previous Google ID token
 						updateHeaderUserLink(true);
 					}
 
 					alert('Login successful!');
 
-					// clears fields after success
+					// clear fields after success
 					emailInput.value = '';
 					passwordInput.value = '';
-					totpInput.value = '';
+					if (totpInput) totpInput.value = '';
 
-					// Redirect to /home using SPA navigation
+					// redirect to /home using SPA navigation
 					window.history.pushState({}, '', '/home');
 					window.dispatchEvent(new PopStateEvent('popstate'));
 
 				} catch (err) {
-					// catches and logs any unexpected errors
+					// catch and log any unexpected errors
 					alert('Error connecting to server.');
 				}
 			});
 		}
 
-		// ensures Google API is loaded before initializing
+		// ensure Google API is loaded before initializing
 		if (!window.google) {
 			// waits until the Google API is loaded.
 			await new Promise((resolve) => {
@@ -347,7 +373,7 @@ export default class Login extends AbstractView {
 			});
 		}
 
-		// initializes the Google sign-in widget with appropriate client ID and callback (handleGoogleCredential).
+		// initialize the Google sign-in widget with appropriate client ID and callback (handleGoogleCredential).
 		window.google.accounts.id.initialize({
 			client_id: "445999956724-9nbpuf3kfd38j2hrji5sl86aajcrsaou.apps.googleusercontent.com",
 			callback: handleGoogleCredential,
@@ -356,7 +382,7 @@ export default class Login extends AbstractView {
 			login_uri: "http://localhost:8042/",
 		});
 
-		// renders the Google sign-in button in the DOM element with ID google-signin-button.
+		// render the Google sign-in button in the DOM element with ID google-signin-button.
 		window.google.accounts.id.renderButton(
 			document.getElementById("google-signin-button"),
 			{
