@@ -1,21 +1,42 @@
 <div class="text-white min-h-screen flex items-center justify-center px-4">
-  <div class="bg-[#23272a] rounded-lg shadow-lg w-full max-w-md p-8 space-y-6">
-    <h2 class="text-2xl font-bold text-center">Change Password</h2>
-    <form class="space-y-4" id="changepass-form">
-      <div>
-        <label class="block text-xs font-semibold uppercase mb-1" for="email">Email</label>
-        <input type="email" id="email" name="email" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
-      </div>
-      <div>
-        <label class="block text-xs font-semibold uppercase mb-1" for="totp">2FA: TOTP</label>
-        <input type="text" id="totp" name="totp" maxlength="6" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
-      </div>
-      <div>
-        <label class="block text-xs font-semibold uppercase mb-1" for="newPassword">New Password</label>
-        <input type="password" id="newPassword" name="newPassword" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
-      </div>
-      <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded transition">Change Password</button>
-      <div id="changepass-message" class="text-xs text-red-400 mt-2"></div>
-    </form>
-  </div>
+	<div class="bg-[#23272a] rounded-lg shadow-lg w-full max-w-md p-8 space-y-6">
+		<h2 class="text-2xl font-bold text-center">Change Password / Display Name</h2>
+		<form class="space-y-4" id="changepass-form">
+
+			<div>
+				<label class="block text-xs font-semibold uppercase mb-1" for="currentPassword">Current Password</label>
+				<input type="password" id="currentPassword" name="currentPassword" required class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
+			</div>
+
+			<div>
+				<label class="block text-xs font-semibold uppercase mb-1" for="email">Email</label>
+				<input type="email" id="email" name="email" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
+			</div>
+
+			<div>
+				<label class="block text-xs font-semibold uppercase mb-1" for="newDisplayName">New Display Name</label>
+				<input type="text" id="newDisplayName" name="newDisplayName" maxlength="9" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="(leave blank to keep current)" />
+			</div>
+			
+			<div>
+				<label class="block text-xs font-semibold uppercase mb-1" for="use2fa-changepass">
+					<input type="checkbox" id="use2fa-changepass" checked />
+					I'm using 2FA
+				</label>
+			</div>
+			
+			<div id="totp-div">
+				<label class="block text-xs font-semibold uppercase mb-1" for="totp">2FA: TOTP</label>
+				<input type="text" id="totp" name="totp" maxlength="6" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
+			</div>
+			
+			<div>
+				<label class="block text-xs font-semibold uppercase mb-1" for="newPassword">New Password</label>
+				<input type="password" id="newPassword" name="newPassword" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="(leave blank to keep current)" />
+			</div>
+			
+			<button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded transition">Change</button>
+			<div id="changepass-message" class="text-xs text-red-400 mt-2"></div>
+		</form>
+	</div>
 </div>
