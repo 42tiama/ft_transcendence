@@ -1,5 +1,6 @@
 import AbstractView from './AbstractView.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
+import { trace } from 'console';
 
 // sets the API base URL to the API gateway for all authentication requests.
 const API_BASE = 'https://localhost:8044';
@@ -29,11 +30,7 @@ export default class Profile extends AbstractView {
 		// extract userId, JWT and time remaining from payload (assume standard claims)
 		const payload = parseJwt(existingJwt);
 		const userId = payload?.id;
-		const timeRemaining = getJwtTimeRemaining(existingJwt);
 		console.log(payload);
-
-		// Format JWT for 4-line display
-		const formattedJwt = formatJwtForDisplay(existingJwt);
 
 		// Fetch user profile from database
 		let userProfile = null;
@@ -44,6 +41,57 @@ export default class Profile extends AbstractView {
 		const displayName = userProfile?.display_name || name;
 		const email = userProfile?.email || 'N/A';
 
+		// Set current avatar (fallback to default)
+		// const avatarImg = document.getElementById('avatar-preview') as HTMLImageElement;
+		// if (avatarImg) {
+		// 	const avatarUrl = userProfile?.avatar_url || 'https://localhost:8044/uploads/avatars/TIAMA-logo.png';
+		// 	avatarImg.src = avatarUrl;
+		// }
+
+		// // Avatar upload preview and POST
+		// const avatarInput = document.getElementById('avatar-upload') as HTMLInputElement;
+		// trace(avatarInput);
+
+		// ----STATS----
+		let match = await getUserProfile(userId);
+		const wins = document.getElementById('wins-count');
+		const losses = document.getElementById('losses-count');
+		// const winRate = document.getElementById('wins-rate');
+		// const totalMatches = document.getElementById('total-matches');
+		// const wins = userProfile?.wins;
+		if (wins) wins.textContent = userProfile.wins;
+		if (losses) losses.textContent = userProfile.losses;
+		// if (winRate) {
+		// 	winRate.textContent = userProfile.losses;
+		// }
+		// if (winRate) {
+		// 	winRate.textContent = userProfile.losses;
+		// }
+
+		// ----SESSION INFO----
+		// Format JWT for 4-line display
+		const jwtDisplay = document.getElementById('jwt-formatted');
+		if (jwtDisplay) {
+			const formattedJwt = formatJwtForDisplay(existingJwt);
+			jwtDisplay.textContent = formattedJwt;
+		}
+
+		// live update the JWT expiration countdown
+		const expiresSpan = document.getElementById('jwt-expires');
+		if (expiresSpan && payload?.exp) {
+			const interval = setInterval(() => {
+				const time = getJwtTimeRemaining(existingJwt);
+				expiresSpan.textContent = time;
+				if (time === "Expired") clearInterval(interval);
+			}, 1000);
+		}
+
+		const jwtEmail = document.getElementById('jwt-email');
+		if (jwtEmail) {
+			jwtEmail.textContent = payload?.email;
+		}
+
+		// ----ACCOUNT ACTIONS----
 		// add event listener for change password
 		const changepassBtn = document.getElementById('changepass-btn');
 		if (changepassBtn) {
@@ -68,15 +116,6 @@ export default class Profile extends AbstractView {
 			});
 		}
 
-		// live update the JWT expiration countdown
-		const expiresSpan = document.getElementById('jwt-expires');
-		if (expiresSpan && payload?.exp) {
-			const interval = setInterval(() => {
-				const time = getJwtTimeRemaining(existingJwt);
-				expiresSpan.textContent = time;
-				if (time === "Expired") clearInterval(interval);
-			}, 1000);
-		}
 		return;
 	}
 
@@ -137,6 +176,26 @@ async function getUserProfile(userId: number): Promise<any> {
 		return data.data;
 	} catch (error) {
 		console.error('Error fetching user profile:', error);
+		return null;
+	}
+}
+
+async function getMatchHistory(userId: number): Promise<any> {
+	try {
+		const response = await fetch(`${API_BASE}/profile/match/${userId}`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		return data.data;
+	} catch (error) {
+		console.error('Error fetching total matches:', error);
 		return null;
 	}
 }

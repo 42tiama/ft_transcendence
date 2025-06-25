@@ -9,7 +9,7 @@
         <h2 class="text-2xl font-bold mb-4">My Profile</h2>
         <div class="flex flex-col md:flex-row gap-6 items-center">
           <div class="flex flex-col items-center bg-gray-700 p-4 rounded-lg">
-            <img id="avatar-preview" src="/images/default-avatar.png" alt="Avatar"
+            <img id="avatar-preview" src="/images/TIAMA-logo.png" alt="Avatar"
               class="w-24 h-24 rounded-full mb-2 border-2 border-white object-cover shadow-lg" />
             <input type="file" id="avatar-upload" accept="image/*"
               class="text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
@@ -68,11 +68,10 @@
         <div class="overflow-x-auto text-white text-sm space-y-2">
           <div>
             <strong class="text-gray-300">JWT:</strong>
-            <pre class="bg-gray-900 p-3 rounded text-xs text-green-400 break-all whitespace-pre-wrap">${formattedJwt}</pre>
+            <pre id="jwt-formatted" class="bg-gray-900 p-3 rounded text-xs text-green-400 break-all whitespace-pre-wrap">${formattedJwt}</pre>
           </div>
-          <div><strong class="text-gray-300">Expires in:</strong> <span id="jwt-expires" class="text-white">${timeRemaining}</span></div>
+          <div><strong class="text-gray-300">Expires in:</strong> <span id="jwt-expires"  class="text-white">${timeRemaining}</span></div>
           <div><strong class="text-gray-300">Email:</strong> <span id="jwt-email" class="text-white">${email}</span></div>
-          <div><strong class="text-gray-300">Display Name:</strong> <span id="jwt-name" class="text-white">${name}</span></div>
         </div>
       </section>
 
