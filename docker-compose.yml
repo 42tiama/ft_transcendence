@@ -27,6 +27,19 @@ services:
             - .env
         volumes:
             - ./certs/api-gateway:/build/certs/api-gateway
+    
+    game-service:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/game-service/Dockerfile
+        ports:
+            - "8045:8045"
+        env_file:
+            - .env
+        volumes:
+            - ./certs/game-service:/build/certs/game-service
+            - game-service-data:/data
 
     # api-game:
     #     restart: always
@@ -145,4 +158,4 @@ services:
 volumes:
   auth-data:
   elastic-data:
-#   api-game-data:
+  game-service-data:

@@ -52,6 +52,11 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/google-login'
 });
 
+server.get('/', (req: any, reply: any)=> {
+    req.log.info('Handling root route');
+	reply.send({hello: 'from api-gateway'});
+});
+
 server.register(fastifyHttpProxy, {
 	upstream: 'https://game-service:8045',
 	prefix: '/users',
@@ -69,11 +74,6 @@ server.register(fastifyHttpProxy, {
 	prefix: '/match-history',
 	rewritePrefix: '/match-history'
 });
-
-server.get('/', (req: any, reply: any)=> {
-    req.log.info('Handling root route');
-	reply.send({hello: 'from api-gateway'});
-})
 
 //business logic
 
