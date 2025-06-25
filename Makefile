@@ -42,9 +42,9 @@ install-mkcert:
                     aarch64) URL="https://dl.filippo.io/mkcert/latest?for=linux/arm64";; \
                 esac ;; \
         esac; \
-		curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" &&\
-		chmod +x mkcert-v*-linux-amd64 &&\
-		mv mkcert-v*-linux-amd64 mkcert;\
+		curl -JLO "$$URL" &&\
+		chmod +x mkcert-v* &&\
+		mv mkcert-v* mkcert;\
 	fi
 
 #Make certificates only for development build (used inside dev container)

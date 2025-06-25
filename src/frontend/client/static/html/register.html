@@ -5,7 +5,6 @@
     <form class="space-y-4">
       <div>
         <label class="block text-xs font-semibold uppercase mb-1" for="email">Email 
-          <!-- <span class="text-red-500">*</span> -->
         </label>
         <input type="email" id="email" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
       </div>
@@ -17,9 +16,15 @@
 
       <div>
         <label class="block text-xs font-semibold uppercase mb-1" for="password">Password 
-          <!-- <span class="text-red-500">*</span> -->
         </label>
         <input type="password" id="password" class="w-full px-4 py-2 bg-[#1e2124] text-white border border-transparent rounded focus:outline-none focus:ring-2 focus:ring-amber-500" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold uppercase mb-1" for="enable2fa">
+          <input type="checkbox" id="enable2fa" checked />
+          Enable Two-Factor Authentication (2FA)
+        </label>
       </div>
 
       <button id="registerBtn" type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded transition">Continue</button>
