@@ -54,15 +54,33 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/google-login'
 });
 
-server.get('/', (req, reply)=> {
+server.get('/', (req: any, reply: any)=> {
     req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});
-})
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://game-service:8045',
+	prefix: '/users',
+	rewritePrefix: '/users'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://game-service:8045',
+	prefix: '/tournament-history',
+	rewritePrefix: '/tournament-history'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://game-service:8045',
+	prefix: '/match-history',
+	rewritePrefix: '/match-history'
+});
 
 //business logic
 
 //start listening
-server.listen({ host: "0.0.0.0", port: 8044 }, (err, address) => {
+server.listen({ host: "0.0.0.0", port: 8044 }, (err: any, address: any) => {
     if (err) {
         server.log.error(err);
         process.exit(1);

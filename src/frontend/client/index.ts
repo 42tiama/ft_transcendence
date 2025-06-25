@@ -127,21 +127,16 @@ const router = async () => {
 			const html = await view.getHtml();
 			appElement.innerHTML = html;
 
-		if (match.route.path === '/login' ||
-			match.route.path === '/register' ||
-			match.route.path === '/changepass' ||
-			match.route.path === '/profile') {
-			await view.onMount();
-      } 
-		else if (match.route.path === '/game') {
-        	await view.renderGame();
-      }
-		else if (match.route.path === '/game-ai') {
-        	await view.onMount();
-      }
-      	else if (match.route.path === '/game-menu') {
-			view.onMount();
-				}
+			if (match.route.path === '/login' ||
+				match.route.path === '/register' ||
+				match.route.path === '/changepass' ||
+				match.route.path === '/profile' ||
+				match.route.path === '/game-ai' ||
+				match.route.path === '/game-menu') {
+				await view.onMount();
+			} else if (match.route.path === '/game') {
+					await view.renderGame();
+			}
 		} else {
 				console.error('Could not find #app element');
 		}

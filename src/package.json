@@ -36,6 +36,7 @@
   },
   "workspaces": [
     "backend/api-gateway",
+    "backend/game-service",
     "backend/auth",
     "frontend/client"
   ]

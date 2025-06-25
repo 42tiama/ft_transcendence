@@ -15,6 +15,11 @@ module.exports = {
       name: "api-gateway",
       script: "api-gateway.js",
       cwd: "./build"
+    },
+    {
+      name: "game-service",
+      script: "game-service.js",
+      cwd: "./build"
     }
   ]
 };
