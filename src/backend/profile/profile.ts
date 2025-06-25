@@ -75,9 +75,13 @@ app.post('/register-profile', async (request: FastifyRequest<{ Body: RegisterReq
 	}
 });
 
-app.get('/', (request, reply) => {
-	reply.send("Hello from profile service");
-});
+interface User {
+	id: number;
+	displayName: string;
+	email: string;
+	avatarUrl: string;
+	cardColor: string;
+}
 
 // Get user profile by ID
 app.get('/user/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
@@ -85,7 +89,7 @@ app.get('/user/:id', async (request: FastifyRequest<{ Params: { id: string } }>,
 
 	try {
 		const db = app.betterSqlite3;
-		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as User;
 
 		if (!user) {
 			reply.code(404).send({ error: "User not found." });
@@ -94,21 +98,89 @@ app.get('/user/:id', async (request: FastifyRequest<{ Params: { id: string } }>,
 
 		reply.send({
 			success: true,
-			data: {
-				id: user.id,
-				display_name: user.display_name,
-				email: user.email,
-				avatar_url: user.avatar_url,
-				wins: user.wins,
-				losses: user.losses,
-				card_color: user.card_color
-			}
+			data: user
 		});
 	} catch (err: any) {
 		app.log.error('Error fetching user profile:', err);
 		reply.code(500).send({ error: "Failed to fetch user profile." });
 	}
 });
+
+interface MatchRecord {
+	id: number;
+	matchType: string;
+	player1: number;
+	player2: number;
+	player1Score: number;
+	player2Score: number;
+	winner: number;
+	matchDate: string;
+};
+
+interface FormattedMatch {
+	date: string;
+	type: string;
+	opponent: string;
+	score: string;
+	result: string;
+};
+
+interface DisplayName {
+	displayName: string;
+};
+
+// Get user Match History
+app.get('/matches/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+	const { id } = request.params;
+
+	try {
+		const db = app.betterSqlite3;
+		const stmt = db.prepare(`
+			SELECT * FROM matches
+			WHERE player1 = ? OR player2 = ?
+			ORDER BY match_date DESC
+		`);
+
+		const matches = stmt.all(id, id) as MatchRecord[];
+		if (matches.length === 0) {
+			reply.code(404).send({ error: "Matches not found." });
+			return;
+		}
+
+		// Format Match Records to Match History
+		const getDisplayName = db.prepare('SELECT displayName FROM users WHERE id = ?');
+
+		const formattedMatches: FormattedMatch[] = matches.map(match => {
+  			const isPlayer1 = match.player1 === Number(id);
+  			const opponentId = isPlayer1 ? match.player2 : match.player1;
+			const opponentResult = getDisplayName.get(opponentId) as { displayName: string };
+  			const opponent = opponentResult?.displayName;
+  			const score = isPlayer1 ? `${match.player1Score} - ${match.player2Score}` : `${match.player2Score} - ${match.player1Score}`;
+  			const result = match.winner === Number(id) ? 'Win' : 'Loss';
+
+  			return {
+    			date: new Date(match.matchDate).toLocaleDateString(),
+    			type: match.matchType,
+    			opponent,
+    			score,
+    			result
+  			};
+		});
+
+		reply.send({
+			success: true,
+			data: formattedMatches
+		});
+	} catch (err: any) {
+		app.log.error('Error fetching matches:', err);
+		reply.code(500).send({ error: "Failed to fetch matches." });
+	}
+});
+
+app.get('/', (request, reply) => {
+	reply.send("Hello from profile service");
+});
+
 
 app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
 	if (err) {

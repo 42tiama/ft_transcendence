@@ -12,20 +12,37 @@ function initializeDatabase() {
     db.exec(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
-            display_name TEXT NOT NULL,
-            email TEXT NOT NULL UNIQUE,
-            avatar_url TEXT,
-            wins INTEGER DEFAULT 0,
-            losses INTEGER DEFAULT 0,
-            card_color TEXT DEFAULT '#ffba00'
+            displayName TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            avatarUrl TEXT DEFAULT '/uploads/avatars/default.png',
+            cardColor TEXT DEFAULT '#ffba00',
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
+    // Matches table
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS matches (
+            id INTEGER PRIMARY KEY,
+            matchType TEXT NOT NULL CHECK(matchType IN ('Tournament', '1v1'),
+            tournamentId INTEGER,
+            player1 INTEGER NOT NULL,
+            player2 INTEGER NOT NULL,
+            player1Score INTEGER DEFAULT 0,
+            player2Score INTEGER DEFAULT 0,
+            winner INTEGER NOT NULL,
+            matchDate DATETIME NOT NULL,
+            FOREIGN KEY (tournamentId) REFERENCES tournaments(id),
+            FOREIGN KEY (player1) REFERENCES users(id),
+            FOREIGN KEY (player2) REFERENCES users(id),
+            FOREIGN KEY (winner) REFERENCES users(id)
+        )
+    `);
 
     // Friends table (one-way friendship)
     db.exec(`
     CREATE TABLE IF NOT EXISTS friends (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         friend_id INTEGER NOT NULL,
         UNIQUE(user_id, friend_id),
