@@ -1,3 +1,4 @@
+
 import AbstractView from './AbstractView.js';
 
 // set the API base URL to the API gateway for all authentication requests
@@ -98,7 +99,7 @@ async function handleGoogleCredential(response: any) {
 			localStorage.setItem('jwt', data.token);
 			alert('Google login successful!');
 			updateHeaderUserLink(true);
-			// === SPA Navigation to /home ===
+			// SPA navigation to /home
         	window.history.pushState({}, '', '/home');
         	window.dispatchEvent(new PopStateEvent('popstate'));
 		} else {
@@ -168,21 +169,17 @@ export default class Login extends AbstractView {
 			if (appDiv) {		
 				appDiv.innerHTML = `
 					<div class="flex flex-col items-center py-6">
-						<!-- 1cm (~38px) below header. Adjust as needed for your header height. -->
 						<p style="margin-top: 38px;" class="text-white mb-0">You are already logged in.</p>
-						<!-- 1cm below text -->
 						<button id="changepass-btn"
 							class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-8 rounded transition"
 							style="margin-top: 38px;">
-							Change Password
+							Change Profile
 						</button>
-						<!-- 1cm below Change Password -->
 						<button id="logout-btn"
 							class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-8 rounded transition"
 							style="margin-top: 38px;">
 							Log Out
 						</button>
-						<!-- 1cm below Log Out -->
 						<div class="bg-white rounded p-4 mt-10 w-full max-w-xl" style="margin-top: 38px;">
 							<h2 class="text-lg font-semibold mb-2 text-black">Session Info</h2>
 							<div class="overflow-x-auto text-black text-sm mb-2">
@@ -200,7 +197,7 @@ export default class Login extends AbstractView {
 				const changepassBtn = document.getElementById('changepass-btn');
 				if (changepassBtn) {
 					changepassBtn.addEventListener('click', () => {
-						// SPA navigation - you may need to trigger your router here
+						// SPA navigation to /changepass
 						window.history.pushState({}, '', '/changepass');
 						window.dispatchEvent(new PopStateEvent('popstate'));
 					});
@@ -313,15 +310,13 @@ export default class Login extends AbstractView {
 				// build the request body
 				const body: any = { email, password };
 				if (use2fa) body.totp = totp;
-				body.twofa_enabled = use2fa;
 
-
-				// send a POST request to /login on the API gateway with the credentials
+				// send a POST request to https://localhost:8044/login with the form data as JSON.
 				try {
 					const response = await fetch(`${API_BASE}/login`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ email, password, totp }),
+						body: JSON.stringify(body),
 					});
 					const data = await response.json();
 

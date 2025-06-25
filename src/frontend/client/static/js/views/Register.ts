@@ -126,21 +126,26 @@ export default class Register extends AbstractView {
 			}
 
 			// on success: show a message with the user’s TOTP secret (for 2FA setup)
-			alert(`User registered!\n\nYour TOTP Secret (save it for 2FA setup):\n${data.totpSecret}`);
+			// alert(`User registered!\n\nYour TOTP Secret (save it for 2FA setup):\n${data.totpSecret}`);
+			if (twofa_enabled && data.totpSecret) {
+				alert(`User registered!\n\nYour TOTP Secret (save it for 2FA setup):\n${data.totpSecret}`);
+			} else {
+				alert("User Registered!\n\nThe 2FA was not enabled for this account.");
+			}
 
-			// clears fields after success
+			// clear fields after success
 			emailInput.value = '';
 			displayNameInput.value = '';
 			passwordInput.value = '';
 			if (twofaToggle) twofaToggle.checked = true;
 
-			// === SPA Navigation to /login ===
+			// SPA Navigation to /login ===
 			window.history.pushState({}, '', '/login');
 			window.dispatchEvent(new PopStateEvent('popstate'));
 
 		}
 		catch (error: any) {
-			// catch and logs any unexpected errors
+			// catch and log any unexpected errors
 			console.error('Registration failed:', error);
 			alert('An unexpected error occurred.');
 		}

@@ -74,8 +74,10 @@ interface LoginRequestBody {
 // requestBody interfaces: types for /changepass
 interface ChangePassRequestBody {
 	email: string;
-	totp: string;
-	newPassword: string;
+	currentPassword: string;
+	totp?: string;
+	newPassword?: string;
+	newDisplayName?: string;
 }
 
 // user interface: DB user row type.
@@ -85,6 +87,7 @@ interface User {
 	displayName: string;
 	password: string;
 	totp_secret: string;
+	twofa_enabled: number;
 }
 
 // email validation
@@ -175,6 +178,14 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 	const db = app.betterSqlite3;
 	try {
+		
+		// check for duplicate displayName before insert
+		const existingDisplayName = db.prepare('SELECT 1 FROM users WHERE displayName = ?').get(displayName);
+		if (existingDisplayName) {
+			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
+			return;
+		}
+		
 		// hashe the password with bcrypt
 		const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -207,10 +218,13 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 		if (message && message.includes('UNIQUE constraint failed: users.email')) {
 			message = 'This email is already registered. Please use another email.';
 		}
+		// handle duplicate displayName error message
+		else if (message && message.includes('UNIQUE constraint failed: users.displayName')) {
+			message = 'This display name is already taken. Please choose another display name.';
+		}
 		reply.code(400).send({ error: message });
 	}
 });
-
 
 
 // --- POST /login ---
@@ -298,14 +312,13 @@ app.post('/login', async (request: FastifyRequest<{ Body: LoginRequestBody }>, r
 });
 
 
-
 // --- POST /changepass ---
 app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequestBody }>, reply) => {
-	const { email, totp, newPassword } = request.body;
+	const { email, currentPassword, totp, newPassword, newDisplayName } = request.body;
 
 	// validate inputs
-	if (!email || !totp || !newPassword) {
-		reply.code(400).send({ error: "Missing required fields." });
+	if (!email || !currentPassword || (!newPassword && !newDisplayName)) {
+		reply.code(400).send({ error: "Missing required fields: email, current password, and at least one of new password or new display name." });
 		return;
 	}
 
@@ -316,8 +329,14 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 	}
 
 	// validate password format
-	if (!isValidPassword(newPassword)) {
+	if (newPassword && !isValidPassword(newPassword)) {
 		reply.code(400).send({ error: "Password too weak. Must be 8+ chars, include upper and lower case, number, special char." });
+		return;
+	}
+
+	// validate displayName format
+	if (newDisplayName && !isValidDisplayName(newDisplayName)) {
+		reply.code(400).send({ error: "Display Name must be 1 to 9 characters." });
 		return;
 	}
 
@@ -329,36 +348,102 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 		return;
 	}
 
-	// reject Google users from changing password.
+	// reject Google users from changing password or displayName
 	if (user.password === 'Google#1A') {
-		reply.code(400).send({ error: "Password change not allowed for Google Sign-In accounts." });
+		reply.code(400).send({ error: "Change not allowed for Google Sign-In accounts." });
 		return;
 	}
 
-	// decrypt TOTP secret and validates TOTP
-	let decryptedTotp: string;
-	try {
-		decryptedTotp = decrypt(user.totp_secret);
-	} catch (err) {
-		reply.code(500).send({ error: "Failed to decrypt TOTP secret." });
-		return;
-	}
-	const totpValid = authenticator.check(totp, decryptedTotp);
-	if (!totpValid) {
-		reply.code(401).send({ error: "TOTP code does not match." });
+	// validate current password
+	const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+	if (!passwordMatch) {
+		reply.code(401).send({ error: "Current password does not match." });
 		return;
 	}
 
-	// hashe new password and updates user record
-	try {
+	// if user has 2FA enabled, require TOTP
+	if (user.twofa_enabled) {
+		if (!totp) {
+			reply.code(400).send({ error: "TOTP code is required." });
+			return;
+		}
+		// decrypt TOTP secret and validates TOTP
+		let decryptedTotp: string;
+		try {
+			decryptedTotp = decrypt(user.totp_secret);
+		} catch (err) {
+			reply.code(500).send({ error: "Failed to decrypt TOTP secret." });
+			return;
+		}
+		const totpValid = authenticator.check(totp, decryptedTotp);
+		if (!totpValid) {
+			reply.code(401).send({ error: "TOTP code does not match." });
+			return;
+		}
+	} else {
+		// if user does NOT have 2FA enabled, TOTP code must NOT be supplied
+		if (typeof totp === "string" && totp.trim() !== "") {
+			reply.code(400).send({ error: "2FA is not enabled for this account." });
+			return;
+		}
+	}
+
+	// if changing display name: check for duplicates
+	if (newDisplayName) {
+		const otherUser = db.prepare(`SELECT 1 FROM users WHERE displayName = ? AND email != ?`).get(newDisplayName, email);
+		if (otherUser) {
+			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
+			return;
+		}
+	}
+
+	// build update statement
+	const updates: string[] = [];
+	const params: any[] = [];
+	if (newPassword) {
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
-		db.prepare(`UPDATE users SET password = ? WHERE email = ?`).run(hashedPassword, email);
-		reply.code(200).send({ success: true, message: "Password changed successfully." });
+		updates.push("password = ?");
+		params.push(hashedPassword);
+	}
+	if (newDisplayName) {
+		updates.push("displayName = ?");
+		params.push(newDisplayName);
+	}
+	params.push(email);
+
+	if (updates.length === 0) {
+		reply.code(400).send({ error: "No fields to update." });
+		return;
+	}
+
+	// hash new password and update user record
+	try {
+		db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE email = ?`).run(...params);
+
+		// return new JWT if display name changed
+		let newToken: string | undefined = undefined;
+		if (newDisplayName) {
+			const updatedUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as User;
+			newToken = app.jwt.sign({
+				id: updatedUser.id,
+				email: updatedUser.email,
+				displayName: updatedUser.displayName,
+			}, { expiresIn: '12h' });
+		}
+
+		reply.code(200).send({ 
+			success: true, 
+			message: "Change successful.",
+			token: newToken // will be undefined if only password changed
+		});
 	} catch (err: any) {
-		reply.code(500).send({ error: "Failed to update password." });
+		let message = err.message;
+		if (message && message.includes('UNIQUE constraint failed: users.displayName')) {
+			message = 'This display name is already taken. Please choose another display name.';
+		}
+		reply.code(500).send({ error: message || "Failed to update user." });
 	}
 });
-
 
 
 // --- POST /google-login ---
@@ -434,7 +519,7 @@ app.listen({host: "0.0.0.0", port: 8043 }, (err, address) => {
 	db.prepare(`CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			email TEXT NOT NULL UNIQUE,
-			displayName TEXT NOT NULL,
+			displayName TEXT NOT NULL UNIQUE,
 			password TEXT NOT NULL,
 			totp_secret TEXT,
 			twofa_enabled INTEGER DEFAULT 1
@@ -445,3 +530,4 @@ app.listen({host: "0.0.0.0", port: 8043 }, (err, address) => {
 		process.exit(1);
 	}
 });
+
