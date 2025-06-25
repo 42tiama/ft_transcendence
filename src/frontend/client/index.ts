@@ -7,7 +7,7 @@ import Game from './static/js/views/Game.js';
 import GameMenu from './static/js/views/GameMenu.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
 import Profile from './static/js/views/Profile.js'; // to check the JWT
-
+import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import { updateHeaderUserLink } from './static/js/views/Login.js';
 
 function getJwtExpiration(token: string | null): number | null {
@@ -65,8 +65,8 @@ function hideLinksIfNotLoggedIn() {
 	navLinks.forEach(link => {
 		if (link instanceof HTMLElement) {
 			const text = link.textContent?.trim().toLowerCase();
-			if (["home", "leaderboard", "game"].includes(text || "")) {
-				link.style.display = isLoggedIn ? "" : "none";
+			if (["home", "leaderboard", "game", "vs ai"].includes(text || "")) {
+				link.style.display = isLoggedIn ? "flex" : "none";
 			}
 		}
 	});
@@ -85,13 +85,14 @@ const router = async () => {
 		{path: '/login', view: Login},
 		{path: '/register', view: Register},
 		{path: '/game', view: Game},
+		{path: '/game-ai', view: GameAi},
 		{path: '/changepass', view: ChangePass},
 		{path: '/profile', view: Profile},
 		{path: '/game-menu', view: GameMenu},
 	];
 
 	const protectedRoutes = [
-		'/', '/Home', '/game', '/game-menu', '/profile', '/changepass'
+		'/', '/Home', '/game', '/game-menu', '/profile', '/changepass', '/game-ai'
 	];
 
 	const jwt = localStorage.getItem('jwt');
@@ -125,21 +126,24 @@ const router = async () => {
 		if (appElement) {
 			const html = await view.getHtml();
 			appElement.innerHTML = html;
-			if (match.route.path === '/login' ||
-					match.route.path === '/register' ||
-					match.route.path === '/changepass' ||
-					match.route.path === '/profile'
-				) {
-				await view.onMount();
-      		} 
-      		else if (match.route.path === '/game') {
-        		await view.renderGame();
-      		}
-      		else if (match.route.path === '/game-menu') {
-        		view.onMount();
-			}
+
+		if (match.route.path === '/login' ||
+			match.route.path === '/register' ||
+			match.route.path === '/changepass' ||
+			match.route.path === '/profile') {
+			await view.onMount();
+      } 
+		else if (match.route.path === '/game') {
+        	await view.renderGame();
+      }
+		else if (match.route.path === '/game-ai') {
+        	await view.onMount();
+      }
+      	else if (match.route.path === '/game-menu') {
+			view.onMount();
+				}
 		} else {
-			console.error('Could not find #app element');
+				console.error('Could not find #app element');
 		}
 	} catch (error) {
 		console.error('Error rendering view:', error);

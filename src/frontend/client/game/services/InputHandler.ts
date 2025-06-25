@@ -6,7 +6,7 @@ export class InputHandler {
     private player1: Player;
     private player2: Player;
 
-    constructor(player1: Player, player2: Player) {
+    constructor(player1: Player, player2?: Player) {
         this.player1 = player1;
         this.player2 = player2;
         this.setupEventListeners();
@@ -26,10 +26,12 @@ export class InputHandler {
         }
 
         // Player 2 controls (Arrow keys)
-        if (event.code === "ArrowUp") {
-            this.player2.setVelocity(-config.playerSpeed);
-        } else if (event.code === "ArrowDown") {
-            this.player2.setVelocity(config.playerSpeed);
+        if (this.player2) {
+            if (event.code === "ArrowUp") {
+                this.player2.setVelocity(-config.playerSpeed);
+            } else if (event.code === "ArrowDown") {
+                this.player2.setVelocity(config.playerSpeed);
+            }
         }
     }
 
@@ -40,8 +42,10 @@ export class InputHandler {
         }
 
         // Player 2 controls
-        if (event.code === "ArrowUp" || event.code === "ArrowDown") {
-            this.player2.setVelocity(0);
+        if (this.player2) {
+            if (event.code === "ArrowUp" || event.code === "ArrowDown") {
+                this.player2.setVelocity(0);
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ export class Game {
     private renderer: Renderer;
     private player1Score: number = 0;
     private player2Score: number = 0;
+    private updatePlayer2: (config: typeof gameConfig) => void;
 
     constructor(canvasId: string) {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -37,19 +38,25 @@ export class Game {
     }
 
     private initializeGame(): void {
-        // Initialize players
-        this.player1 = new Player(10, gameConfig.boardHeight / 2, gameConfig);
-        this.player2 = new Player(
-            gameConfig.boardWidth - gameConfig.playerWidth - 10,
-            gameConfig.boardHeight / 2,
-            gameConfig
-        );
-
         // Initialize ball
         this.ball = new Ball(gameConfig);
 
-        // Initialize input handler
-        this.inputHandler = new InputHandler(this.player1, this.player2);
+        // Initialize players
+        this.player1 = new Player(gameConfig.playerWidth, gameConfig.boardHeight / 2, gameConfig, this.ball);
+        this.player2 = new Player(
+            gameConfig.boardWidth - gameConfig.playerWidth - 10,
+            gameConfig.boardHeight / 2,
+            gameConfig, this.ball);
+
+        const currentRoute = window.location.pathname;
+    
+        if (currentRoute === "/game") {
+            this.inputHandler = new InputHandler(this.player1, this.player2);
+            this.updatePlayer2 = (config) => this.player2.update(config);
+        } else {
+            this.inputHandler = new InputHandler(this.player1);
+            this.updatePlayer2 = (config) => this.player2.aiMode(config);
+        }
 
         // Initialize renderer
         this.renderer = new Renderer(this.context, gameConfig);
@@ -67,20 +74,27 @@ export class Game {
 
         // Update players
         this.player1.update(gameConfig);
-        this.player2.update(gameConfig);
+        this.updatePlayer2(gameConfig);
 
         // Update ball
         this.ball.update();
 
         // Handle ball collisions with walls
         if (this.ball.isOutOfBoundsVertical(gameConfig)) {
-            this.ball.bounceVertical();
+            CollisionDetector.handleWallCollision(this.ball, gameConfig);
         }
 
         // Handle ball collisions with players
         CollisionDetector.handlePlayerCollision(this.ball, this.player1, this.player2);
 
         // Check for scoring
+        this.checkScore();
+
+        // Draw everything
+        this.drawGameElements();
+    }
+    
+    private checkScore(): void {
         if (this.ball.isOutOfBoundsLeft()) {
             this.player2Score++;
             this.ball.reset(1, gameConfig);
@@ -88,12 +102,19 @@ export class Game {
             this.player1Score++;
             this.ball.reset(-1, gameConfig);
         }
+    }
 
-        // Draw everything
+    private drawGameElements(): void {
         this.player1.draw(this.context);
         this.player2.draw(this.context);
         this.ball.draw(this.context);
         this.renderer.drawScore(this.player1Score, this.player2Score);
         this.renderer.drawCenterLine();
+    }
+
+    setSelectedDifficulty(difficulty: number): void {
+        if (this.player2) {
+            this.player2.setDifficulty(difficulty);
+        }
     }
 }
