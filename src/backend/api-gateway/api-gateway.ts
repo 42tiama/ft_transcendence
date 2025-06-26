@@ -54,8 +54,20 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
+	prefix: '/profile-register',
+	rewritePrefix: '/profile-register'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
 	prefix: '/profile',
 	rewritePrefix: '/profile'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/profile-matches',
+	rewritePrefix: '/profile-matches'
 });
 
 server.get('/', (req, reply)=> {

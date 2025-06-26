@@ -121,7 +121,6 @@ const app = fastify({
 	https: httpsOptions
 });
 
-// if in devContainer, creates database in relative path
 // if in devContainer, create database in relative path
 if (SINGLE_CONTAINER === 'true'){
 	app.register(fastifyBetterSqlite3, {
@@ -187,7 +186,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 			return;
 		}
 
-		// hashe the password with bcrypt
+		// hash the password with bcrypt
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		// determine if 2FA is enabled (default: true = enable; false = disable)
@@ -233,7 +232,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 			//Insert user into profile-service DB
 			try {
-				const profileResponse = await fetch('https://profile:8046/register-profile', {
+				const profileResponse = await fetch('https://profile:8046/profile-register', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(profilePayload)
@@ -248,7 +247,6 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 			} catch (err) {
 				app.log.error('Could not reach profile service:', err);
 			}
-		}
 		}
 
 		// only return totpSecret if 2FA is enabled

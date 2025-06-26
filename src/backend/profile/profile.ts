@@ -39,16 +39,15 @@ if (SINGLE_CONTAINER === 'true'){
 
 interface RegisterRequestBody {
 	id : number;
-	email: string;
 	displayName: string;
 }
 
 //Adds new user to users table
-app.post('/register-profile', async (request: FastifyRequest<{ Body: RegisterRequestBody }>, reply) => {
-	const { id, email, displayName } = request.body;
-	app.log.info(`Received register request for user id=${id} email=${email}`);
+app.post('/profile-register', async (request: FastifyRequest<{ Body: RegisterRequestBody }>, reply) => {
+	const { id, displayName } = request.body;
+	app.log.info(`Received register request for user id=${id}`);
 
-	if (!id || !email || !displayName) {
+	if (!id || !displayName) {
 		app.log.warn(`Missing fields in register request: ${JSON.stringify(request.body)}`);
 		reply.code(400).send({ error: "Missing required fields." });
 		return;
@@ -58,12 +57,12 @@ app.post('/register-profile', async (request: FastifyRequest<{ Body: RegisterReq
 		const db = app.betterSqlite3;
 
 		const stmt = db.prepare(`
-  			INSERT INTO users (id, display_name, email)
- 	  		VALUES (?, ?, ?)
+  			INSERT INTO users (id, displayName)
+ 	  		VALUES (?, ?)
 	    `);
- 		stmt.run(id, displayName, email);
+ 		stmt.run(id, displayName);
 
-		app.log.info(`User profile created: id=${id}, email=${email}`);
+		app.log.info(`User profile created: id=${id}`);
  		reply.code(201).send({ success: true, message: "User profile created." });
 	} catch (err: any) {
 		if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
@@ -77,13 +76,12 @@ app.post('/register-profile', async (request: FastifyRequest<{ Body: RegisterReq
 interface User {
 	id: number;
 	displayName: string;
-	email: string;
 	avatarUrl: string;
 	cardColor: string;
 }
 
 // Get user profile by ID
-app.get('/user/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+app.get('/profile/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
 
 	try {
@@ -130,7 +128,7 @@ interface DisplayName {
 
 // Get user Match History
 //TODO - move to game-service
-app.get('/matches/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
 
 	try {
@@ -189,7 +187,6 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
 		CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
             displayName TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
             avatarUrl TEXT,
             cardColor TEXT DEFAULT '#ffba00',
 			createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
