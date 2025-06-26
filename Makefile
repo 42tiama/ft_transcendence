@@ -50,7 +50,7 @@ install-mkcert:
 
 #Make certificates only for development build (used inside dev container)
 dev-certs: install-mkcert
-	bash -c 'mkdir -p src/build/certs/{api-gateway,auth,client,game-service} src/build/data'
+	bash -c 'mkdir -p src/build/certs/{api-gateway,game-service,auth,client} src/build/data'
 	CAROOT=$$(./mkcert -CAROOT);\
 		if [ ! -f "$$CAROOT/rootCA.pem" ] || [ ! -f "$$CAROOT/rootCA-key.pem" ]; then \
 			echo "\033[;32mDid not detect Certificate Authority files. Installing...\033[0m";\

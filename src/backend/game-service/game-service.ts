@@ -44,7 +44,6 @@ const app = fastify({
     https: httpsOptions
  });
 
-// using fastifyBetterSqlite3: (instead of betterSqlite3);
 app.register(fastifyBetterSqlite3, {
   "pathToDb": pathToDb,
   "verbose": console.log
@@ -247,7 +246,7 @@ app.get('/', (request: any, reply: any) => {
 app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
   const db = app.betterSqlite3;
 
-  try {db.prepare(`
+   db.prepare(`
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
             displayName TEXT NOT NULL,
@@ -255,10 +254,6 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
             wins INTEGER DEFAULT 0,
             losses INTEGER DEFAULT 0
         )`).run();
-  }
-  catch (err){
-    app.log.error(err);
-  };
 
     db.prepare(`
         CREATE TABLE IF NOT EXISTS tournaments (
