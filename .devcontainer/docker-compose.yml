@@ -17,7 +17,9 @@ services:
       - nvim-data:/home/node/.local
 
     ports:
+        - "8042:8042"
         - "8043:8043"
+        - "8044:8044"
     extra_hosts:
         - "api-gateway:127.0.0.1"
         - "auth:127.0.0.1"
