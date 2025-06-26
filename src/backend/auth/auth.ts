@@ -201,7 +201,6 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 			const profilePayload = {
 				id: result.lastInsertRowid,
 				displayName: displayName,
-				email: email
 			}
 
 			fetch('https://game-service:8045/register-from-auth', {
