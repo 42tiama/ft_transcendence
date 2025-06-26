@@ -1,10 +1,13 @@
 import AbstractView from './AbstractView.js';
-import {Game} from '../../../game/entities/Game.js';
+import Game from '../../../game/entities/Game.js';
+import TiamaPong from "../../../game/entities/TiamaPong";
+import Match from '../../../game/entities/Match.js';
+import User from '../../../game/entities/User.js';
 
 export default class GameAi extends AbstractView {
 
   private selectedDifficulty: number = 0.5;
-  private game: Game;
+  private game: Game | null = null;
 
   constructor() {
     super();
@@ -24,7 +27,7 @@ export default class GameAi extends AbstractView {
     }
   }
 
-  private onClickStartButton() {
+  private onClickStartButton(gameContext: TiamaPong) {
     const btn = document.getElementById('start');
 
     if (btn) {
@@ -32,13 +35,18 @@ export default class GameAi extends AbstractView {
 
         if (btn) {
           this.showElement('start', false);
-          this.onClickDifficultyButton();
+          this.onClickDifficultyButton(gameContext);
         }
       });
     }
   }
 
-  private onClickDifficultyButton() {
+  private async showAfterMatchModal(): Promise<void> {
+    const modal = document.getElementById('after-match-modal');
+    modal?.classList.replace('hidden', 'flex');
+  }
+
+  private onClickDifficultyButton(gameContext: TiamaPong) {
 
     const difficulties = [
       { id: 'easy', value: 0.6 },
@@ -52,6 +60,7 @@ export default class GameAi extends AbstractView {
       this.showElement('ai-player');
       this.showElement('human-player');
       this.showElement('difficulty-group');
+      this.showElement('difficulty-container');
 
       difficulties.forEach(diff => {
         const diffButton = document.getElementById(diff.id);
@@ -59,13 +68,14 @@ export default class GameAi extends AbstractView {
         if (diffButton) {
           diffButton.addEventListener('click', () => {
             this.showElement('difficulty-group', false);
+            this.showElement('difficulty-container', false);
             this.showElement('board');
 
             this.selectedDifficulty = diff.value;
-
-            this.game = new Game('board');
+            const terminatorX = new User(gameContext, 'TerminatorX', 'terminatorX@uol.com.br')
+            this.game = new Game(new Match('versus-ai', null, terminatorX, null), 'board');
             this.game.setSelectedDifficulty(this.selectedDifficulty);
-            this.renderGame();
+            this.renderGame(gameContext);
           });
         }
       });
@@ -81,19 +91,25 @@ export default class GameAi extends AbstractView {
     }
   }
 
-  async onMount() {
+  async onMount(gameContext: TiamaPong) {
     this.showElement('ai-player', false);
     this.showElement('human-player', false);
     this.showElement('difficulty-group', false);
+    this.showElement('difficulty-container');
     this.showElement('board', false);
-    this.onClickStartButton();
+    this.onClickStartButton(gameContext);
   }
 
-  async renderGame() {
+  async renderGame(gameContext: TiamaPong) {
     try {
-      this.game.start();
+      await this.game!.startMatch(this.game!.match);
+      await this.showAfterMatchModal();
     } catch (error) {
       console.error("Failed to initialize game:", error);
     }
+  }
+
+  async beforeMount(gameContext: TiamaPong): Promise<boolean> {
+    return true;
   }
 }

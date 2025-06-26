@@ -8,7 +8,7 @@ import MatchService from '../../services/MatchService.js'
 import { Server } from "http";
 
 export default class Tournament {
-  tournamentId: string = '';
+  tournamentId: string = '0';
   currentRound: Match[] = [];
   totalPlayers: number = 0;
   totalMatches: number = 0;
@@ -58,16 +58,16 @@ export default class Tournament {
     }
   }
 
-  public debugPrintRoundArray(): void {
-    for (let i = 0; i < this.currentRound.length; i++) {
-      console.log(`Match ${i}\n`);
-      console.log(`player 1 - ${this.currentRound[i].player1.displayName} VS ${this.currentRound[i].player2.displayName} - Player 2\n`);
-    }
-    console.log(`Byers: \n`);
-    for (let i = 0; i < this.byes.length; i++) {
-      console.log(`Byer ${i}: ${this.byes[i].displayName}`);
-    }
-  }
+  // public debugPrintRoundArray(): void {
+  //   for (let i = 0; i < this.currentRound.length; i++) {
+  //     console.log(`Match ${i}\n`);
+  //     console.log(`player 1 - ${this.currentRound[i].player1.displayName} VS ${this.currentRound[i].player2.displayName} - Player 2\n`);
+  //   }
+  //   console.log(`Byers: \n`);
+  //   for (let i = 0; i < this.byes.length; i++) {
+  //     console.log(`Byer ${i}: ${this.byes[i].displayName}`);
+  //   }
+  // }
 
   private shuffleParticipants(participants: User[]): User[] {
     console.log("Before shuffle: ");
@@ -95,25 +95,25 @@ export default class Tournament {
     const nextMatchP2 = appElement.querySelector('#next-match-p2');
 
     displayNameP1!.innerHTML = currentMatch.player1.displayName;
-    displayNameP2!.innerHTML = currentMatch.player2.displayName;
+    displayNameP2!.innerHTML = currentMatch.player2!.displayName;
     p1Wins!.innerHTML = `Wins: ${currentMatch.player1.wins.toString()}`;
     p1Losses!.innerHTML = `Losses: ${currentMatch.player1.losses.toString()}`;
-    p2Wins!.innerHTML = `Wins: ${currentMatch.player2.wins.toString()}`;
-    p2Losses!.innerHTML = `Losses: ${currentMatch.player2.losses.toString()}`;
+    p2Wins!.innerHTML = `Wins: ${currentMatch.player2!.wins.toString()}`;
+    p2Losses!.innerHTML = `Losses: ${currentMatch.player2!.losses.toString()}`;
 
     matchTitle.innerHTML = this.matchTitle.length === 0 ? 'Next Match' : this.matchTitle;
     matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
     this.matchTitle = matchTitle.innerHTML;
 
     nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
-    nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2.displayName : '';
+    nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
   }
 
   private async renderFreezeTimeModalInfo(appElement: Element): Promise<void> {
     const displayNameP1 = appElement.querySelector('#player1')!;
     const displayNameP2 = appElement.querySelector('#player2')!;
     displayNameP1.textContent = this.currentRound[0].player1.displayName;
-    displayNameP2.textContent = this.currentRound[0].player2.displayName;
+    displayNameP2.textContent = this.currentRound[0].player2!.displayName;
 
     const startButton = appElement.querySelector('#start-button')! as HTMLButtonElement;
     const modal = appElement.querySelector('#freeze-time-modal')! as HTMLElement;
@@ -201,7 +201,7 @@ export default class Tournament {
       for (let i : number = 0; i < this.currentRound.length; i++) {
         const currentGame = new Game(this.currentRound[i], 'board');
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
-        this.debugPrintRoundArray();
+        // this.debugPrintRoundArray();
         await currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
           this.matchLog.push(...this.currentRound);
@@ -226,7 +226,7 @@ export default class Tournament {
     this.shuffleParticipants(gameContext.preTournamentSelection);
     this.byes = gameContext.preTournamentSelection.splice(0, this.totalByes);
     for (let i = 0; i < this.firstRoundTotalParticipants; i = i + 2) {
-        this.currentRound.push(new Match('tournament', gameContext.preTournamentSelection[i], gameContext.preTournamentSelection[i + 1]));
+        this.currentRound.push(new Match('tournament', this, gameContext.preTournamentSelection[i], gameContext.preTournamentSelection[i + 1]));
         gameContext.preTournamentSelection.splice(i, 2);
     }
   }
@@ -247,7 +247,7 @@ export default class Tournament {
       this.totalByes = 0;
     }
     for (let i : number = 0; i < nextRoundPlayers.length; i+=2) {
-        nextRound.push(new Match('tournament', nextRoundPlayers[i], nextRoundPlayers[i + 1]));
+        nextRound.push(new Match('tournament', this, nextRoundPlayers[i], nextRoundPlayers[i + 1]));
     }
     return nextRound;
   }

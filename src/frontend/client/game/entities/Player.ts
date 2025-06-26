@@ -8,7 +8,7 @@ export class Player implements PlayerInterface {
     height: number;
     velocityY: number;
     user: User | null = null;
-    private difficulty: number;
+    private difficulty: number | null = null;
     private ball?: BallInterface;
     private lastDecisionTime: number = 0;
     private lastBallPosition: Position = { x: 0, y: 0 };
@@ -22,7 +22,7 @@ export class Player implements PlayerInterface {
         this.velocityY = 0;
         this.ball = ballInfo;
         this.lastBallPosition = { x: ballInfo?.x || 0, y: ballInfo?.y || 0 };
-        this.lastBallVelocity = { velocityX: ballInfo.velocityX, velocityY: ballInfo.velocityY };
+        this.lastBallVelocity = { velocityX: ballInfo!.velocityX, velocityY: ballInfo!.velocityY };
     }
 
     update(config: GameConfig): void {
@@ -83,15 +83,15 @@ export class Player implements PlayerInterface {
         let limitX: number;
 
         if (this.x > config.boardWidth / 2) {
-            limitX = config.boardWidth * this.difficulty;
-            if (this.ball.x < limitX) {
+            limitX = config.boardWidth * this.difficulty!;
+            if (this.ball!.x < limitX) {
                 this.setVelocity(0);
             } else {
                 this.aiMove(config);
             }
         } else {
-            limitX = config.boardWidth * (1 - this.difficulty);
-            if (this.ball.x > limitX) {
+            limitX = config.boardWidth * (1 - this.difficulty!);
+            if (this.ball!.x > limitX) {
                 this.setVelocity(0);
             } else {
                 this.aiMove(config);
@@ -103,8 +103,8 @@ export class Player implements PlayerInterface {
         const now = Date.now();
         if (now - this.lastDecisionTime >= 1000) {
             this.lastDecisionTime = now;
-            this.lastBallPosition = { x: this.ball.x, y: this.ball.y };
-            this.lastBallVelocity = { velocityX: this.ball.velocityX, velocityY: this.ball.velocityY };
+            this.lastBallPosition = { x: this.ball!.x, y: this.ball!.y };
+            this.lastBallVelocity = { velocityX: this.ball!.velocityX, velocityY: this.ball!.velocityY };
             return true;
         }
         return false;
