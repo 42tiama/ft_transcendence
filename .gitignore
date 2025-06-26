@@ -5,3 +5,4 @@ src/node_modules
 *.db
 package-lock.json
 old-game*.DS_Store
+src/frontend/client/static/css/style.out.css
