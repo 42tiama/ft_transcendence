@@ -1,4 +1,5 @@
 import AbstractView from './AbstractView.js';
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class Home extends AbstractView {
   constructor() {
@@ -17,5 +18,12 @@ export default class Home extends AbstractView {
       console.error('Error loading template:', error);
       return '<h1 class="h-96 bg-amber-600">Error Loading home</h1>';
     }
+  }
+
+  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+  }
+  
+  async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+    return true;
   }
 }

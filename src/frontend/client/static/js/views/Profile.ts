@@ -94,6 +94,7 @@
 // 	}
 // }
 
+import TiamaPong from 'game/entities/TiamaPong.js';
 import AbstractView from './AbstractView.js';
 
 const API_BASE = 'https://localhost:8044';
@@ -232,5 +233,9 @@ export default class Profile extends AbstractView {
 				</div>
 			`;
 		});
+	}
+
+	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+		return true;
 	}
 }

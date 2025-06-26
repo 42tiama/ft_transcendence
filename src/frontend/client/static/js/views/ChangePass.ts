@@ -1,4 +1,4 @@
-
+import TiamaPong from 'game/entities/TiamaPong.js';
 import AbstractView from './AbstractView.js';
 
 // function to validate password
@@ -117,5 +117,9 @@ export default class ChangePass extends AbstractView {
 				alert("An unexpected error occurred.");
 			}
 		});
+	}
+
+	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+		return true;
 	}
 }

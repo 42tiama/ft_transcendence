@@ -9,26 +9,42 @@
         </div>
 
         <div class="w-[600px] h-[360px] bg-[#1e2124] border-4 border-dashed border-white rounded-lg flex items-center justify-center shadow-lg shadow-white/20 relative">
-            <div class="flex flex-col items-center justify-center z-10 space-y-4">
+            <div id="difficulty-container" class="flex flex-col items-center justify-center bg-black/80 border-4 border-yellow-500 rounded-3xl px-16 py-12 space-y-10 shadow-xl">
                 <button id="start"
-                    class="text-yellow-500 text-5xl font-extrabold px-10 py-4 hover:text-yellow-500 cursor-pointer animate-pulse hover:animate-none">
+                    class="text-yellow-400 text-5xl font-extrabold px-10 py-4 hover:text-yellow-300 cursor-pointer animate-pulse hover:animate-none">
                     CLICK TO PLAY
                 </button>
-                <div id="difficulty-group" class="flex flex-col items-start gap-6">
-                    <button id="easy" class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-500">
+                <div id="difficulty-group" class="flex flex-col items-center gap-6">
+                    <button id="easy"
+                        class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-400">
                         Easy
                     </button>
-                    <button id="medium" class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-500">
+                    <button id="medium"
+                        class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-400">
                         Medium
                     </button>
-                    <button id="hard" class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-500">
+                    <button id="hard"
+                        class="difficulty-btn text-3xl text-white cursor-pointer font-bold animate-pulse hover:animate-none hover:text-yellow-400">
                         Hard
                     </button>
                 </div>
             </div>
-            <canvas id="board" class="text-white text-xl font-semibold">
-                Loading...
-            </canvas>
+            <div id="after-match-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm items-center justify-center z-50 hidden">
+                <div class="bg-white/10 border-4 border-amber-400 rounded-3xl p-8 flex flex-col items-center gap-8 shadow-2xl">
+                    <div class="flex items-center gap-6 text-white font-extrabold text-3xl">
+                        GAME OVER
+                    </div>
+                    <a href="/game-ai" id="retry-btn"
+                        class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer" data-link>
+                        Retry
+                    </a>
+                    <a href="/game-menu" id="game-menu-btn"
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer" data-link>
+                        Game Menu
+                    </a>
+                </div>
+            </div>
+            <canvas id="board" class="text-white text-xl font-semibold"></canvas>
         </div>
 
         <div id="ai-player" class="flex flex-col items-center space-y-4">
@@ -38,8 +54,4 @@
         </div>
 
     </div>
-
-    <!-- Botões de dificuldade -->
-   
-
 </div>

@@ -1,5 +1,6 @@
 
 import AbstractView from './AbstractView.js';
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 // set the API base URL to the API gateway for all authentication requests
 const API_BASE = 'https://localhost:8044';
@@ -55,17 +56,17 @@ function formatJwtForDisplay(jwt: string | null): string {
 
 // update the header after login (true = User || false = Log In)
 export function updateHeaderUserLink(isLoggedIn: boolean) {
-    const navLinks = document.querySelectorAll('header nav a');
-    navLinks.forEach(link => {
-        // if logged in, change "Log In" → "User"
-        if (isLoggedIn && link.textContent?.trim().toLowerCase() === "log in") {
-            link.textContent = "User";
-        }
-        // if logged out, change "User" → "Log In"
-        else if (!isLoggedIn && link.textContent?.trim().toLowerCase() === "user") {
-            link.textContent = "Log In";
-        }
-    });
+	const navLinks = document.querySelectorAll('header nav a');
+	navLinks.forEach(link => {
+		// if logged in, change "Log In" → "User"
+		if (isLoggedIn && link.textContent?.trim().toLowerCase() === "log in") {
+			link.textContent = "User";
+		}
+		// if logged out, change "User" → "Log In"
+		else if (!isLoggedIn && link.textContent?.trim().toLowerCase() === "user") {
+			link.textContent = "Log In";
+		}
+	});
 }
 
 
@@ -379,7 +380,7 @@ export default class Login extends AbstractView {
 
 		// render the Google sign-in button in the DOM element with ID google-signin-button.
 		window.google.accounts.id.renderButton(
-			document.getElementById("google-signin-button"),
+			document.getElementById("google-signin-button")!,
 			{
 				type: "standard",
 				theme: "filled_black",
@@ -389,5 +390,9 @@ export default class Login extends AbstractView {
 				logo_alignment: "left",
 			}
 		);
+	}
+
+	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+		return true;
 	}
 }

@@ -1,0 +1,25 @@
+import { User as UserInterface } from '../types.js';
+import TiamaPong from '../entities/TiamaPong.js'
+
+export default class User implements UserInterface {
+    id: number;
+    displayName: string;
+    points: number;
+    wins : number; 
+    losses: number;
+
+    constructor(game: TiamaPong, displayName: string, email: string) {
+        this.id = 0;
+        this.displayName = displayName;
+        this.points = 0;
+        this.wins = 0;
+        this.losses = 0;
+    }
+
+    // getId(game: TiamaPong) : number {
+    //     if (game.users.length == 0 )
+    //         return 0
+    //     else
+    //         return (game.users.length + 1);
+    // }
+}

@@ -1,3 +1,7 @@
+import UserService from "../services/UserService";
+import TournamentService from "../services/TournamentService";
+import MatchService from "../services/MatchService";
+
 export interface Position {
     x: number;
     y: number;
@@ -20,22 +24,34 @@ export interface Player extends Position, Size {
 export interface User {
     id: number;
     displayName: string;
-    userName: string;
-    email: string;
-    record: {wins : number, losses: number};
-    level: number;
-    cardColor: number;
+    points: number;
+    wins : number;
+    losses: number;
 }
 
-export interface Match extends User {
+export interface Match extends User, Tournament {
     matchId: string;
     player1: User;
     player2: User;
 }
 
-export interface Tournament extends Match {
-    tournamentId: number;
-    matches: Match[];
+export interface Tournament {
+    tournamentId: string;
+    currentRound: Match[];
+    totalPlayers: number;
+    totalMatches: number;
+    nextPowerOf2: number;
+    totalByes: number;
+    firstRoundBracketSize: number;
+    totalRounds: number;
+    tournamentFinished: boolean;
+    tournamentWinner: User;
+}
+
+export interface TournamentInfo {
+    totalPlayers: number;
+    totalMatches: number;
+    winner: User | null;
 }
 
 export interface Ball extends Position, Size, Velocity {}
@@ -49,4 +65,16 @@ export interface GameConfig {
     ballHeight: number;
     ballVelocity: number;
     playerSpeed: number
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export interface GameServices {
+    user: UserService;
+    tournament: TournamentService;
+    match: MatchService;
 }

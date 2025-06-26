@@ -480,7 +480,7 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 			id: user!.id,
 			email: user!.email,
 			displayName: user!.displayName
-		}, { expiresIn: '1m' });
+		}, { expiresIn: '10h' });
 
 		reply.send({ token, email: user!.email, displayName: user!.displayName });
 	} catch (err) {

@@ -1,5 +1,5 @@
 import AbstractView from './AbstractView.js';
-import run from '../../../game/main.js'
+import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class Game extends AbstractView {
   constructor() {
@@ -20,7 +20,11 @@ export default class Game extends AbstractView {
     }
   }
 
-  async renderGame() {
-    run();
+  async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
   }
+
+  async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
+    return true;
+  }
+  
 }

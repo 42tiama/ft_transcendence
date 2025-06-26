@@ -1,4 +1,4 @@
-import { GameConfig } from 'game/types';
+import { GameConfig } from '../../game/types';
 import { Ball } from '../entities/Ball';
 import { Player } from '../entities/Player';
 

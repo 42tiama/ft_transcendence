@@ -1,21 +1,28 @@
 <div class="flex flex-col items-center justify-center min-h-screen min-w-screen leading-0">
 
-  <div class="max-w-[600px] w-full mb-4 h-64 bg-contain bg-no-repeat bg-center bg-[url('images/TIAMA-logo.png')]"></div>
+  <div class="max-w-[600px] w-full mb-4 h-64 bg-contain bg-no-repeat bg-center bg-[url('images/TIAMA-logo.png')] drop-shadow-[0_5px_10px_rgba(255,255,255,0.6)]"></div>
 
   <div class="bg-black/70 border-4 border-amber-400 rounded-3xl px-16 py-10 flex flex-col items-center space-y-8 shadow-xl">
 
     <div class="flex items-center w-full">
-      <div id="versus" class="w-2 h-full rounded-sm animate-pulse">&#x25b6;</div>
-      <div class="flex-1 pl-6 text-white hover:text-yellow-300 cursor-pointer">
-        Versus
-      </div>
+      <div id="versus-player" class="w-2 h-full text-amber-400 rounded-sm animate-pulse">&#x25b6;</div>
+      <a id="versus-player-Link" href="/game" class="flex-1 pl-6 text-white hover:text-yellow-300 cursor-pointer" data-link>
+        Player vs Player
+      </a>
     </div>
 
     <div class="flex items-center w-full">
-      <div id="tournament" class="w-2 h-full rounded-sm animate-pulse"></div>
-      <div class="flex-1 pl-6 text-white hover:text-yellow-300 cursor-pointer">
+      <div id="versus-ai" class="w-2 h-full text-amber-400 rounded-sm animate-pulse"></div>
+      <a id="versusLink-ai-link" href="/game-ai" class="flex-1 pl-6 text-white hover:text-yellow-300 cursor-pointer" data-link>
+        Player vs AI
+      </a>
+    </div>
+
+    <div class="flex items-center w-full">
+      <div id="tournament" class="w-2 h-full text-amber-400 rounded-sm animate-pulse"></div>
+      <a id="tournamentLink" href="/tournament-player-selection" class="flex-1 pl-6 text-white hover:text-yellow-300 cursor-pointer" data-link>
         Tournament
-      </div>
+      </a>
     </div>
 
     <p class="text-sm text-white/50 mt-2">

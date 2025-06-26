@@ -4,4 +4,5 @@ client_secret_445999956724-9nbpuf3kfd38j2hrji5sl86aajcrsaou.apps.googleuserconte
 src/node_modules
 *.db
 package-lock.json
-*.DS_Store
+old-game*.DS_Store
+src/frontend/client/static/css/style.out.css

@@ -1,0 +1,203 @@
+import Home from './static/js/views/Home.js';
+import Login from './static/js/views/Login.js';
+import Register from './static/js/views/Register.js';
+import Game from './static/js/views/Game.js';
+import NotFound from './static/js/views/404.js';
+import GameMenu from './static/js/views/GameMenu.js';
+import PlayerSelection from './static/js/views/PlayerSelection.js';
+import Tournament from './static/js/views/Tournament.js';
+import TiamaPong from './game/entities/TiamaPong.js';
+import ChangePass from './static/js/views/ChangePass.js'; // to change the password
+import Profile from './static/js/views/Profile.js'; // to check the JWT
+import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
+import { updateHeaderUserLink } from './static/js/views/Login.js';
+
+export default class SpaRouter {
+  public gameContext: TiamaPong;
+
+  constructor(gameContext: TiamaPong) {
+    this.gameContext = gameContext;
+    this.initListeners();
+  }
+
+  initListeners() {
+    window.addEventListener('popstate', () => {
+      this.router();
+      this.hideLinksIfNotLoggedIn();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.addEventListener('click', (e: MouseEvent) => {
+        if (
+          e.target instanceof HTMLAnchorElement &&
+          e.target.matches('[data-link]')
+        ) {
+          e.preventDefault();
+          this.navigateTo(e.target.href);
+        }
+      });
+      // On first load, if not logged in and not already at /login or /register, redirect to /login
+      const jwt = localStorage.getItem('jwt');
+      if (!this.isJwtValid(jwt) && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        history.replaceState({}, '', '/login');
+      }
+      void this.router();
+      this.hideLinksIfNotLoggedIn();
+      if (typeof window !== "undefined" && typeof document !== "undefined") {
+        this.autoLogoutOnJwtExpiry();
+      }
+    });
+  }
+
+  getJwtExpiration(token: string | null): number | null {
+    if (!token) return null;
+    try {
+      const [, payloadB64] = token.split('.');
+      const payload = JSON.parse(atob(payloadB64));
+      return payload.exp ? payload.exp : null;
+    } catch {
+      return null;
+    }
+  }
+
+  isJwtValid(token: string | null): boolean {
+    const exp = this.getJwtExpiration(token);
+    if (!exp) return false;
+    const now = Math.floor(Date.now() / 1000);
+    return exp > now;
+  }
+
+  autoLogoutOnJwtExpiry() {
+    setInterval(() => {
+      const jwt = localStorage.getItem('jwt');
+      if (jwt && !this.isJwtValid(jwt)) {
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('google_jwt');
+
+        updateHeaderUserLink(false); // <-- update header to "Log In"
+
+        // Redirect to login page (SPA navigation)
+        if (window.location.pathname !== '/login') {
+          history.pushState({}, '', '/login');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+        // Optionally, show a message only once
+        if (!window.sessionStorage.getItem('jwt_expired_alerted')) {
+          alert('Session expired. Please log in again.');
+          window.sessionStorage.setItem('jwt_expired_alerted', '1');
+        }
+        // Hide links when logged out
+        this.hideLinksIfNotLoggedIn();
+      } else if (jwt && this.isJwtValid(jwt)) {
+        // Reset alert flag if user logs in again
+        window.sessionStorage.removeItem('jwt_expired_alerted');
+        // Show links when logged in
+        this.hideLinksIfNotLoggedIn();
+      }
+    }, 1000); // check every second
+  }
+
+  hideLinksIfNotLoggedIn() {
+    const jwt = localStorage.getItem('jwt');
+    const isLoggedIn = this.isJwtValid(jwt);
+    const navLinks = document.querySelectorAll('header nav a');
+    navLinks.forEach(link => {
+      if (link instanceof HTMLElement) {
+        const text = link.textContent?.trim().toLowerCase();
+        if (["home", "leaderboard", "game", "vs ai"].includes(text || "")) {
+          link.style.display = isLoggedIn ? "flex" : "none";
+        }
+      }
+    });
+  }
+
+  navigateTo = (url: string) => {
+    history.pushState(null, '', url);
+    void this.router();
+  };
+
+  router = async () => {
+    const routes = [
+      { path: '/404,', view: NotFound },
+      { path: '/', view: Home },
+      { path: '/Home', view: Home },
+      { path: '/login', view: Login },
+      { path: '/register', view: Register },
+      { path: '/game', view: Game },
+      { path: '/game-ai', view: GameAi },
+      { path: '/changepass', view: ChangePass },
+      { path: '/profile', view: Profile },
+      { path: '/game-menu', view: GameMenu },
+      { path: '/tournament-player-selection', view: PlayerSelection },
+      { path: '/tournament', view: Tournament },
+    ];
+
+    const protectedRoutes = [
+      '/', '/Home', '/game', '/game-menu', '/profile', '/changepass', '/game-ai'
+    ];
+
+    const jwt = localStorage.getItem('jwt');
+    const isLoggedIn = this.isJwtValid(jwt);
+
+    // If not logged in and trying to visit a protected route, redirect to /login
+    if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+      history.replaceState({}, '', '/login');
+    }
+
+    const potentialMatches = routes.map(route => {
+      return {
+        route: route,
+        isMatch: location.pathname === route.path,
+      };
+    });
+
+    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
+
+    if (!match) {
+      match = {
+        route: routes[0],
+        isMatch: true,
+      };
+    }
+
+    try {
+      const view = new match.route.view() as any;
+      const appElement = document.querySelector('#app') as HTMLElement;
+
+      if (appElement) {
+        const html = await view.getHtml();
+
+        //validate phase
+        if (match.route.path === '/tournament' && !(await view.beforeMount(this.gameContext))) {
+          return false;
+        }
+
+        //render the view page
+        appElement.innerHTML = html;
+
+        //after html view rendered
+        if (match.route.path === '/login' || match.route.path === '/register'
+          || match.route.path === '/changepass' || match.route.path === '/profile') {
+          await view.onMount();
+        }
+        else if (match.route.path === '/game-menu') {
+          await view.onMount(this.gameContext);
+        }
+        else if (match.route.path === '/game-ai') {
+          await view.onMount(this.gameContext);
+        }
+        else if (match.route.path === '/tournament') {
+          await view.onMount(this.gameContext, appElement);
+        }
+        else if (match.route.path === '/tournament-player-selection') {
+          await view.onMount(this.gameContext);
+        }
+      } else {
+        console.error('Could not find #app element');
+      }
+    } catch (error) {
+      console.error('Error rendering view:', error);
+    }
+    this.hideLinksIfNotLoggedIn();
+  };
+}

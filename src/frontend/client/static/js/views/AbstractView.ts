@@ -1,4 +1,6 @@
-export default class AbstractView {
+import TiamaPong from "../../../game/entities/TiamaPong";
+
+export default abstract class AbstractView {
   constructor() {}
 
   setTitle(title: string) {
@@ -9,5 +11,7 @@ export default class AbstractView {
     return "";
   }
 
-  async onMount(): Promise<void> {}
+  abstract beforeMount(gameContext: TiamaPong | null): Promise<boolean> 
+
+  abstract onMount(gameContext: TiamaPong | null, appElement: Element | null): Promise<void> 
 }
