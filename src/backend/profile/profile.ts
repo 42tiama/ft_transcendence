@@ -98,6 +98,52 @@ app.get('/profile/:id', async (request: FastifyRequest<{ Params: { id: string } 
 	}
 });
 
+// Get User Match Stats
+//TODO - move to game-service
+app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+	const { id } = request.params;
+
+	try {
+		const db = app.betterSqlite3;
+		const winStmt = db.prepare(`
+			SELECT COUNT(*) AS count FROM matches
+			WHERE winner = ?
+		`);
+		const lossStmt = db.prepare(`
+			SELECT COUNT(*) AS count FROM matches
+			WHERE player1 = ? OR player2 = ?
+			AND winner != ?
+		`);
+
+		const wins = winStmt.get(id) as {count: number};
+		const losses = lossStmt.get(id, id, id) as {count: number};
+		const totalMatches = wins.count + losses.count;
+		if (totalMatches === 0) {
+			app.log.info('No matches found for Match Stat');
+			reply.send({
+				success: true,
+				data: null
+			});
+		}
+		const winRate = Math.round((wins.count / totalMatches) * 100);
+
+		app.log.info('User matches: ', totalMatches);
+
+		reply.send({
+			success: true,
+			data: {
+				wins: wins.count,
+				losses: losses.count,
+				winRate: winRate,
+				totalMatches: totalMatches
+			}
+		});
+	} catch (err: any) {
+		app.log.error('Error fetching matches:', err);
+		reply.code(500).send({ error: "Failed to fetch matches." });
+	}
+});
+
 interface MatchRecord {
 	id: number;
 	matchType: string;
@@ -132,14 +178,13 @@ app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: s
 
 		const matches = stmt.all(id, id) as MatchRecord[];
 		if (matches.length === 0) {
-			app.log.info('No matches found.');
+			app.log.info('No matches found for Match History.');
 			reply.send({
 				success: true,
 				data: []
 			});
 		}
 
-		app.log.info('User matches:', matches);
 		// Format Match Records to Match History
 		const getDisplayName = db.prepare('SELECT displayName FROM users WHERE id = ?');
 
@@ -147,7 +192,7 @@ app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: s
   			const isPlayer1 = match.player1 === Number(id);
   			const opponentId = isPlayer1 ? match.player2 : match.player1;
 			const opponentResult = getDisplayName.get(opponentId) as { displayName: string };
-  			const opponent = opponentResult?.displayName ?? "Unknown";
+  			const opponent = opponentResult?.displayName ?? "AI";
   			const score = isPlayer1 ? `${match.player1Score} - ${match.player2Score}` : `${match.player2Score} - ${match.player1Score}`;
   			const result = match.winner === Number(id) ? 'Win' : 'Loss';
 
@@ -159,13 +204,11 @@ app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: s
     			result
   			};
 		});
-		app.log.info('User matches:', formattedMatches);
 		reply.send({
 			success: true,
 			data: formattedMatches
 		});
 	} catch (err: any) {
-		app.log.error(err); // <--- log raw error
 		app.log.error('Error fetching matches:', err);
 		reply.code(500).send({ error: "Failed to fetch matches." });
 	}
@@ -195,7 +238,7 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
             id INTEGER PRIMARY KEY,
             matchType TEXT NOT NULL CHECK(matchType IN ('Tournament', '1v1')),
             player1 INTEGER NOT NULL,
-            player2 INTEGER NOT NULL,
+            player2 INTEGER,
             player1Score INTEGER DEFAULT 0,
             player2Score INTEGER DEFAULT 0,
             winner INTEGER NOT NULL,

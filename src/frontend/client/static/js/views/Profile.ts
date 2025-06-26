@@ -54,20 +54,18 @@ export default class Profile extends AbstractView {
 		// trace(avatarInput);
 
 		// ----STATS----
-		// let match = await getUserProfile(userId);
-		// const wins = document.getElementById('wins-count');
-		// const losses = document.getElementById('losses-count');
-		// const winRate = document.getElementById('wins-rate');
-		// const totalMatches = document.getElementById('total-matches');
-		// const wins = userProfile?.wins;
-		// if (wins) wins.textContent = userProfile.wins;
-		// if (losses) losses.textContent = userProfile.losses;
-		// if (winRate) {
-		// 	winRate.textContent = userProfile.losses;
-		// }
-		// if (winRate) {
-		// 	winRate.textContent = userProfile.losses;
-		// }
+		let stat = await getMatchStat(userId);
+		if (stat) {
+			const wins = document.getElementById('wins-count');
+			const losses = document.getElementById('losses-count');
+			const winRate = document.getElementById('wins-rate');
+			const totalMatches = document.getElementById('total-matches');
+			if (wins) wins.textContent = stat.wins;
+			if (losses) losses.textContent = stat.losses;
+			console.log(stat);
+			if (winRate) winRate.textContent = stat.winRate;
+			if (totalMatches) totalMatches.textContent = stat.totalMatches;
+		}
 
 		// ----MATCH HISTORY----
 		let matches = await getMatchHistory(userId);
@@ -206,6 +204,25 @@ async function getUserProfile(userId: number): Promise<any> {
 	}
 }
 
+async function getMatchStat(userId: number): Promise<any> {
+	try {
+		const response = await fetch(`${API_BASE}/match-stat/${userId}`, {
+			method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+		});
+
+		const data = await response.json();
+		if (data.data.length === 0) {
+			console.info(`User has no Match Stat.`);
+			return null;
+		}
+		return data.data;
+	} catch (error) {
+		console.error('Error fetching matches for Stat:', error);
+		return null;
+	}
+}
+
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/profile-matches/${userId}`, {
@@ -215,12 +232,12 @@ async function getMatchHistory(userId: number): Promise<any> {
 
 		const data = await response.json();
 		if (data.data.length === 0) {
-			console.info(`No matches found.`);
+			console.info(`User has no Match History.`);
 			return null;
 		}
 		return data.data;
 	} catch (error) {
-		console.error('Error fetching total matches:', error);
+		console.error('Error fetching matches for History:', error);
 		return null;
 	}
 }
