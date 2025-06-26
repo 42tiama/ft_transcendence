@@ -187,6 +187,33 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 			`INSERT INTO users (email, displayName, password, totp_secret) VALUES (?, ?, ?, ?)`
 		);
 		const result = stmt.run(email, displayName, hashedPassword, encryptedTotp);
+
+		//send POST so that game-service can add to its users tables
+		const profilePayload = {
+			id: result.lastInsertRowid,
+			displayName: displayName,
+			email: email
+		};
+
+		if (result.changes === 1) {
+					try {
+						const gameServiceResponse = await fetch('https://game-service:8045/register-from-auth', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify(profilePayload)
+						});
+
+						if (!gameServiceResponse.ok) {
+							app.log.warn(`Profile service failed for user ID ${profilePayload.id}`);
+						}
+						else {
+							app.log.info(`Profile service registered user ID ${profilePayload.id}`)
+						}
+					} catch (err) {
+						app.log.error('Could not reach game-service service:', err);
+					}
+				}
+
 		// returns: new user ID, email, displayName, and plain TOTP secret (for user to set up authenticator app).
 		reply.code(201).send({ id: result.lastInsertRowid, email, displayName, totpSecret });
 	} catch (err: any) {

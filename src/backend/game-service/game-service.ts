@@ -1,4 +1,4 @@
-import fastify from "fastify";
+import fastify, { FastifyReply, FastifyRequest } from "fastify";
 import { readFileSync } from "node:fs"; // function to read files with SSL certificates
 // import { db } from "./db";
 import dotenv from 'dotenv'; // loads environment variables from .env
@@ -239,6 +239,36 @@ const app = fastify({
 //     return { success: false, error: 'Internal server error' };
 //   }
 // });
+
+interface UserPayload {
+  id: number;
+  displayName: string;
+  email: string;
+}
+
+async function addUser(
+  request: FastifyRequest<{ Body: UserPayload }>,
+  reply: FastifyReply
+)
+{
+  const { id, displayName, email }= request.body;
+  
+  try {
+    const stmt = request.server.betterSqlite3.prepare(
+      `INSERT INTO users (id, username, email)
+      VALUES (?, ?, ?)`
+    );
+    stmt.run();
+
+    reply.code(201).send({ message: 'User synced to game-service DB' });
+  }
+  catch (e) {
+  request.log.error(e);
+    reply.code(500).send({ error: 'Internal Server Error' });
+  }
+}
+
+app.post('/register-from-auth', addUser);
 
 app.get('/', (request: any, reply: any) => {
     reply.send("Hello from game service");
