@@ -55,14 +55,11 @@ app.post('/profile-register', async (request: FastifyRequest<{ Body: RegisterReq
 
 	try {
 		const db = app.betterSqlite3;
-
 		const stmt = db.prepare(`
   			INSERT INTO users (id, displayName)
  	  		VALUES (?, ?)
 	    `);
  		stmt.run(id, displayName);
-
-		app.log.info(`User profile created: id=${id}`);
  		reply.code(201).send({ success: true, message: "User profile created." });
 	} catch (err: any) {
 		if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
@@ -87,12 +84,10 @@ app.get('/profile/:id', async (request: FastifyRequest<{ Params: { id: string } 
 	try {
 		const db = app.betterSqlite3;
 		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as User;
-
 		if (!user) {
 			reply.code(404).send({ error: "User not found." });
 			return;
 		}
-
 		reply.send({
 			success: true,
 			data: user
@@ -122,10 +117,6 @@ interface FormattedMatch {
 	result: string;
 };
 
-interface DisplayName {
-	displayName: string;
-};
-
 // Get user Match History
 //TODO - move to game-service
 app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
@@ -136,15 +127,19 @@ app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: s
 		const stmt = db.prepare(`
 			SELECT * FROM matches
 			WHERE player1 = ? OR player2 = ?
-			ORDER BY match_date DESC
+			ORDER BY matchDate DESC
 		`);
 
 		const matches = stmt.all(id, id) as MatchRecord[];
 		if (matches.length === 0) {
-			reply.code(404).send({ error: "Matches not found." });
-			return;
+			app.log.info('No matches found.');
+			reply.send({
+				success: true,
+				data: []
+			});
 		}
 
+		app.log.info('User matches:', matches);
 		// Format Match Records to Match History
 		const getDisplayName = db.prepare('SELECT displayName FROM users WHERE id = ?');
 
@@ -152,24 +147,25 @@ app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: s
   			const isPlayer1 = match.player1 === Number(id);
   			const opponentId = isPlayer1 ? match.player2 : match.player1;
 			const opponentResult = getDisplayName.get(opponentId) as { displayName: string };
-  			const opponent = opponentResult?.displayName;
+  			const opponent = opponentResult?.displayName ?? "Unknown";
   			const score = isPlayer1 ? `${match.player1Score} - ${match.player2Score}` : `${match.player2Score} - ${match.player1Score}`;
   			const result = match.winner === Number(id) ? 'Win' : 'Loss';
 
   			return {
-    			date: new Date(match.matchDate).toLocaleDateString(),
+    			date: new Date(match.matchDate).toLocaleDateString('pt-BR'),
     			type: match.matchType,
     			opponent,
     			score,
     			result
   			};
 		});
-
+		app.log.info('User matches:', formattedMatches);
 		reply.send({
 			success: true,
 			data: formattedMatches
 		});
 	} catch (err: any) {
+		app.log.error(err); // <--- log raw error
 		app.log.error('Error fetching matches:', err);
 		reply.code(500).send({ error: "Failed to fetch matches." });
 	}

@@ -1,6 +1,5 @@
 import AbstractView from './AbstractView.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
-import { trace } from 'console';
 
 // sets the API base URL to the API gateway for all authentication requests.
 const API_BASE = 'https://localhost:8044';
@@ -37,9 +36,11 @@ export default class Profile extends AbstractView {
 		if (userId) {
 			userProfile = await getUserProfile(userId);
 		}
-		const name = userProfile?.name || payload?.preferred_username || 'N/A';
-		const displayName = userProfile?.display_name || name;
-		const email = userProfile?.email || 'N/A';
+		console.log(userProfile);
+		// const name = userProfile?.name || payload?.preferred_username || 'N/A';
+		const displayName = userProfile?.display_name;
+		console.log(displayName);
+		// const email = userProfile?.email || 'N/A';
 
 		// Set current avatar (fallback to default)
 		// const avatarImg = document.getElementById('avatar-preview') as HTMLImageElement;
@@ -53,20 +54,46 @@ export default class Profile extends AbstractView {
 		// trace(avatarInput);
 
 		// ----STATS----
-		let match = await getUserProfile(userId);
-		const wins = document.getElementById('wins-count');
-		const losses = document.getElementById('losses-count');
+		// let match = await getUserProfile(userId);
+		// const wins = document.getElementById('wins-count');
+		// const losses = document.getElementById('losses-count');
 		// const winRate = document.getElementById('wins-rate');
 		// const totalMatches = document.getElementById('total-matches');
 		// const wins = userProfile?.wins;
-		if (wins) wins.textContent = userProfile.wins;
-		if (losses) losses.textContent = userProfile.losses;
+		// if (wins) wins.textContent = userProfile.wins;
+		// if (losses) losses.textContent = userProfile.losses;
 		// if (winRate) {
 		// 	winRate.textContent = userProfile.losses;
 		// }
 		// if (winRate) {
 		// 	winRate.textContent = userProfile.losses;
 		// }
+
+		// ----MATCH HISTORY----
+		let matches = await getMatchHistory(userId);
+		if (matches) {
+			const matchTable = document.getElementById('match-history-table');
+			if (matchTable) {
+				// Clear table first
+				matchTable.innerHTML = '';
+
+				// Create table row for each match
+				matches.forEach(match => {
+			    	const row = document.createElement('tr');
+			    	row.classList.add('border-b', 'border-gray-700');
+					var resultEmoji = match.result === 'Win'? '🏆' : '❌';
+
+			    	row.innerHTML = `
+			    		<td class="py-2">${match.date}</td>
+			    		<td class="py-2">${match.type}</td>
+			    		<td class="py-2">${match.opponent}</td>
+			    		<td class="py-2">${match.score}</td>
+			    		<td class="py-2">${resultEmoji}</td>
+			    	`;
+      				matchTable.appendChild(row);
+				});
+			}
+		}
 
 		// ----SESSION INFO----
 		// Format JWT for 4-line display
@@ -115,7 +142,6 @@ export default class Profile extends AbstractView {
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			});
 		}
-
 		return;
 	}
 
@@ -162,7 +188,7 @@ function formatJwtForDisplay(jwt: string | null): string {
 // fetches user profile data from profile service
 async function getUserProfile(userId: number): Promise<any> {
 	try {
-		const response = await fetch(`${API_BASE}/profile/user/${userId}`, {
+		const response = await fetch(`${API_BASE}/profile/${userId}`, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' },
 		});
@@ -182,17 +208,16 @@ async function getUserProfile(userId: number): Promise<any> {
 
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
-		const response = await fetch(`${API_BASE}/profile/match/${userId}`, {
+		const response = await fetch(`${API_BASE}/profile-matches/${userId}`, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' },
 		});
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
 		const data = await response.json();
+		if (data.data.length === 0) {
+			console.info(`No matches found.`);
+			return null;
+		}
 		return data.data;
 	} catch (error) {
 		console.error('Error fetching total matches:', error);

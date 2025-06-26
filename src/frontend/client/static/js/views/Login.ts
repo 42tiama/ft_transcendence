@@ -188,7 +188,6 @@ export default class Login extends AbstractView {
 						body: JSON.stringify(body),
 					});
 					const data = await response.json();
-					console.log(data);
 
 					// on error: show alert with error message
 					if (!response.ok) {
