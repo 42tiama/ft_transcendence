@@ -238,6 +238,8 @@ app.register(fastifyBetterSqlite3, {
 //   }
 // });
 
+/////////////// CALLBACK FUNCTIONS ///////////////////////
+
 interface UserPayload {
 	id: number;
 	displayName: string;
@@ -251,12 +253,13 @@ async function addUser(
 
 	try {
 		const stmt = request.server.betterSqlite3.prepare(`
-			INSERT INTO users (id, displayName)
+			INSERT INTO players (id, displayName)
 			VALUES (?, ?)`
 		);
 
 		stmt.run(id, displayName);
 
+		request.server.log.info(`Player ${displayName} added to players table.`);
 		reply.code(201).send({message: 'User synced to game-service DB'});
 	}
 	catch (err){
@@ -264,6 +267,8 @@ async function addUser(
 		reply.code(500).send({error: 'Internal server Error'});
 	}
 }
+
+/////////////////// ROUTE HANDLERS //////////////////
 
 app.post('/register-from-auth', addUser);
 
@@ -273,10 +278,10 @@ app.get('/', (request: any, reply: any) => {
 
 // Start app
 app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
-  const db = app.betterSqlite3;
+	const db = app.betterSqlite3;
 
-   db.prepare(`
-        CREATE TABLE IF NOT EXISTS users (
+	db.prepare(`
+        CREATE TABLE IF NOT EXISTS players (
             id INTEGER PRIMARY KEY,
             displayName TEXT NOT NULL,
             points INTEGER DEFAULT 0,
@@ -289,31 +294,30 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             totalPlayers INTEGER DEFAULT 0,
             totalMatches INTEGER DEFAULT 0,
-            winner TEXT NOT NULL,
-            FOREIGN KEY (winner) REFERENCES users(displayName)
-            )
-        `).run();
+            winner INTEGER NOT NULL,
+            FOREIGN KEY (winner) REFERENCES players(id)
+            )`).run();
 
     db.prepare(`
         CREATE TABLE IF NOT EXISTS matches (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             matchType TEXT NOT NULL,
             tournamentId INTEGER,
-            player1 TEXT NOT NULL,
-            player2 TEXT NOT NULL,
+            player1 INTEGER NOT NULL,
+            player2 INTEGER,
             player1Score INTEGER DEFAULT 0,
             player2Score INTEGER DEFAULT 0,
-            winner TEXT NOT NULL,
+            winner INTEGER,
             FOREIGN KEY (tournamentId) REFERENCES tournaments(id),
-            FOREIGN KEY (player1) REFERENCES users(displayName),
-            FOREIGN KEY (player2) REFERENCES users(displayName),
-            FOREIGN KEY (winner) REFERENCES users(displayName)
-        )
-    `).run();
+            FOREIGN KEY (player1) REFERENCES players(id),
+            FOREIGN KEY (player2) REFERENCES players(id),
+            FOREIGN KEY (winner) REFERENCES players(id)
+        )`).run();
 
     if (err) {
         app.log.error(err);
         process.exit(1);
     }
+
     app.log.info(`Game-service is running at ${address}`);
 });
