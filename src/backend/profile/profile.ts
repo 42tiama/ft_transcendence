@@ -1,6 +1,5 @@
 import fastify, { FastifyRequest } from "fastify";
 import { readFileSync } from "node:fs"; // function to read files with SSL certificates
-import { db } from "./profile_db"
 import dotenv from 'dotenv'; // loads environment variables from .env
 import { Database } from 'better-sqlite3'; // type for SQLite database
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify plugin for SQLite
@@ -24,17 +23,17 @@ const httpsOptions = {
 const app = fastify({
     logger: true,
     https: httpsOptions
- });
+});
 
 if (SINGLE_CONTAINER === 'true'){
 	app.register(fastifyBetterSqlite3, {
 		"pathToDb": './data/profile.db',
-		"verbose": app.log.info
+		"verbose": console.log
 	});
 } else {
 	app.register(fastifyBetterSqlite3, {
 		"pathToDb": './data/profile.db',
-		"verbose": app.log.info
+		"verbose": console.log
 	});
 }
 
@@ -130,6 +129,7 @@ interface DisplayName {
 };
 
 // Get user Match History
+//TODO - move to game-service
 app.get('/matches/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
 
@@ -181,8 +181,49 @@ app.get('/', (request, reply) => {
 	reply.send("Hello from profile service");
 });
 
-
 app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
+	const db = app.betterSqlite3;
+
+	//Users table
+	db.prepare(`
+		CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            displayName TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            avatarUrl TEXT,
+            cardColor TEXT DEFAULT '#ffba00',
+			createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+		)
+	`).run();
+
+    //Matches table
+    db.prepare(`
+        CREATE TABLE IF NOT EXISTS matches (
+            id INTEGER PRIMARY KEY,
+            matchType TEXT NOT NULL CHECK(matchType IN ('Tournament', '1v1')),
+            player1 INTEGER NOT NULL,
+            player2 INTEGER NOT NULL,
+            player1Score INTEGER DEFAULT 0,
+            player2Score INTEGER DEFAULT 0,
+            winner INTEGER NOT NULL,
+            matchDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (player1) REFERENCES users(id),
+            FOREIGN KEY (player2) REFERENCES users(id),
+            FOREIGN KEY (winner) REFERENCES users(id)
+        )
+	`).run();
+
+    // Friends table (one-way friendship)
+    // db.exec(`
+    //     CREATE TABLE IF NOT EXISTS friends (
+    //         user_id INTEGER NOT NULL,
+    //         friend_id INTEGER NOT NULL,
+    //         UNIQUE(user_id, friend_id),
+    //         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    //         FOREIGN KEY(friend_id) REFERENCES users(id) ON DELETE CASCADE
+    //     )
+    // `);
+
 	if (err) {
 		app.log.error(err);
 		process.exit(1);
