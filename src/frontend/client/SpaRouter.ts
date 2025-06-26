@@ -7,6 +7,9 @@ import GameMenu from './static/js/views/GameMenu.js';
 import PlayerSelection from './static/js/views/PlayerSelection.js';
 import Tournament from './static/js/views/Tournament.js';
 import TiamaPong from './game/entities/TiamaPong.js';
+import ChangePass from './static/js/views/ChangePass.js'; // to change the password
+import Profile from './static/js/views/Profile.js'; // to check the JWT
+import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import { updateHeaderUserLink } from './static/js/views/Login.js';
 
 export default class SpaRouter {
@@ -18,7 +21,10 @@ export default class SpaRouter {
   }
 
   initListeners() {
-    window.addEventListener('popstate', this.router);
+    window.addEventListener('popstate', () => {
+      this.router();
+      this.hideLinksIfNotLoggedIn();
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       document.body.addEventListener('click', (e: MouseEvent) => {
@@ -30,11 +36,14 @@ export default class SpaRouter {
           this.navigateTo(e.target.href);
         }
       });
+      // On first load, if not logged in and not already at /login or /register, redirect to /login
+      const jwt = localStorage.getItem('jwt');
+      if (!this.isJwtValid(jwt) && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+        history.replaceState({}, '', '/login');
+      }
       void this.router();
-      if (
-        typeof window !== "undefined" &&
-        typeof document !== "undefined"
-      ) {
+      this.hideLinksIfNotLoggedIn();
+      if (typeof window !== "undefined" && typeof document !== "undefined") {
         this.autoLogoutOnJwtExpiry();
       }
     });
@@ -77,11 +86,29 @@ export default class SpaRouter {
           alert('Session expired. Please log in again.');
           window.sessionStorage.setItem('jwt_expired_alerted', '1');
         }
+        // Hide links when logged out
+        this.hideLinksIfNotLoggedIn();
       } else if (jwt && this.isJwtValid(jwt)) {
         // Reset alert flag if user logs in again
         window.sessionStorage.removeItem('jwt_expired_alerted');
+        // Show links when logged in
+        this.hideLinksIfNotLoggedIn();
       }
     }, 1000); // check every second
+  }
+
+  hideLinksIfNotLoggedIn() {
+    const jwt = localStorage.getItem('jwt');
+    const isLoggedIn = this.isJwtValid(jwt);
+    const navLinks = document.querySelectorAll('header nav a');
+    navLinks.forEach(link => {
+      if (link instanceof HTMLElement) {
+        const text = link.textContent?.trim().toLowerCase();
+        if (["home", "leaderboard", "game", "vs ai"].includes(text || "")) {
+          link.style.display = isLoggedIn ? "flex" : "none";
+        }
+      }
+    });
   }
 
   navigateTo = (url: string) => {
@@ -97,10 +124,25 @@ export default class SpaRouter {
       { path: '/login', view: Login },
       { path: '/register', view: Register },
       { path: '/game', view: Game },
+      { path: '/game-ai', view: GameAi },
+      { path: '/changepass', view: ChangePass },
+      { path: '/profile', view: Profile },
       { path: '/game-menu', view: GameMenu },
       { path: '/tournament-player-selection', view: PlayerSelection },
       { path: '/tournament', view: Tournament },
     ];
+
+    const protectedRoutes = [
+      '/', '/Home', '/game', '/game-menu', '/profile', '/changepass', '/game-ai'
+    ];
+
+    const jwt = localStorage.getItem('jwt');
+    const isLoggedIn = this.isJwtValid(jwt);
+
+    // If not logged in and trying to visit a protected route, redirect to /login
+    if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+      history.replaceState({}, '', '/login');
+    }
 
     const potentialMatches = routes.map(route => {
       return {
@@ -134,10 +176,14 @@ export default class SpaRouter {
         appElement.innerHTML = html;
 
         //after html view rendered
-        if (match.route.path === '/login' || match.route.path === '/register') {
+        if (match.route.path === '/login' || match.route.path === '/register'
+          || match.route.path === '/changepass' || match.route.path === '/profile') {
           await view.onMount();
         }
         else if (match.route.path === '/game-menu') {
+          await view.onMount(this.gameContext);
+        }
+        else if (match.route.path === '/game-ai') {
           await view.onMount(this.gameContext);
         }
         else if (match.route.path === '/tournament') {
@@ -152,5 +198,6 @@ export default class SpaRouter {
     } catch (error) {
       console.error('Error rendering view:', error);
     }
+    this.hideLinksIfNotLoggedIn();
   };
 }
