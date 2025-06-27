@@ -60,8 +60,14 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
-	prefix: '/profile',
-	rewritePrefix: '/profile'
+	prefix: '/profile-by-id',
+	rewritePrefix: '/profile-by-id'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/profile-by-displayname',
+	rewritePrefix: '/profile-by-displayname'
 });
 
 server.register(fastifyHttpProxy, {
@@ -72,9 +78,17 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
-	prefix: '/profile-matches',
-	rewritePrefix: '/profile-matches'
+	prefix: '/match-hist',
+	rewritePrefix: '/match-hist'
 });
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/friend-register',
+	rewritePrefix: '/friend-register'
+});
+
+
 
 server.get('/', (req, reply)=> {
     req.log.info('Handling root route');

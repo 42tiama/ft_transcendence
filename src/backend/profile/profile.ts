@@ -70,6 +70,39 @@ app.post('/profile-register', async (request: FastifyRequest<{ Body: RegisterReq
 	}
 });
 
+//Adds user to friends table
+app.post('/friend-register', async (request: FastifyRequest<{ Body: {userId: number, displayName: string}}>, reply) => {
+	const { userId, displayName } = request.body;
+	if (!userId|| !displayName) {
+		app.log.warn(`Missing fields in register request: ${JSON.stringify(request.body)}`);
+		reply.code(400).send({ error: "Missing required fields." });
+		return;
+	}
+	app.log.info(`Received request for user id=${userId} to add ${displayName} as friend`);
+
+	try {
+		const db = app.betterSqlite3;
+		//get the friend id
+		const friend = db.prepare('SELECT id FROM users WHERE displayName = ?').get(displayName) as {id: number};
+		if (!friend) {
+			return reply.status(404).send({ error: 'User not found.' });
+		}
+		if (friend.id === userId) {
+		  return reply.status(400).send({ error: 'Cannot add yourself.' });
+		}
+
+		//insert the friend
+		const insertFriend = db.prepare('INSERT OR IGNORE INTO friends (userId, friendId) VALUES (?, ?)');
+		const result = insertFriend.run(userId, friend.id);
+		if (result.changes === 0) {
+  			return reply.code(409).send({ error: "Already friends." });
+		}
+ 		reply.code(201).send({ success: true, message: "Friend added successfully." });
+	} catch (err: any) {
+			reply.code(500).send({ error: err.message });
+	}
+});
+
 interface User {
 	id: number;
 	displayName: string;

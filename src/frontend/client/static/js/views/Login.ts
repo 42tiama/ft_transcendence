@@ -83,18 +83,7 @@ export default class Login extends AbstractView {
 		}
 	}
 
-	async onMount() {
-
-		// const existingJwt = localStorage.getItem('jwt');
-
-		// if (isJwtValid(existingJwt)) {
-
-		// 	// hides login form and Google button
-		// 	const loginForm = document.getElementById('login-form');
-		// 	const googleBtn = document.getElementById('google-signin-button');
-		// 	if (loginForm) loginForm.style.display = 'none';
-		// 	if (googleBtn) googleBtn.style.display = 'none';
-		// }
+	async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
 
 		// add 2FA toggle if not present in the HTML template
 		let twofaToggle = document.getElementById('use2fa-login') as HTMLInputElement | null;

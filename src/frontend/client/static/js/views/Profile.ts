@@ -1,5 +1,6 @@
 import AbstractView from './AbstractView.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
+import { resourceLimits } from 'worker_threads';
 
 // sets the API base URL to the API gateway for all authentication requests.
 const API_BASE = 'https://localhost:8044';
@@ -34,7 +35,7 @@ export default class Profile extends AbstractView {
 		// Fetch user profile from database
 		let userProfile = null;
 		if (userId) {
-			userProfile = await getUserProfile(userId);
+			userProfile = await getUserProfileById(userId);
 		}
 		console.log(userProfile);
 		// const name = userProfile?.name || payload?.preferred_username || 'N/A';
@@ -52,6 +53,31 @@ export default class Profile extends AbstractView {
 		// // Avatar upload preview and POST
 		// const avatarInput = document.getElementById('avatar-upload') as HTMLInputElement;
 		// trace(avatarInput);
+
+		// ----ACCOUNT ACTIONS----
+		// add event listener for change password
+		const changepassBtn = document.getElementById('changepass-btn');
+		if (changepassBtn) {
+			changepassBtn.addEventListener('click', () => {
+				// SPA navigation - you may need to trigger your router here
+				window.history.pushState({}, '', '/changepass');
+				// If you have a SPA router, trigger it to load the view
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			});
+		}
+
+		// add event listener for logout
+		const logoutBtn = document.getElementById('logout-btn');
+		if (logoutBtn) {
+			logoutBtn.addEventListener('click', () => {
+				localStorage.removeItem('jwt');
+				localStorage.removeItem('google_jwt');
+				alert('You have been logged out successfully!');
+				// === SPA Navigation to /login ===
+				window.history.pushState({}, '', '/login');
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			});
+		}
 
 		// ----STATS----
 		let stat = await getMatchStat(userId);
@@ -115,28 +141,34 @@ export default class Profile extends AbstractView {
 			jwtEmail.textContent = payload?.email;
 		}
 
-		// ----ACCOUNT ACTIONS----
-		// add event listener for change password
-		const changepassBtn = document.getElementById('changepass-btn');
-		if (changepassBtn) {
-			changepassBtn.addEventListener('click', () => {
-				// SPA navigation - you may need to trigger your router here
-				window.history.pushState({}, '', '/changepass');
-				// If you have a SPA router, trigger it to load the view
-				window.dispatchEvent(new PopStateEvent('popstate'));
-			});
-		}
+		// ----FRIENDS----
+		// add event listener for adding friends
+		const addFriendBtn = document.getElementById('add-friend-btn');
+		const addFriendMessage = document.getElementById('add-friend-message');
 
-		// add event listener for logout
-		const logoutBtn = document.getElementById('logout-btn');
-		if (logoutBtn) {
-			logoutBtn.addEventListener('click', () => {
-				localStorage.removeItem('jwt');
-				localStorage.removeItem('google_jwt');
-				alert('You have been logged out successfully!');
-				// === SPA Navigation to /login ===
-				window.history.pushState({}, '', '/login');
-				window.dispatchEvent(new PopStateEvent('popstate'));
+		if (addFriendBtn) {
+			addFriendBtn.addEventListener('click', async () => {
+				const nameInput = document.getElementById('friend-display-name') as HTMLInputElement;
+				const friendDisplayName = nameInput?.value.trim();
+				if (!friendDisplayName) return;
+
+				const result = await postFriend(userId, friendDisplayName);
+
+				if (result.success) {
+		    		addFriendMessage.textContent = `✅ ${result.message}`;
+					addFriendMessage.classList.remove('text-red-400');
+					addFriendMessage.classList.add('text-green-400');
+				}
+				else {
+		    		addFriendMessage.textContent = `❌ ${result.message}`;
+				    addFriendMessage.classList.remove('text-green-400');
+				    addFriendMessage.classList.add('text-red-400');
+				}
+				nameInput.value = '';
+				// 🧼 Clear the message after 2 seconds
+				setTimeout(() => {
+					addFriendMessage.textContent = '';
+				}, 2000);
 			});
 		}
 		return;
@@ -183,9 +215,9 @@ function formatJwtForDisplay(jwt: string | null): string {
 }
 
 // fetches user profile data from profile service
-async function getUserProfile(userId: number): Promise<any> {
+async function getUserProfileById(userId: number): Promise<any> {
 	try {
-		const response = await fetch(`${API_BASE}/profile/${userId}`, {
+		const response = await fetch(`${API_BASE}/profile-by-id/${userId}`, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' },
 		});
@@ -203,6 +235,30 @@ async function getUserProfile(userId: number): Promise<any> {
 	}
 }
 
+//post friend using display name
+async function postFriend(userId: string, displayName: string): Promise<any> {
+	try {
+	    const response = await fetch(`${API_BASE}/friend-register`, {
+	    	method: 'POST',
+	    	headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ userId, displayName })
+    	});
+
+	    const result = await response.json();
+
+		if (response.ok) {
+			return { success: true, message: result.message};
+		} else {
+			return { success: false, message: result.error};
+		}
+	} catch (err) {
+		console.error(err);
+		return { success: false, message: err.message};
+	}
+}
+
+// fetches match stat from game service
+//TODO - change path on api-gateway
 async function getMatchStat(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match-stat/${userId}`, {
@@ -222,9 +278,11 @@ async function getMatchStat(userId: number): Promise<any> {
 	}
 }
 
+// fetches match history from game service
+//TODO - change path on api-gateway
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
-		const response = await fetch(`${API_BASE}/profile-matches/${userId}`, {
+		const response = await fetch(`${API_BASE}/match-hist/${userId}`, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' },
 		});
