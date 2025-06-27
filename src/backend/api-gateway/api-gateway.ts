@@ -59,8 +59,8 @@ server.get('/', (req: any, reply: any)=> {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://game-service:8045',
-	prefix: '/users',
-	rewritePrefix: '/users'
+	prefix: '/register-ai-match',
+	rewritePrefix: '/register-ai-match'
 });
 
 server.register(fastifyHttpProxy, {
