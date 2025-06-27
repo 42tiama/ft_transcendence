@@ -65,8 +65,8 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://game-service:8045',
-	prefix: '/tournament-history',
-	rewritePrefix: '/tournament-history'
+	prefix: '/create-tournament',
+	rewritePrefix: '/create-tournament'
 });
 
 server.register(fastifyHttpProxy, {

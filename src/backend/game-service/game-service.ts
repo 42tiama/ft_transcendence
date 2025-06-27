@@ -56,6 +56,18 @@ interface UserPayload {
 	displayName: string;
 }
 
+interface MatchPayload {
+  matchType: string;
+  tournamentId?: number;
+  player1: number;
+  player2?: number;
+}
+
+interface TournamentPayload {
+  totalPlayers: number;
+  totalMatches: number;
+}
+
 async function addUser(
 	request: FastifyRequest<{ Body: UserPayload }>,
 	reply: FastifyReply
@@ -79,10 +91,38 @@ async function addUser(
 	}
 }
 
+async function addTournament(
+  request: FastifyRequest<{ Body: TournamentPayload }>,
+  reply: FastifyReply
+){
+  const {totalPlayers, totalMatches} = request.body;
+
+  try {
+    const query = request.server.betterSqlite3.prepare(`
+      INSERT INTO tournaments (totalPlayers, totalMatches)
+      VALUES (?, ?, 0)`
+    );
+
+    const result = query.run(totalPlayers, totalMatches);
+
+    request.server.log.info(`Tournament with ID ${result.lastInsertRowid} added.`);
+    reply.code(201).send({message: 'Tournament created'});
+  }
+  catch (err: any){
+    request.log.error(err, `Error adding tournament: ${err.message}`);
+    reply.code(500).send({error: 'Internal server Error'});
+  }
+}
+
 /////////////////// ROUTE HANDLERS //////////////////
 
+/* POST */
 app.post('/register-from-auth', addUser);
+app.post('/create-tournament', addTournament);
+// app.post('/winner-match', addMatchWinner);
+// app.post('/winner-tournament', addTournamentWinner);
 
+/* GET */
 app.get('/', (request: any, reply: any) => {
     reply.send("Hello from game service");
 });
@@ -104,9 +144,9 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
     db.prepare(`
         CREATE TABLE IF NOT EXISTS tournaments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            totalPlayers INTEGER DEFAULT 0,
-            totalMatches INTEGER DEFAULT 0,
-            winner INTEGER NOT NULL,
+            totalPlayers INTEGER,
+            totalMatches INTEGER,
+            winner INTEGER DEFAULT 0,
             FOREIGN KEY (winner) REFERENCES players(id)
             )`).run();
 
@@ -119,7 +159,7 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
             player2 INTEGER,
             player1Score INTEGER DEFAULT 0,
             player2Score INTEGER DEFAULT 0,
-            winner INTEGER,
+            winner INTEGER DEFAULT 0,
             FOREIGN KEY (tournamentId) REFERENCES tournaments(id),
             FOREIGN KEY (player1) REFERENCES players(id),
             FOREIGN KEY (player2) REFERENCES players(id),
