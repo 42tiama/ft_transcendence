@@ -250,15 +250,15 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
 	`).run();
 
     // Friends table (one-way friendship)
-    // db.exec(`
-    //     CREATE TABLE IF NOT EXISTS friends (
-    //         user_id INTEGER NOT NULL,
-    //         friend_id INTEGER NOT NULL,
-    //         UNIQUE(user_id, friend_id),
-    //         FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-    //         FOREIGN KEY(friend_id) REFERENCES users(id) ON DELETE CASCADE
-    //     )
-    // `);
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS friends (
+            userId INTEGER NOT NULL,
+            friendId INTEGER NOT NULL,
+            UNIQUE(userId, friendId),
+            FOREIGN KEY(userId) REFERENCES users(id),
+            FOREIGN KEY(friendId) REFERENCES users(id)
+        )
+    `);
 
 	if (err) {
 		app.log.error(err);
