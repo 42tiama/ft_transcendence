@@ -85,7 +85,7 @@ export default class Game {
 				player1Id : this.match.player1.id,
 				player1Score : this.match.player1Score,
 				player2Score : this.match.player2Score,
-				winner : this.match.winner
+				winner : this.match.winner?.id ?? null //coercing to null if this.match.winner is null (it would be undefined otherwise)
 			};
 
 			fetch('https://localhost:8044/register-ai-match', {
