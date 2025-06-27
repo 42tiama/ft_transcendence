@@ -3,6 +3,7 @@ import Game from '../../../game/entities/Game.js';
 import TiamaPong from "../../../game/entities/TiamaPong";
 import Match from '../../../game/entities/Match.js';
 import User from '../../../game/entities/User.js';
+import { parseJwt } from '../views/Login.js'
 
 export default class GameAi extends AbstractView {
 
@@ -72,7 +73,15 @@ export default class GameAi extends AbstractView {
             this.showElement('board');
 
             this.selectedDifficulty = diff.value;
-            const terminatorX = new User(gameContext, 'TerminatorX', 'terminatorX@uol.com.br')
+
+
+			//get id from jwt
+			const existingJwt = localStorage.getItem('jwt');
+			const payload = parseJwt(existingJwt);
+			const id = payload.id;
+
+            const terminatorX = new User(gameContext, id, 'TerminatorX', 'terminatorX@uol.com.br')
+
             this.game = new Game(new Match('versus-ai', null, terminatorX, null), 'board');
             this.game.setSelectedDifficulty(this.selectedDifficulty);
             this.renderGame(gameContext);
