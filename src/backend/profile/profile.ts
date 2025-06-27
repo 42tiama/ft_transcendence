@@ -78,12 +78,33 @@ interface User {
 }
 
 // Get user profile by ID
-app.get('/profile/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+app.get('/profile-by-id/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
 
 	try {
 		const db = app.betterSqlite3;
 		const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as User;
+		if (!user) {
+			reply.code(404).send({ error: "User not found." });
+			return;
+		}
+		reply.send({
+			success: true,
+			data: user
+		});
+	} catch (err: any) {
+		app.log.error('Error fetching user profile:', err);
+		reply.code(500).send({ error: "Failed to fetch user profile." });
+	}
+});
+
+// Get user profile by DisplayName
+app.get('/profile-by-displayname/:displayName', async (request: FastifyRequest<{ Params: { displayName: string } }>, reply) => {
+	const { displayName } = request.params;
+
+	try {
+		const db = app.betterSqlite3;
+		const user = db.prepare('SELECT * FROM users WHERE displayName = ?').get(displayName) as User;
 		if (!user) {
 			reply.code(404).send({ error: "User not found." });
 			return;
@@ -165,7 +186,7 @@ interface FormattedMatch {
 
 // Get user Match History
 //TODO - move to game-service
-app.get('/profile-matches/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+app.get('/match-hist/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
 
 	try {
@@ -250,7 +271,7 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
 	`).run();
 
     // Friends table (one-way friendship)
-    db.exec(`
+    db.prepare(`
         CREATE TABLE IF NOT EXISTS friends (
             userId INTEGER NOT NULL,
             friendId INTEGER NOT NULL,
@@ -258,7 +279,7 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
             FOREIGN KEY(userId) REFERENCES users(id),
             FOREIGN KEY(friendId) REFERENCES users(id)
         )
-    `);
+	`).run();
 
 	if (err) {
 		app.log.error(err);
