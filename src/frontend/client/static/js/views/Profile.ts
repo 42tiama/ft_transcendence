@@ -58,12 +58,11 @@ export default class Profile extends AbstractView {
 		if (stat) {
 			const wins = document.getElementById('wins-count');
 			const losses = document.getElementById('losses-count');
-			const winRate = document.getElementById('wins-rate');
+			const winRate = document.getElementById('win-rate');
 			const totalMatches = document.getElementById('total-matches');
 			if (wins) wins.textContent = stat.wins;
 			if (losses) losses.textContent = stat.losses;
-			console.log(stat);
-			if (winRate) winRate.textContent = stat.winRate;
+			if (winRate) winRate.textContent = stat.winRate + '%';
 			if (totalMatches) totalMatches.textContent = stat.totalMatches;
 		}
 
