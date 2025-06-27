@@ -1,4 +1,3 @@
-
 import AbstractView from './AbstractView.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
 
@@ -21,7 +20,8 @@ function isJwtValid(token: string | null): boolean {
 }
 
 // parse JWT and return its payload or null
-function parseJwt(token: string | null): any | null {
+// iury: exporting to use on other places
+export function parseJwt(token: string | null): any | null {
 	if (!token) return null;
 	try {
 		const [, payloadB64] = token.split('.');
