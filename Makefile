@@ -68,6 +68,7 @@ clean:
 
 fclean: clean
 	rm -rf certs
+	rm mkcert
 	docker system prune --all --volumes --force
 
 re: fclean

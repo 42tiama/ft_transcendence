@@ -49,195 +49,6 @@ app.register(fastifyBetterSqlite3, {
   "verbose": console.log
 });
 
-
-// ROUTE HANDLERS
-// app.get('/users', async (request: any, reply: any) => {
-//     try {
-//         const users = db.prepare('SELECT * FROM users ORDER BY id DESC').all();
-//         return { success: true, data: users };
-//     } catch (error) {
-//         app.log.error(error);
-//         reply.status(500);
-//         return { success: false, error: 'Failed to fetch users' };
-//     }
-// });
-
-// app.get('/users/:id', async (request: any, reply: any) => {
-//     try {
-//         const { id } = request.params as { id: string };
-//         const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
-        
-//         if (!user) {
-//             reply.status(404);
-//             return { success: false, error: 'User not found' };
-//         }
-        
-//         return { success: true, data: user };
-//     } catch (error) {
-//         app.log.error(error);
-//         reply.status(500);
-//         return { success: false, error: 'Failed to fetch user' };
-//     }
-// });
-
-// app.post('/users', async (request: any, reply: any) => {
-//     try {
-//         const {displayName} = request.body as any;
-        
-//         if (!displayName) {
-//             reply.status(400);
-//             return { success: false, error: 'The display name is required' };
-//         }
-
-//         const insertUser = db.prepare(`
-//             INSERT INTO users (displayName) 
-//             VALUES (?)
-//         `);
-        
-//         const result = insertUser.run(displayName);
-        
-//         // Get the created user
-//         const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
-        
-//         return { success: true, data: newUser };
-//     } catch (error) {
-//         app.log.error(error);
-        
-//         // Handle unique constraint error
-//         if (error instanceof Error && error.message.includes('UNIQUE constraint failed')) {
-//             reply.status(409);
-//             return { success: false, error: 'Email already exists' };
-//         }
-        
-//         reply.status(500);
-//         return { success: false, error: 'Failed to create user' };
-//     }
-// });
-
-// tournament routes
-// app.get('/tournament-history', async (request: any, reply: any) => {
-//     try {
-//         const tournaments = db.prepare('SELECT * FROM tournaments ORDER BY id DESC').all();
-//         return { success: true, data: tournaments };
-//     } catch (error) {
-//         // server.log.error(error); //uncomment after import log stash
-//         reply.status(500);
-//         return { success: false, error: 'Failed to fetch tournaments' };
-//     }
-// });
-
-// app.post('/tournament-history', async (request: any, reply: any) => {
-//   try {
-//     const tournamentInfo = request.body as TournamentInfo;
-    
-//     if (!tournamentInfo.totalPlayers || !tournamentInfo.totalMatches || !tournamentInfo.winner) {
-//         reply.status(400);
-//         return { success: false, error: 'Missing data to insert in tournament history' };
-//     }
-
-//     const insertTournament = db.prepare(`
-//         INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
-//         VALUES (?, ?, ?)
-//     `);
-    
-//     insertTournament.run(tournamentInfo.totalPlayers, tournamentInfo.totalMatches, tournamentInfo.winner);
-    
-//     // server.log.info('Data inserted at tournaments table'); // descomentar qdo importar logstash
-    
-//     return { success: true };
-    
-//   } catch (error) {
-//     // server.log.error('Error inserting tournament data:', error); // descomentar qdo importar logstash
-    
-//     if (error instanceof Error) {
-//       if (error.message.includes('UNIQUE constraint failed')) {
-//         reply.status(409);
-//         return { success: false, error: 'Duplicate tournament data' };
-//       }
-      
-//       if (error.message.includes('FOREIGN KEY constraint failed')) {
-//         reply.status(400);
-//         return { success: false, error: 'Invalid player/winner reference' };
-//       }
-//     }
-    
-//     reply.status(500);
-//     return { success: false, error: 'Internal server error' };
-//   }
-// });
-
-//match routes
-
-// app.get('/match-history', async (request: any, reply: any) => {
-//     try {
-//         const matches = db.prepare('SELECT * FROM matches ORDER BY id DESC').all();
-//         return { success: true, data: matches };
-//     } catch (error) {
-//         // server.log.error(error); // uncomments when import logstash
-//         reply.status(500);
-//         return { success: false, error: 'Failed to fetch matches' };
-//     }
-// });
-
-// app.post('/match-history', async (request: any, reply: any) => {
-//   try {
-//     const matches = request.body as Match[];
-    
-//     if (!matches || !Array.isArray(matches) || matches.length === 0) {
-//       reply.status(400);
-//       return { success: false, error: 'Missing or invalid match data' };
-//     }
-
-//     for (const match of matches) {
-//       if (!match.matchType || !match.player1 || !match.player2 || !match.winner) {
-//         reply.status(400);
-//         return { success: false, error: 'Invalid match data: missing required fields' };
-//       }
-//     }
-
-//     const insertMatch = db.prepare(`
-//       INSERT INTO matches (matchType, tournamentId, player1, player2, player1Score, player2Score, winner)
-//       VALUES (?, ?, ?, ?, ?, ?, ?)
-//     `);
-    
-//     const insertTransaction = db.transaction((matchesToInsert: Match[]) => {
-//       for (const match of matchesToInsert) {
-//         insertMatch.run(
-//           match.matchType,
-//           match.tournamentId || null,
-//           match.player1,
-//           match.player2,
-//           match.player1Score,
-//           match.player2Score,
-//           match.winner
-//         );
-//       }
-//     });
-
-//     insertTransaction(matches);
-//     // server.log.info('Data inserted at matches table'); // descomentar qdo importar logstash
-//     return { success: true, data: { insertedCount: matches.length } };
-    
-//   } catch (error) {
-//     // server.log.error('Error inserting match history:', error); // descomentar qdo importar logstash
-    
-//     if (error instanceof Error) {
-//       if (error.message.includes('UNIQUE constraint failed')) {
-//         reply.status(409);
-//         return { success: false, error: 'Duplicate match data' };
-//       }
-      
-//       if (error.message.includes('FOREIGN KEY constraint failed')) {
-//         reply.status(400);
-//         return { success: false, error: 'Invalid player or tournament reference' };
-//       }
-//     }
-    
-//     reply.status(500);
-//     return { success: false, error: 'Internal server error' };
-//   }
-// });
-
 /////////////// CALLBACK FUNCTIONS ///////////////////////
 
 interface UserPayload {
@@ -253,7 +64,7 @@ async function addUser(
 
 	try {
 		const stmt = request.server.betterSqlite3.prepare(`
-			INSERT INTO players (id, displayName)
+			INSERT INTO players (userId, displayName)
 			VALUES (?, ?)`
 		);
 
@@ -282,7 +93,8 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
 
 	db.prepare(`
         CREATE TABLE IF NOT EXISTS players (
-            id INTEGER PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER NOT NULL UNIQUE,
             displayName TEXT NOT NULL,
             points INTEGER DEFAULT 0,
             wins INTEGER DEFAULT 0,
