@@ -100,7 +100,7 @@ async function addTournament(
   try {
     const query = request.server.betterSqlite3.prepare(`
       INSERT INTO tournaments (totalPlayers, totalMatches)
-      VALUES (?, ?, 0)`
+      VALUES (?, ?)`
     );
 
     const result = query.run(totalPlayers, totalMatches);
@@ -146,7 +146,7 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             totalPlayers INTEGER,
             totalMatches INTEGER,
-            winner INTEGER DEFAULT 0,
+            winner INTEGER,
             FOREIGN KEY (winner) REFERENCES players(id)
             )`).run();
 
