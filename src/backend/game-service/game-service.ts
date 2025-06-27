@@ -51,6 +51,36 @@ app.register(fastifyBetterSqlite3, {
 
 /////////////// CALLBACK FUNCTIONS ///////////////////////
 
+interface aiMatchPayload {
+	player1Id: number;
+	player1Score: number;
+	player2Score: number;
+	winner: number | null;
+}
+
+async function addAiMatch(
+	request: FastifyRequest<{ Body: aiMatchPayload }>,
+	reply: FastifyReply
+){
+	const {player1Id, player1Score, player2Score, winner} = request.body;
+
+	try {
+		const stmt = request.server.betterSqlite3.prepare(`
+			INSERT INTO matches (matchType, tournamentId, player1, player2,
+			player1Score, player2Score, winner)
+			VALUES (?, ?, ?, ?, ?, ?, ?)`);
+
+		stmt.run("vsAI", null, player1Id, null, player1Score, player2Score, winner);
+
+		request.server.log.info(`AI match added to matches table.`);
+		reply.code(201).send({message: 'AI match stored on backend'});
+	}
+	catch (err) {
+		request.log.error(err);
+		reply.code(500).send({error: 'Internal server Error'});
+	}
+}
+
 interface UserPayload {
 	id: number;
 	displayName: string;
@@ -82,6 +112,8 @@ async function addUser(
 /////////////////// ROUTE HANDLERS //////////////////
 
 app.post('/register-from-auth', addUser);
+
+app.post('/register-ai-match', addAiMatch)
 
 app.get('/', (request: any, reply: any) => {
     reply.send("Hello from game service");
