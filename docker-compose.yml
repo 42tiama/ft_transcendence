@@ -25,8 +25,25 @@ services:
             - "8044:8044"
         env_file:
             - .env
+        environment: #in production, overrides value of env var set for development
+            SINGLE_CONTAINER: "false"
         volumes:
             - ./certs/api-gateway:/build/certs/api-gateway
+    
+    game-service:
+        restart: always
+        build:
+          context: .
+          dockerfile: containers/game-service/Dockerfile
+        ports:
+            - "8045:8045"
+        env_file:
+            - .env
+        environment: #in production, overrides value of env var set for development
+            SINGLE_CONTAINER: "false"
+        volumes:
+            - ./certs/game-service:/build/certs/game-service
+            - game-service-data:/data
 
     # api-game:
     #     restart: always
@@ -48,9 +65,13 @@ services:
           dockerfile: containers/auth/Dockerfile
         volumes:
           - ./certs/auth:/build/certs/auth
+          - ./certs/ca:/build/certs/ca
           - auth-data:/data
         env_file:
             - .env
+        environment: #in production, overrides value of env var set for development
+          NODE_EXTRA_CA_CERTS: /build/certs/ca/rootCA.pem
+          SINGLE_CONTAINER: "false"
 
     client:
         restart: always
@@ -61,6 +82,8 @@ services:
             - ./certs/client:/build/certs/client
         env_file:
             - .env
+        environment: #in production, overrides value of env var set for development
+            SINGLE_CONTAINER: "false"
         ports:
             - "8042:8042"
 
@@ -145,4 +168,4 @@ services:
 volumes:
   auth-data:
   elastic-data:
-#   api-game-data:
+  game-service-data:

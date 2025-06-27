@@ -207,6 +207,30 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 		);
 		const result = stmt.run(email, displayName, hashedPassword, encryptedTotp, use2fa ? 1 : 0);
 
+		//if insertion was OK, send POST to game-service so that it can add to its own database
+		if (result.changes === 1){
+			const profilePayload = {
+				id: result.lastInsertRowid,
+				displayName: displayName,
+			}
+
+			fetch('https://game-service:8045/register-from-auth', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(profilePayload)
+			})
+			.then((gameServiceResponse) => {
+				if (!gameServiceResponse.ok) {
+					app.log.warn(`Game-service failed for user ID ${profilePayload.id}`);
+				} else {
+					app.log.info(`Game-service registered user ID ${profilePayload.id}`);
+				}
+			})
+			.catch((err) => {
+				app.log.error('Could not reach game-service:', err);
+				})
+		}
+
 		// only return totpSecret if 2FA is enabled
 		const response: any = { id: result.lastInsertRowid, email, displayName };
 		if (use2fa) response.totpSecret = totpSecret;

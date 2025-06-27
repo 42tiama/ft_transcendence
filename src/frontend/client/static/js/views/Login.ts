@@ -101,7 +101,7 @@ async function handleGoogleCredential(response: any) {
 			alert('Google login successful!');
 			updateHeaderUserLink(true);
 			// SPA navigation to /home
-        	window.history.pushState({}, '', '/home');
+        	window.history.pushState({}, '', '/');
         	window.dispatchEvent(new PopStateEvent('popstate'));
 		} else {
 			alert(data.error || 'Google login failed.');
@@ -346,7 +346,7 @@ export default class Login extends AbstractView {
 					if (totpInput) totpInput.value = '';
 
 					// redirect to /home using SPA navigation
-					window.history.pushState({}, '', '/home');
+					window.history.pushState({}, '', '/');
 					window.dispatchEvent(new PopStateEvent('popstate'));
 
 				} catch (err) {
