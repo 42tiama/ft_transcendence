@@ -493,13 +493,37 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 		// if user doesn't exist, create it with placeholder password and empty TOTP
 		if (!user) {
 			const googlePlaceholderPassword = "Google#1A";
-			app.betterSqlite3.prepare(
+			const result = app.betterSqlite3.prepare(
 				"INSERT INTO users (email, displayName, password, totp_secret) VALUES (?, ?, ?, ?)"
 			).run(email, displayName, googlePlaceholderPassword, "");
-			user = app.betterSqlite3.prepare('SELECT * FROM users WHERE email = ?').get(email) as User | undefined;
+
+			//sync user with game-service players table
+			if (result.changes === 1){
+				const profilePayload = {
+					id: result.lastInsertRowid,
+					displayName: displayName,
+				}
+
+				fetch('https://game-service:8045/register-from-auth', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(profilePayload)
+				})
+				.then((gameServiceResponse) => {
+					if (!gameServiceResponse.ok) {
+						app.log.warn(`Game-service failed for user ID ${profilePayload.id}`);
+					} else {
+						app.log.info(`Game-service registered user ID ${profilePayload.id}`);
+					}
+				})
+				.catch((err) => {
+					app.log.error('Could not reach game-service:', err);
+					})
+			}
+
 		}
 
-		// issue app JWT (expires in 1 minute), returns with user info.
+		// issue app JWT (expires in 10 hours), returns with user info.
 		const token = app.jwt.sign({
 			id: user!.id,
 			email: user!.email,
