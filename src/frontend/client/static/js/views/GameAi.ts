@@ -80,6 +80,15 @@ export default class GameAi extends AbstractView {
 			const payload = parseJwt(existingJwt);
 			const id = payload.id;
 
+			const humanPlayerDiv = document.getElementById('human-player') as HTMLElement | null;
+			if (humanPlayerDiv){
+				const heading = humanPlayerDiv.querySelector('h1') as HTMLHeadingElement | null;
+				if (heading){
+					// const pastValue = heading.textContent;
+					heading.textContent = payload.displayName;
+				}
+			}
+
             const terminatorX = new User(gameContext, id, 'TerminatorX', 'terminatorX@uol.com.br')
 
             this.game = new Game(new Match('versus-ai', null, terminatorX, null), 'board');
