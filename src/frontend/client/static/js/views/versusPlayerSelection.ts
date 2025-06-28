@@ -35,14 +35,15 @@ export default class VersusPlayerSelection extends AbstractView {
     if (e.target instanceof HTMLElement) {
       const h3 = e.target.closest(".player")?.querySelector("h3");
 
-    if (h3) {
-      gameContext!.preVersusSelection = gameContext!.users.find(
-          (user) => user.displayName === h3.textContent!.trim()
+      if (h3) {
+        gameContext!.preVersusSelection = gameContext!.users.find(
+            (user) => user.displayName === h3.textContent!.trim()
         )!;
-    
-      h3.parentElement!.classList.replace('border-white/10', 'border-fuchsia-600');
-      h3.parentElement!.classList.add('border-8', 'animate-pulse', 'selected');
-      console.log(`Selected player: ${gameContext.preVersusSelection.displayName}`);
+        h3.parentElement!.classList.replace('border-white/10', 'border-fuchsia-600')
+        h3.parentElement!.classList.add('border-8', 'animate-pulse', 'selected');
+        console.log(`Selected player: ${gameContext.preVersusSelection.displayName}`);
+      } else {
+        gameContext!.preVersusSelection = null;
       }
     }
   }
