@@ -142,6 +142,15 @@ export default class Profile extends AbstractView {
 		}
 
 		// ----FRIENDS----
+		// update the following stats
+		let followStat = await updateFollowStats(userId);
+		if (followStat) {
+			const following = document.getElementById('following-count');
+			const followers = document.getElementById('followers-count');
+			if (following) following.textContent = followStat.following;
+			if (followers) followers.textContent = followStat.followers;
+		}
+
 		// add event listener for adding friends
 		const addFriendBtn = document.getElementById('add-friend-btn');
 		const addFriendMessage = document.getElementById('add-friend-message');
@@ -158,6 +167,7 @@ export default class Profile extends AbstractView {
 		    		addFriendMessage.textContent = `✅ ${result.message}`;
 					addFriendMessage.classList.remove('text-red-400');
 					addFriendMessage.classList.add('text-green-400');
+					await updateFollowStats(userId);
 				}
 				else {
 		    		addFriendMessage.textContent = `❌ ${result.message}`;
@@ -177,7 +187,6 @@ export default class Profile extends AbstractView {
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
  	   return;
 	}
-
 }
 
 // parses JWT and returns its payload or null
@@ -231,6 +240,24 @@ async function getUserProfileById(userId: number): Promise<any> {
 		return data.data;
 	} catch (error) {
 		console.error('Error fetching user profile:', error);
+		return null;
+	}
+}
+
+//get follow stats
+async function updateFollowStats(userId: number) {
+	try {
+		const response = await fetch(`${API_BASE}/follow-stat/${userId}`);
+		const followStat = await response.json();
+		if (followStat) {
+			const following = document.getElementById('following-count');
+			const followers = document.getElementById('followers-count');
+			if (following) following.textContent = followStat.following;
+			if (followers) followers.textContent = followStat.followers;
+		}
+		return followStat;
+	} catch (error) {
+		console.error('Error fetching friends for Stat:', error);
 		return null;
 	}
 }
