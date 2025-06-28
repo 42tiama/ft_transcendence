@@ -37,9 +37,4 @@ export default class Tournament extends AbstractView {
   async onMount(gameContext: TiamaPong, appElement: Element) {
     gameContext.tournamentHistory[0].runTournament(appElement);
   }
-
-  // private createVersusMatch(participants: User[]) {
-      // let size: number = this.versusMatchHistory.push(new TiamaMatch(this, 'versus', participants[0], participants[1], null);
-      // this.versusMatchHistory[size - 1].matchId = (size - 1).toString();
-  // }
 }

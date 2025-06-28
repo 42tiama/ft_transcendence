@@ -105,7 +105,8 @@ export default class PlayerSelection extends AbstractView {
   async onMount(gameContext: TiamaPong, appElement: Element | null) {
     document.body.addEventListener("click", (e: MouseEvent) => this.playerSelection(e));
     this.gameContext = gameContext;
-    this.availablePlayers = gameContext.users;
+    this.availablePlayers = gameContext.users; // Iury, Andre, aqui eu chamaria o metodo get pra fazer o fetch dos usuarios do banco, 
+    // em vez de fazer isso no TiamaPong e passar por contexto, vai para os bugs na selecao dos players qdo sair da pagina, refresh etc....
     this.renderPlayerCard();
   }
 }

@@ -1,10 +1,11 @@
 import Home from './static/js/views/Home.js';
 import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
-import Game from './static/js/views/Game.js';
+import Versus from './static/js/views/Versus.js';
 import NotFound from './static/js/views/404.js';
 import GameMenu from './static/js/views/GameMenu.js';
-import PlayerSelection from './static/js/views/PlayerSelection.js';
+import PlayerSelection from './static/js/views/tournamentPlayerSelection.js';
+import VersusPlayerSelection from './static/js/views/versusPlayerSelection.js';
 import Tournament from './static/js/views/Tournament.js';
 import TiamaPong from './game/entities/TiamaPong.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
@@ -123,12 +124,13 @@ export default class SpaRouter {
       { path: '/Home', view: Home },
       { path: '/login', view: Login },
       { path: '/register', view: Register },
-      { path: '/game', view: Game },
+      { path: '/versus', view: Versus },
       { path: '/game-ai', view: GameAi },
       { path: '/changepass', view: ChangePass },
       { path: '/profile', view: Profile },
       { path: '/game-menu', view: GameMenu },
       { path: '/tournament-player-selection', view: PlayerSelection },
+      { path: '/versus-player-selection', view: VersusPlayerSelection },
       { path: '/tournament', view: Tournament },
     ];
 
@@ -171,6 +173,9 @@ export default class SpaRouter {
         if (match.route.path === '/tournament' && !(await view.beforeMount(this.gameContext))) {
           return false;
         }
+        else if (match.route.path === '/versus' && !(await view.beforeMount(this.gameContext))) {
+          return false;
+        }
 
         //render the view page
         appElement.innerHTML = html;
@@ -188,6 +193,12 @@ export default class SpaRouter {
         }
         else if (match.route.path === '/tournament') {
           await view.onMount(this.gameContext, appElement);
+        }
+        else if (match.route.path === '/versus') {
+          await view.onMount(this.gameContext);
+        }
+        else if (match.route.path === '/versus-player-selection') {
+          await view.onMount(this.gameContext);
         }
         else if (match.route.path === '/tournament-player-selection') {
           await view.onMount(this.gameContext);

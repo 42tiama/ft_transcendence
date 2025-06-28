@@ -210,6 +210,8 @@ export default class Tournament {
         }
       }
       this.matchLog.push(...this.currentRound);
+      // Iury, Andre nesse ponto, caso decida enviar os matchs antes de finalizar o campeonato
+      // vc consegue no array "matchLog", todos os resultados de partidas desse round
       this.totalRounds--;
       if (this.totalRounds == 0) {
         this.tournamentFinished = true;
@@ -220,6 +222,9 @@ export default class Tournament {
       }
     }
     await this.createTournamentLog();
+    // Iury, Andre aqui da forma que eu havia pensado, eu crio o payload pra mandar os dados macros do torneio
+    // e tbm chamo o endpoint pra mandar o log dos matchs, igual pode ser feito la em cima(213), porem de uma vez só,
+    // matchs do torneio inteiro
   }
 
   private createFirstRound(gameContext: TiamaPong) {
