@@ -19,7 +19,7 @@ export default class TiamaPong {
     constructor() {
         this.initGameServices();
         this.loadUsers();
-        this.sessionUser = new User(this, 'DevUser', 'devuser@dev.com');
+        this.sessionUser = new User(this, 42, 'DevUser', 'devuser@dev.com');
     }
     
     private initGameServices() {
