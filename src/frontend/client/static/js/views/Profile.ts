@@ -143,13 +143,7 @@ export default class Profile extends AbstractView {
 
 		// ----FRIENDS----
 		// update the following stats
-		let followStat = await updateFollowStats(userId);
-		if (followStat) {
-			const following = document.getElementById('following-count');
-			const followers = document.getElementById('followers-count');
-			if (following) following.textContent = followStat.following;
-			if (followers) followers.textContent = followStat.followers;
-		}
+		await updateFollowStats(userId);
 
 		// add event listener for adding friends
 		const addFriendBtn = document.getElementById('add-friend-btn');
