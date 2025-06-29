@@ -9,38 +9,38 @@
         Log Out
       </button>
 
-  <h2 class="text-2xl font-bold mb-4">My Profile</h2>
-  <div class="flex flex-col md:flex-row gap-6 items-center">
-    <div class="flex flex-col items-center bg-gray-700 p-4 rounded-lg">
-      <img id="avatar-preview" src="/images/TIAMA-logo.png" alt="Avatar"
-        class="w-24 h-24 rounded-full mb-2 border-2 border-white object-cover shadow-lg" />
-      <input type="file" id="avatar-upload" accept="image/*"
-        class="text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
-    </div>
-    <form id="update-profile-form" class="flex-1 space-y-3 w-full">
-      <div>
-        <label class="block text-sm mb-1">Display Name</label>
-        <input id="display-name-input" type="text" value="${displayName}"
-          class="w-full p-2 rounded border border-gray-400 bg-gray-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <h2 class="text-2xl font-bold mb-4">My Profile</h2>
+      <div class="flex flex-col md:flex-row gap-6 items-center">
+        <div class="flex flex-col items-center bg-gray-700 p-4 rounded-lg">
+          <img id="avatar-preview" src="/images/TIAMA-logo.png" alt="Avatar"
+            class="w-24 h-24 rounded-full mb-2 border-2 border-white object-cover shadow-lg" />
+          <input type="file" id="avatar-upload" accept="image/*"
+            class="text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
+        </div>
+        <form id="update-profile-form" class="flex-1 space-y-3 w-full">
+          <div>
+            <label class="block text-sm mb-1">Display Name</label>
+            <input id="display-name-input" type="text" value="${displayName}"
+              class="w-full p-2 rounded border border-gray-400 bg-gray-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Card Color</label>
+            <input id="card-color-input" type="color"
+              class="w-16 h-10 p-1 border border-gray-400 rounded bg-white" />
+          </div>
+          <div class="flex gap-4 mt-4">
+            <button type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">
+              Update Profile
+            </button>
+            <button id="changepass-btn" type="button"
+              class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded transition">
+              Change Password
+            </button>
+          </div>
+        </form>
       </div>
-      <div>
-        <label class="block text-sm mb-1">Card Color</label>
-        <input id="card-color-input" type="color"
-          class="w-16 h-10 p-1 border border-gray-400 rounded bg-white" />
-      </div>
-      <div class="flex gap-4 mt-4">
-        <button type="submit"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">
-          Update Profile
-        </button>
-        <button id="changepass-btn" type="button"
-          class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded transition">
-          Change Password
-        </button>
-      </div>
-    </form>
-  </div>
-</section>
+    </section>
 
     <!-- 🔽 Grid for Remaining Sections -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -62,7 +62,7 @@
         <!-- Match History -->
         <section class="bg-[#23272a] rounded-lg shadow p-6">
           <h2 class="text-2xl font-bold mb-4">Match History</h2>
-          <div class="overflow-y-auto max-h-40">
+          <div class="overflow-y-auto h-40">
             <table class="w-full table-auto text-sm">
               <thead>
                 <tr class="border-b border-gray-600 text-center">
@@ -74,7 +74,7 @@
                 </tr>
               </thead>
               <tbody id="match-history-table" class="text-center">
-                <!-- Filled by JS -->
+                <!-- Dynamically filled with matches -->
               </tbody>
             </table>
           </div>
@@ -129,7 +129,7 @@
           <hr class="border-gray-600 my-2" />
 
           <!-- Friends List -->
-          <div class="flex-1 overflow-y-auto">
+          <div class="flex-1 overflow-y-auto max-h-110">
             <ul id="friends-list" class="space-y-2">
               <!-- Dynamically filled with friends -->
             </ul>

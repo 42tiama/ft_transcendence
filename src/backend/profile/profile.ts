@@ -119,7 +119,32 @@ app.get('/profile-by-displayname/:displayName', async (request: FastifyRequest<{
 	}
 });
 
-//Adds user to friends table
+// Get User Follow Stats
+app.get('/follow-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
+	const { id } = request.params;
+
+	try {
+		const db = app.betterSqlite3;
+		const followingStmt = db.prepare(`
+			SELECT COUNT(*) AS count FROM friends
+			WHERE userId = ?
+		`);
+		const followersStmt = db.prepare(`
+			SELECT COUNT(*) AS count FROM friends
+			WHERE friendId = ?
+		`);
+
+		const following= followingStmt.get(id) as {count: number};
+		const followers = followersStmt.get(id) as {count: number};
+
+		return reply.send({ following: following.count, followers: followers.count });
+	} catch (err: any) {
+		app.log.error('Error fetching friends:', err);
+		reply.code(500).send({ error: "Failed to fetch friends." });
+	}
+});
+
+//Adds a new friend
 app.post('/friend-register', async (request: FastifyRequest<{ Body: {userId: number, displayName: string}}>, reply) => {
 	const { userId, displayName } = request.body;
 	if (!userId|| !displayName) {
@@ -148,36 +173,50 @@ app.post('/friend-register', async (request: FastifyRequest<{ Body: {userId: num
 		}
  		reply.code(201).send({ success: true, message: "Friend added successfully." });
 	} catch (err: any) {
-			reply.code(500).send({ error: err.message });
+		reply.code(500).send({ error: err.message });
 	}
 });
 
-// Get User Follow Stats
-app.get('/follow-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
-	const { id } = request.params;
+interface Friend {
+	id: number;
+	displayName: string;
+	avatarUrl: string;
+	cardColor: string;
+}
+
+// Get the list of friends the user follows
+app.get('/friend-list/:userId', async (request: FastifyRequest<{ Params: { userId: string } }>, reply) => {
+	const { userId } = request.params;
 
 	try {
 		const db = app.betterSqlite3;
-		const followingStmt = db.prepare(`
-			SELECT COUNT(*) AS count FROM friends
-			WHERE userId = ?
-		`);
-		const followersStmt = db.prepare(`
-			SELECT COUNT(*) AS count FROM friends
-			WHERE friendId = ?
+		const stmt = db.prepare(`
+    		SELECT u.id, u.displayName, u.avatarUrl, u.cardColor
+    		FROM friends f
+    		JOIN users u ON u.id = f.friendId
+    		WHERE f.userId = ?
+			ORDER BY u.displayName COLLATE NOCASE
 		`);
 
-		const following= followingStmt.get(id) as {count: number};
-		const followers = followersStmt.get(id) as {count: number};
-
-		return reply.send({ following: following.count, followers: followers.count });
+		const friends = stmt.all(userId) as Friend[];
+		if (friends.length === 0) {
+			app.log.info(`User ${userId} hasn't added any friends.`);
+			return reply.send({
+				success: true,
+				data: null
+			});
+		}
+		reply.send({
+  		    success: true,
+			data: friends
+    	});
 	} catch (err: any) {
-		app.log.error('Error fetching friends:', err);
-		reply.code(500).send({ error: "Failed to fetch friends." });
+		app.log.error('Error fetching friends list:', err);
+		reply.code(500).send({ error: "Failed to fetch friends list." });
 	}
 });
 
-// Get User Match Stats
+// Get user Match Stat
 //TODO - move to game-service
 app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
