@@ -555,28 +555,25 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 	}
 });
 
-
-// --- GET /token (Protected Route) ---
-app.get('/token', { preValidation: [app.authenticate] }, async (request, reply) => {
-	// Extracts JWT from Authorization header
-	const authHeader = request.headers['authorization'] || request.headers['Authorization'];
-	let jwt = '';
-	if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
-		jwt = authHeader.substring(7);
-	}
-	reply.send({
-		jwt,                 // the raw JWT
-		json: request.user,  // the decoded JWT payload
-		status: 'ok'
-	});
-});
-
+// // --- GET /token (Protected Route) ---
+// app.get('/token', { preValidation: [app.authenticate] }, async (request, reply) => {
+// 	// Extracts JWT from Authorization header
+// 	const authHeader = request.headers['authorization'] || request.headers['Authorization'];
+// 	let jwt = '';
+// 	if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+// 		jwt = authHeader.substring(7);
+// 	}
+// 	reply.send({
+// 		jwt,                 // the raw JWT
+// 		json: request.user,  // the decoded JWT payload
+// 		status: 'ok'
+// 	});
+// });
 
 // health check
 app.get('/', (request, reply) => {
 	reply.send("Hello from auth service");
 });
-
 
 // on startup creates users table if not exists, log errors and aborts on failure
 // and listens on 0.0.0.0:8043

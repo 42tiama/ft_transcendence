@@ -206,7 +206,7 @@ app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string
 		}
 		const winRate = Math.round((wins.count / totalMatches) * 100);
 
-		app.log.info('User matches: ', totalMatches);
+		app.log.info('User total matches: ', totalMatches);
 
 		reply.send({
 			success: true,
@@ -258,7 +258,7 @@ app.get('/match-hist/:id', async (request: FastifyRequest<{ Params: { id: string
 		const matches = stmt.all(id, id) as MatchRecord[];
 		if (matches.length === 0) {
 			app.log.info('No matches found for Match History.');
-			reply.send({
+			return reply.send({
 				success: true,
 				data: []
 			});

@@ -1,5 +1,6 @@
 import AbstractView from './AbstractView.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
+import { parseJwt } from '../views/Login.js'
 import { resourceLimits } from 'worker_threads';
 
 // sets the API base URL to the API gateway for all authentication requests.
@@ -93,7 +94,15 @@ export default class Profile extends AbstractView {
 		}
 
 		// ----MATCH HISTORY----
-		let matches = await getMatchHistory(userId);
+		interface FormattedMatch {
+			date: string;
+			type: string;
+			opponent: string;
+			score: string;
+			result: string;
+		};
+
+		let matches = await getMatchHistory(userId) as FormattedMatch[];
 		if (matches) {
 			const matchTable = document.getElementById('match-history-table');
 			if (matchTable) {
@@ -149,7 +158,7 @@ export default class Profile extends AbstractView {
 		const addFriendBtn = document.getElementById('add-friend-btn');
 		const addFriendMessage = document.getElementById('add-friend-message');
 
-		if (addFriendBtn) {
+		if (addFriendBtn && addFriendMessage) {
 			addFriendBtn.addEventListener('click', async () => {
 				const nameInput = document.getElementById('friend-display-name') as HTMLInputElement;
 				const friendDisplayName = nameInput?.value.trim();
@@ -179,18 +188,7 @@ export default class Profile extends AbstractView {
 	}
 
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
- 	   return;
-	}
-}
-
-// parses JWT and returns its payload or null
-function parseJwt(token: string | null): any | null {
-	if (!token) return null;
-	try {
-		const [, payloadB64] = token.split('.');
-		return JSON.parse(atob(payloadB64));
-	} catch {
-		return null;
+ 	   return true;
 	}
 }
 
@@ -272,9 +270,9 @@ async function postFriend(userId: string, displayName: string): Promise<any> {
 		} else {
 			return { success: false, message: result.error};
 		}
-	} catch (err) {
-		console.error(err);
-		return { success: false, message: err.message};
+	} catch (error) {
+		console.error('Error posting friend:', error);
+		return null;
 	}
 }
 
@@ -288,7 +286,7 @@ async function getMatchStat(userId: number): Promise<any> {
 		});
 
 		const data = await response.json();
-		if (data.data.length === 0) {
+		if (!data.data) {
 			console.info(`User has no Match Stat.`);
 			return null;
 		}

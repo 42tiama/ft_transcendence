@@ -95,6 +95,34 @@ export default class SpaRouter {
     }, 1000); // check every second
   }
 
+  hideLinksIfNotLoggedIn() {
+    const jwt = localStorage.getItem('jwt');
+    const isLoggedIn = this.isJwtValid(jwt);
+    const navLinks = document.querySelectorAll('header nav a');
+    navLinks.forEach(link => {
+      if (link instanceof HTMLElement) {
+        const text = link.textContent?.trim().toLowerCase();
+        if (["home", "leaderboard", "game", "vs ai"].includes(text || "")) {
+          link.style.display = isLoggedIn ? "flex" : "none";
+        }
+      }
+    });
+  }
+
+  // updates the header when loggedIn (true = User || false = Log In)
+  updateHeaderUserLink(isLoggedIn: boolean) {
+  	const loginLink = document.querySelector('a[href="/login"]');
+  	const profileLink = document.querySelector('a[href="/profile"]');
+
+  	if (isLoggedIn) {
+  		if (loginLink) loginLink.classList.add('hidden');
+  		if (profileLink) profileLink.classList.remove('hidden');
+  	} else {
+  		if (loginLink) loginLink.classList.remove('hidden');
+  		if (profileLink) profileLink.classList.add('hidden');
+  	}
+  }
+
   navigateTo = (url: string) => {
     history.pushState(null, '', url);
     void this.router();
@@ -125,6 +153,14 @@ export default class SpaRouter {
     const jwt = localStorage.getItem('jwt');
     const isLoggedIn = this.isJwtValid(jwt);
 
+    //update User/Log In Header
+    if (isLoggedIn) {
+      this.updateHeaderUserLink(true); // <-- update header to "User"
+    }
+    else {
+      this.updateHeaderUserLink(false); // <-- update header to "Log In"
+    }
+
     // If not logged in and trying to visit a protected route, redirect to /login
     if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
       history.replaceState({}, '', '/login');
@@ -144,15 +180,6 @@ export default class SpaRouter {
         route: routes[0],
         isMatch: true,
       };
-    }
-
-	  const jwt = localStorage.getItem('jwt');
-	  const isLoggedIn = this.isJwtValid(jwt);
-    if (isLoggedIn) {
-      this.updateHeaderUserLink(true); // <-- update header to "User"
-    }
-    else {
-      this.updateHeaderUserLink(false); // <-- update header to "Log In"
     }
 
     try {

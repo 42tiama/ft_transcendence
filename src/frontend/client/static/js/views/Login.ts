@@ -19,6 +19,17 @@ function isJwtValid(token: string | null): boolean {
 	}
 }
 
+// parse JWT and return its payload or null
+export function parseJwt(token: string | null): any | null {
+	if (!token) return null;
+	try {
+		const [, payloadB64] = token.split('.');
+		return JSON.parse(atob(payloadB64));
+	} catch {
+		return null;
+	}
+}
+
 // handles sign-in with Google
 async function handleGoogleCredential(response: any) {
 

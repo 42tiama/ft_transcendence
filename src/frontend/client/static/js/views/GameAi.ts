@@ -74,11 +74,10 @@ export default class GameAi extends AbstractView {
 
             this.selectedDifficulty = diff.value;
 
-
-			//get id from jwt
-			const existingJwt = localStorage.getItem('jwt');
-			const payload = parseJwt(existingJwt);
-			const id = payload.id;
+			      //get id from jwt
+			      const existingJwt = localStorage.getItem('jwt');
+			      const payload = parseJwt(existingJwt);
+			      const id = payload.id;
 
             const terminatorX = new User(gameContext, id, 'TerminatorX', 'terminatorX@uol.com.br')
 

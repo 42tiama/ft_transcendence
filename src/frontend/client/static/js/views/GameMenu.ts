@@ -56,7 +56,7 @@ export default class GameMenu extends AbstractView {
         if (this.selectedMode.tournament)
           tournament!.innerHTML = '&#x25b6;';
         else
-          tournament.innerHTML = '';
+          tournament!.innerHTML = '';
     } //else if (e.code === "enter") {
       //if (this.selectedMode.versus) {
         // startVersusMatch();

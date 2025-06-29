@@ -40,12 +40,6 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/changepass'
 });
 
-// server.register(fastifyHttpProxy, {
-// 	upstream: 'https://auth:8043',
-// 	prefix: '/token',
-// 	rewritePrefix: '/token'
-// });
-
 server.register(fastifyHttpProxy, {
 	upstream: 'https://auth:8043',
 	prefix: '/google-login',
