@@ -536,7 +536,25 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 				})
 				.catch((err) => {
 					app.log.error('Could not reach game-service:', err);
-					})
+				})
+
+				//sync user with profile-service users table
+				try {
+					const profileResponse = await fetch('https://profile:8046/profile-register', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(profilePayload)
+					});
+
+					if (!profileResponse.ok) {
+						app.log.warn(`Profile service failed for user ID ${profilePayload.id}`);
+					}
+					else {
+						app.log.info(`Profile service registered user ID ${profilePayload.id}`)
+					}
+				} catch (err) {
+					app.log.error('Could not reach profile service:', err);
+				}
 			}
 
 		}
