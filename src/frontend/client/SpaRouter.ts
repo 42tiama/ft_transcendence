@@ -138,7 +138,6 @@ export default class SpaRouter {
       { path: '/versus', view: Versus },
       { path: '/game-ai', view: GameAi },
       { path: '/changepass', view: ChangePass },
-      { path: '/profile', view: Profile },
       { path: '/game-menu', view: GameMenu },
       { path: '/tournament-player-selection', view: PlayerSelection },
       { path: '/versus-player-selection', view: VersusPlayerSelection },
@@ -153,13 +152,8 @@ export default class SpaRouter {
     const jwt = localStorage.getItem('jwt');
     const isLoggedIn = this.isJwtValid(jwt);
 
-    //update User/Log In Header
-    if (isLoggedIn) {
-      this.updateHeaderUserLink(true); // <-- update header to "User"
-    }
-    else {
-      this.updateHeaderUserLink(false); // <-- update header to "Log In"
-    }
+    //update header to either "Log In" or "User"
+    this.updateHeaderUserLink(isLoggedIn);
 
     // If not logged in and trying to visit a protected route, redirect to /login
     if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {

@@ -66,14 +66,8 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
-	prefix: '/match-stat',
-	rewritePrefix: '/match-stat'
-});
-
-server.register(fastifyHttpProxy, {
-	upstream: 'https://profile:8046',
-	prefix: '/match-hist',
-	rewritePrefix: '/match-hist'
+	prefix: '/follow-stat',
+	rewritePrefix: '/follow-stat'
 });
 
 server.register(fastifyHttpProxy, {
@@ -84,8 +78,20 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
-	prefix: '/follow-stat',
-	rewritePrefix: '/follow-stat'
+	prefix: '/friend-list',
+	rewritePrefix: '/friend-list'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/match-stat',
+	rewritePrefix: '/match-stat'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/match-hist',
+	rewritePrefix: '/match-hist'
 });
 
 server.get('/', (req, reply)=> {

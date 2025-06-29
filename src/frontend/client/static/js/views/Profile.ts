@@ -128,7 +128,7 @@ export default class Profile extends AbstractView {
 		}
 
 		// ----SESSION INFO----
-		// Format JWT for 4-line display
+		// Format JWT for 3-line display
 		const jwtDisplay = document.getElementById('jwt-formatted');
 		if (jwtDisplay) {
 			const formattedJwt = formatJwtForDisplay(existingJwt);
@@ -171,6 +171,7 @@ export default class Profile extends AbstractView {
 					addFriendMessage.classList.remove('text-red-400');
 					addFriendMessage.classList.add('text-green-400');
 					await updateFollowStats(userId);
+					await updateFriendList(userId);
 				}
 				else {
 		    		addFriendMessage.textContent = `❌ ${result.message}`;
@@ -184,6 +185,10 @@ export default class Profile extends AbstractView {
 				}, 2000);
 			});
 		}
+
+		// list friends added by user
+		await updateFriendList(userId);
+
 		return;
 	}
 
@@ -204,12 +209,12 @@ function getJwtTimeRemaining(token: string | null): string {
 	return `${min}m ${sec}s`;
 }
 
-// breaks a long JWT string into 4 lines
+// breaks a long JWT string into 3 lines
 function formatJwtForDisplay(jwt: string | null): string {
 	if (!jwt) return "";
-	const partLength = Math.ceil(jwt.length / 4);
+	const partLength = Math.ceil(jwt.length / 3);
 	const lines = [];
-	for (let i = 0; i < 4; i++) {
+	for (let i = 0; i < 3; i++) {
 		lines.push(jwt.slice(i * partLength, (i + 1) * partLength));
 	}
 	return lines.join('\n');
@@ -272,6 +277,54 @@ async function postFriend(userId: string, displayName: string): Promise<any> {
 		}
 	} catch (error) {
 		console.error('Error posting friend:', error);
+		return null;
+	}
+}
+
+interface Friend {
+	id: number;
+	displayName: string;
+	avatarUrl: string;
+	cardColor: string;
+}
+
+// get list of friends added
+async function updateFriendList(userId: number) {
+	try {
+		const response = await fetch(`${API_BASE}/friend-list/${userId}`);
+		const data = await response.json();
+		const friends = data.data as Friend[];
+
+		if (friends) {
+			const list = document.getElementById('friends-list');
+			if (list) {
+				// Clear list first
+				list.innerHTML = '';
+
+				// Create list item for each friend
+				friends.forEach(friend => {
+					const avatar = friend.avatarUrl
+						? `<img src="${friend.avatarUrl}" class="w-8 h-8 rounded-full object-cover" alt="${friend.displayName}">`
+						: `<div class="w-8 h-8 rounded-full bg-white text-gray-700 font-extrabold text-center flex items-center justify-center text-lg">
+ 					    	${friend.displayName.charAt(0)}
+ 					   	   </div>`;
+					const li = document.createElement('li');
+					li.className = 'flex items-center gap-3 p-2 bg-gray-700 rounded';
+
+					li.innerHTML = `
+						${avatar}
+					  	<span class="text-white">${friend.displayName}</span>
+					`;
+
+					list.appendChild(li);
+				});
+			}
+		} else {
+			console.info("User hasn't added any friends.");
+		}
+		return friends;
+	} catch (error) {
+		console.error('Error fetching list of friends:', error);
 		return null;
 	}
 }
