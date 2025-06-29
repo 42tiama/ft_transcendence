@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs"; // function to read files with SSL certi
 import dotenv from 'dotenv'; // loads environment variables from .env
 import { Database } from 'better-sqlite3'; // type for SQLite database
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify plugin for SQLite
+import { get } from "node:http";
 
 dotenv.config();
 
@@ -52,80 +53,397 @@ app.register(fastifyBetterSqlite3, {
 /////////////// CALLBACK FUNCTIONS ///////////////////////
 
 interface UserPayload {
-	id: number;
-	displayName: string;
+	id?: number;
+	displayName?: string;
+	wins?: number;
+	losses?: number;
+	points?: number;
 }
 
 interface MatchPayload {
-  matchType: string;
+  id?: number;
+  matchType?: string;
   tournamentId?: number;
-  player1: number;
-  player2?: number;
+  player1?: number;
+  player2?: number | null;
+  player1Score?: number;
+  player2Score?: number;
+  winner?: number | null;
 }
 
 interface TournamentPayload {
-  totalPlayers: number;
-  totalMatches: number;
+  id?: number;
+  totalPlayers?: number;
+  totalMatches?: number;
+  winner?: number | null;
 }
+
+// PLAYER FUNCTIONS
 
 async function addUser(
 	request: FastifyRequest<{ Body: UserPayload }>,
 	reply: FastifyReply
 ){
-	const {id, displayName} = request.body;
+	const {
+		id,
+		displayName
+	} = request.body;
 
 	try {
 		const stmt = request.server.betterSqlite3.prepare(`
-			INSERT INTO players (userId, displayName)
-			VALUES (?, ?)`
-		);
+			INSERT INTO 
+				players (userId, displayName)
+			VALUES 
+				(?, ?)
+		`);
 
 		stmt.run(id, displayName);
 
 		request.server.log.info(`Player ${displayName} added to players table.`);
-		reply.code(201).send({message: 'User synced to game-service DB'});
+		reply.code(201).send({
+			success: true,
+			message: 'User created',
+		});
 	}
 	catch (err){
 		request.log.error(err);
-		reply.code(500).send({error: 'Internal server Error'});
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
 	}
 }
 
-async function addTournament(
-  request: FastifyRequest<{ Body: TournamentPayload }>,
-  reply: FastifyReply
+async function playerInfoById(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply
 ){
-  const {totalPlayers, totalMatches} = request.body;
+	const userId = request.params.id;
 
-  try {
-    const query = request.server.betterSqlite3.prepare(`
-      INSERT INTO tournaments (totalPlayers, totalMatches)
-      VALUES (?, ?)`
-    );
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			SELECT 
+				id, userId, displayName, points, wins, losses 
+			FROM 
+				players 
+			WHERE 
+				id = ?
+		`);
 
-    const result = query.run(totalPlayers, totalMatches);
+		const playerInfo = query.get(userId);
 
-    request.server.log.info(`Tournament with ID ${result.lastInsertRowid} added.`);
-    reply.code(201).send({message: 'Tournament created'});
-  }
-  catch (err: any){
-    request.log.error(err, `Error adding tournament: ${err.message}`);
-    reply.code(500).send({error: 'Internal server Error'});
-  }
+		if (playerInfo) {
+			reply.send({
+				success: true,
+				message: `Player with ID ${userId} found`,
+				data: playerInfo
+			});
+		} else {
+			reply.code(404).send({
+				error: `Player with ID ${userId} not found`
+			});
+		}
+	} catch (err) {
+		request.log.error(err, `Error fetching player with ID ${userId}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+
+async function uploadDisplayName(
+	request: FastifyRequest<{ Params: { id: string }, Body: UserPayload }>,
+	reply: FastifyReply
+){
+	const userId = request.params.id;
+	const {
+		displayName
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			UPDATE 
+				players
+			SET 
+				displayName = ?
+			WHERE 
+				id = ?
+		`);
+
+		query.run(displayName, userId);
+
+		request.server.log.info(`Player with ID ${userId} updated.`);
+		reply.code(200).send({
+			success: true,
+			message: 'Display name updated'
+		});
+	} catch (err) {
+		request.log.error(err, `Error updating player with ID ${userId}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+async function getAllPlayers(
+	request: FastifyRequest,
+	reply: FastifyReply
+){
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			SELECT 
+				id, userId, displayName, points, wins, losses 
+			FROM 
+				players
+		`);
+
+		const players = query.all();
+
+		if (players.length > 0) {
+			reply.send({
+				success: true,
+				message: 'Players found',
+				data: players
+			});
+		} else {
+			reply.code(404).send({
+				error: 'No players found'
+			});
+		}
+	} catch (err) {
+		request.log.error(err, 'Error fetching players');
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+// TOURNAMENT FUNCTIONS
+
+async function addTournament(
+	request: FastifyRequest<{ Body: TournamentPayload }>,
+	reply: FastifyReply
+){
+
+	const {
+		totalPlayers,
+		totalMatches
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			INSERT INTO 
+				tournaments (totalPlayers, totalMatches)
+			VALUES
+				(?, ?)
+		`);
+
+		const result = query.run(totalPlayers, totalMatches);
+
+		request.server.log.info(`Tournament with ID ${result.lastInsertRowid} added.`);
+		reply.code(201).send({
+			success: true,
+			message: 'Tournament created',
+			data: result.lastInsertRowid
+		});
+	} catch (err: any) {
+		request.log.error(err, `Error adding tournament: ${err.message}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+async function tournamentInfoById(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply
+){
+	const tournamentId = request.params.id;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+    		SELECT
+				id, 
+				totalPlayers, 
+				totalMatches, 
+				winner 
+			FROM 
+				tournaments 
+			WHERE
+				id = ?
+		`);
+
+		const tournamentInfo = query.get(tournamentId);
+
+		if (tournamentInfo) {
+			reply.send({
+				success: true,
+				message: `Tournament with ID ${tournamentId} found`,
+				data: tournamentInfo
+			});
+		} else {
+			reply.code(404).send({
+				error: `Tournament with ID ${tournamentId} not found`
+			});
+		}
+	} catch (err) {
+		request.log.error(err, `Error fetching tournament with ID ${tournamentId}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+// MATCH FUNCTIONS
+
+async function addMach(
+	request: FastifyRequest<{ Body: MatchPayload }>,
+	reply: FastifyReply
+){
+	const {
+		matchType,
+		tournamentId,
+		player1,
+		player2,
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			INSERT INTO 
+				matches (matchType, tournamentId, player1, player2)
+			VALUES
+				(?, ?, ?, ?)
+		`);
+
+		const result = query.run(matchType, tournamentId, player1, player2);
+
+		request.server.log.info(`Match with ID ${result.lastInsertRowid} added.`);
+		reply.code(201).send({
+			success: true,
+			message: 'Match created',
+			data: result.lastInsertRowid
+		});
+	} catch (err: any) {
+		request.log.error(err, `Error adding match: ${err.message}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+async function matchInfoById(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply
+){
+	const matchId = request.params.id;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			SELECT
+				id, 
+				matchType, 
+				tournamentId, 
+				player1, 
+				player2, 
+				player1Score, 
+				player2Score, 
+				winner 
+			FROM 
+				matches 
+			WHERE
+				id = ?
+		`);
+
+		const matchInfo = query.get(matchId);
+
+		if (matchInfo) {
+			reply.send({
+				success: true,
+				message: `Match with ID ${matchId} found`,
+				data: matchInfo
+			});
+		} else {
+			reply.code(404).send({
+				error: `Match with ID ${matchId} not found`
+			});
+		}
+	} catch (err) {
+		request.log.error(err, `Error fetching match with ID ${matchId}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
+async function addResultMatch(
+	request: FastifyRequest<{ Params: { id: string }, Body: MatchPayload }>,
+	reply: FastifyReply
+){
+	const matchId = request.params.id;
+	const { 
+		player1Score,
+		player2Score,
+		winner 
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			UPDATE 
+				matches
+			SET 
+				player1Score = ?, player2Score = ?, winner = ?
+			WHERE id = ?
+		`);
+
+		query.run(player1Score, player2Score, winner, matchId);
+
+		request.server.log.info(`Match with ID ${matchId} updated.`);
+		reply.code(200).send({
+			success: true,
+			message: 'Match result updated',
+			data: true
+		});
+	} catch (err) {
+		request.log.error(err, `Error updating match with ID ${matchId}`);
+		reply.code(500).send({
+			error: 'Internal server Error',
+			data: false
+		});
+	}
 }
 
 /////////////////// ROUTE HANDLERS //////////////////
 
 /* POST */
 app.post('/register-from-auth', addUser);
-app.post('/create-tournament', addTournament);
-// app.post('/winner-match', addMatchWinner);
-// app.post('/winner-tournament', addTournamentWinner);
+
+// Tournament
+app.post('/tournament/register', addTournament);
+app.post('/tournament/winner/:id', addTournament);
+
+// Match
+app.post('/match/register', addMach );
+app.post('/match/:id/info', addResultMatch);
+
+// Player
+app.post('/player/register', addUser);
+app.post('/player/:id/info', uploadDisplayName);
+
 
 /* GET */
-app.get('/', (request: any, reply: any) => {
-    reply.send("Hello from game service");
-});
+app.get('/', (request: any, reply: any) => { reply.send("Hello from game service"); });
+
+// Tournament
+app.get('/tournament/:id/info', tournamentInfoById);
+
+// Match
+app.get('/match/:id/info', matchInfoById);
+// app.get('/match/)
+
+// Player
+app.get('/player/:id/info', playerInfoById);
+app.get('/player/players', getAllPlayers);
+
 
 // Start app
 app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
@@ -144,9 +462,10 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
     db.prepare(`
         CREATE TABLE IF NOT EXISTS tournaments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            totalPlayers INTEGER,
-            totalMatches INTEGER,
+            totalPlayers INTEGER NOT NULL,
+            totalMatches INTEGER NOT NULL,
             winner INTEGER,
+			finished INTEGER DEFAULT 0,
             FOREIGN KEY (winner) REFERENCES players(id)
             )`).run();
 
@@ -159,7 +478,7 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
             player2 INTEGER,
             player1Score INTEGER DEFAULT 0,
             player2Score INTEGER DEFAULT 0,
-            winner INTEGER DEFAULT 0,
+            winner INTEGER,
             FOREIGN KEY (tournamentId) REFERENCES tournaments(id),
             FOREIGN KEY (player1) REFERENCES players(id),
             FOREIGN KEY (player2) REFERENCES players(id),

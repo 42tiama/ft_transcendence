@@ -3,11 +3,13 @@ import Game from '../../../game/entities/Game.js';
 import TiamaPong from "../../../game/entities/TiamaPong";
 import Match from '../../../game/entities/Match.js';
 import User from '../../../game/entities/User.js';
+import TournamentService from '../../../services/TournamentService.js';
 
 export default class GameAi extends AbstractView {
 
   private selectedDifficulty: number = 0.5;
   private game: Game | null = null;
+  private tournamentId: number | null = null;
 
   constructor() {
     super();
@@ -80,7 +82,7 @@ export default class GameAi extends AbstractView {
         }
       });
     }
-  }
+	}
 
   private showElement(name: string, on_off: boolean = true): void {
     const displayStyle = on_off ? 'flex' : 'none';
@@ -91,40 +93,14 @@ export default class GameAi extends AbstractView {
     }
   }
 
-	private async createTournament(): Promise<void> {
-		const TournamentPayload = {
-			totalPlayers: 1,
-			totalMatches: 1
-		};
-
-		try {
-			const response = await fetch('https://localhost:8044/create-tournament', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify(TournamentPayload)
-			}).then((gameServiceResponse: any) => {
-				if (!gameServiceResponse.ok) {
-					alert(`Game-service failed for user ID ${TournamentPayload.totalPlayers}`);
-				} else {
-					alert(`Game-service registered user ID ${TournamentPayload.totalPlayers}`);
-				}
-			})
-			.catch((err) => {
-				alert(`Could not reach game-service: ${err}`);
-			});
-
-			// if (!response.ok) {
-			// 	alert(`Game-service failed for tournament table`);
-			// } else {
-			// 	alert(`Game-service registered tournament table`);
-			// }
-		} catch (err) {
-			alert('Could not reach game-service: ' + err);
-		}
-	}
+	
 
   async onMount(gameContext: TiamaPong) {
-	this.createTournament();
+  // this.tournamentId = await TournamentService.createTournament();
+  // if (this.tournamentId) {
+  // 	const info = await TournamentService.getTournamentsById(this.tournamentId);
+	// console.log(`Tournament info: ${JSON.stringify(info)}`);
+  // }
     this.showElement('ai-player', false);
     this.showElement('human-player', false);
     this.showElement('difficulty-group', false);

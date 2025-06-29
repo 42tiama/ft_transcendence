@@ -1,4 +1,4 @@
-import UserService from "../services/UserService";
+import PlayerService from "../services/PlayerService";
 import TournamentService from "../services/TournamentService";
 import MatchService from "../services/MatchService";
 
@@ -74,7 +74,7 @@ export interface ApiResponse<T> {
 }
 
 export interface GameServices {
-    user: UserService;
+    user: PlayerService;
     tournament: TournamentService;
     match: MatchService;
 }

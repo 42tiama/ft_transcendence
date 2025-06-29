@@ -1,72 +1,98 @@
-import { Server } from 'http';
-import { User, ApiResponse } from '../game/types';
-import Match from '../game/entities/Match'
-import { TournamentInfo } from '../game/types';
+import { ApiResponse, MatchData, MatchResult } from './types';
+
 
 export default class MatchService {
-    private API_GATEWAY = 'https://localhost:8044';
+    private API_GATEWAY = 'https://localhost:8044/match/';
 
-    public async getMatches(): Promise<Match[]> {
-        let result: ApiResponse<Match[]>;
+    public async createMatch(matchData: MatchData): Promise<number> {
+        const matchPayload: MatchData = matchData;
+        let response = {} as Response;
+
+		const request = {
+				route: `${this.API_GATEWAY}register`, 
+				options: {
+				method: 'POST',
+				headers: {
+                    'Content-Type': 'application/json'
+                },
+				body: JSON.stringify(matchPayload)
+		    }
+        };
+
         try {
-            const response = await fetch(`${this.API_GATEWAY}/match-history`);
-            result = await response.json();
+            response = await fetch(request.route, request.options);
+            const result: ApiResponse<number> = await response.json();
 
-            if (result.success && result.data) {
+            if (response.ok && result.data) {
+                console.log(`Match successfully registered, id: ${result.data}`);
                 return result.data;
             }
-        } catch (error) {
-            //    Server.log.error(result.error || 'Failed to fetch users');
-            return [];
+            console.log(`Failed to create match: ${response.status} ${response.statusText}`);
+        } catch (err) {
+            console.log(`Could not reach game-service: ${err}`);
         }
-        return [];
+        return 0;
     }
 
-    public async updateMatchHistory(matches: Match[]): Promise<ApiResponse<{ insertedCount: number }>> {
-        try {
-            // Validate input
-            if (!matches || matches.length === 0) {
-                return { success: false, error: 'No matches provided' };
-            }
+    public async getMatchById(id: number): Promise<MatchData> {
+        const idMatchString = id.toString();
+        let response = {} as Response;
 
-            const response = await fetch(`${this.API_GATEWAY}/match-history`, {
+        const request = {
+            route: `${this.API_GATEWAY}${idMatchString}/info`, 
+            options: {
+                method: 'GET'
+            }
+        };
+
+        try {
+            response = await fetch(request.route, request.options);
+            const result: ApiResponse<MatchData> = await response.json();
+
+            if (response.ok && result.data) {
+                return result.data;
+            }
+			console.log(`failed to get match: ${response.status} ${response.statusText}`);
+        } catch (err) {
+            console.log(`Could not reach game-service: ${err}`);
+        }
+        return {} as MatchData;
+    }
+
+    public async registerMatchResult(resultData: MatchResult): Promise<boolean> {
+        const matchPayload: MatchResult = resultData;
+        const idMatchString = matchPayload.matchId.toString();
+
+        let response = {} as Response;
+
+        const request = {
+            route: `${this.API_GATEWAY}${idMatchString}/info`, 
+            options: {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(matches)
-            });
-
-            // Check if the HTTP request was successful
-            if (!response.ok) {
-                const errorText = await response.text();
-                return {
-                    success: false,
-                    error: `HTTP ${response.status}: ${errorText}`
-                };
+                body: JSON.stringify(matchPayload)
             }
+        };
 
-            const result: ApiResponse<{ insertedCount: number }> = await response.json();
+        try {
+            response = await fetch(request.route, request.options);
+            const result: ApiResponse<boolean> = await response.json();
 
-            if (result.success) {
-                console.log(`Successfully inserted ${result.data?.insertedCount} matches`);
-            } else {
-                console.error('Failed to update match history:', result.error);
+            if (response.ok && result.data) {
+                console.log(`Match result successfully registered for match ID ${matchPayload.matchId}`);
+                return true;
             }
-
-            return result;
-
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            console.error('Error in updateMatchHistory:', errorMessage);
-
-            return {
-                success: false,
-                error: `Network or parsing error: ${errorMessage}`
-            };
+            console.log(`Failed to register match result: ${response.status} ${response.statusText}`);
+        } catch (err) {
+            console.log(`Could not reach game-service: ${err}`);
         }
+        return false;
     }
 }
+
+
 // server.log.info(msg)
 // server.log.warn(...)
 // server.log.debug(...)

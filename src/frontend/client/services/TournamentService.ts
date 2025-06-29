@@ -1,63 +1,63 @@
-import { Server } from 'http';
-import { User, ApiResponse } from '../game/types';
-import Match from '../game/entities/Match'
-import { TournamentInfo } from '../game/types';
+import { ApiResponse, TournamentData } from './types';
+
 
 export default class TournamentService {
-  private API_GATEWAY = 'https://localhost:8044';
+	private API_GATEWAY = 'https://localhost:8044/tournament/';
 
-  public async getTournaments(): Promise<TournamentInfo[]> {
-    let result: ApiResponse<TournamentInfo[]>;
-    try {
-        const response = await fetch(`${this.API_GATEWAY}/tournament-history`);
-        result = await response.json();
-        
-        if (result.success && result.data) {
-            return result.data;
-        }
-    } catch (error) {
-    //    Server.log.error(result.error || 'Failed to fetch users');
-        return [];
-    }
-    return []
-  }
+	public async addTournament(tournamentData: TournamentData): Promise<number> {
+		const tournamentPayload: TournamentData = tournamentData;
+		let response = {} as Response;
 
-    public async updateTournamentHistory(tournamentInfo: TournamentInfo): Promise<ApiResponse<TournamentInfo>> {
-        try {
-            const response = await fetch(`${this.API_GATEWAY}/tournament-history`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(tournamentInfo)
-            });
+		const request = {
+			route: `${this.API_GATEWAY}register`, 
+			options: {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(tournamentPayload)
+			}
+		};
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                return {
-                    success: false,
-                    error: `HTTP ${response.status}: ${errorText}`
-                };
-            }
+		try {
+			response = await fetch(request.route, request.options);
+			const result:ApiResponse<number> = await response.json();
 
-            const result = await response.json();
+			if (response.ok && result.data) {
+				console.log(`Tournament successfully registered, id: ${result.data}`);
+				return result.data;
+			}
+			console.log(`failed to create tournament: ${response.status} ${response.statusText}`);
+		} catch (err) {
+            console.log(`Could not reach game-service: ${err}`);
+    	}
+		return 0;
+	}
 
-            if (result.success) {
-                // server.log.info(`Tournament successfully inserted`); //descomentar depois logstash
-            } else {
-                // server.log.error('Failed to insert tournament log:', result.error); //descomentar depois logstash
-            }
+	public async getTournamentById(id: number): Promise<TournamentData> {
+		const idTournament = id.toString();
+		let response = {} as Response;
 
-            return result;
+		const request = {
+			route: `${this.API_GATEWAY}${idTournament}/info`, 
+			options: {
+				method: 'GET'
+			}
+		};
 
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-            console.error('Error in updateMatchHistory:', errorMessage);
-
-            return {
-                success: false,
-                error: `Network or parsing error: ${errorMessage}`
-            };
-        }
-    }
+		try {
+			response = await fetch(request.route, request.options);
+			const result: ApiResponse<TournamentData> = await response.json();
+			
+			if (response.ok && result.data) {
+				return result.data;
+			}
+			console.log(`failed to get tournament: ${response.status} ${response.statusText}`);
+		} catch (err) {
+			console.log(`Could not reach game-service: ${err}`);
+		}
+		return {} as TournamentData;
+	}
 }
 
 // server.log.info(msg)
