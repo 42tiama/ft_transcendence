@@ -36,7 +36,7 @@ export default class VersusPlayerSelection extends AbstractView {
       const h3 = e.target.closest(".player")?.querySelector("h3");
 
       if (h3) {
-        gameContext!.preVersusSelection = gameContext!.users.find(
+        gameContext!.preVersusSelection = this.availablePlayers.find(
             (user) => user.displayName === h3.textContent!.trim()
         )!;
         h3.parentElement!.classList.replace('border-white/10', 'border-fuchsia-600')
@@ -81,6 +81,9 @@ export default class VersusPlayerSelection extends AbstractView {
 
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
     return true;
+  }
+
+  async onUnMount() {
   }
   
 }
