@@ -228,6 +228,9 @@ export default class Profile extends AbstractView {
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
  	   return true;
 	}
+
+	async onUnMount() {
+  	}
 }
 
 // returns time remaining (as string) until JWT expiration
@@ -402,6 +405,4 @@ async function getMatchHistory(userId: number): Promise<any> {
 		return null;
 	}
 
-	async onUnMount() {
-  	}
 }
