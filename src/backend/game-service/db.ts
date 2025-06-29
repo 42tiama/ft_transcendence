@@ -53,7 +53,7 @@ function seedUsers() {
 
     if (checkUsers.count === 0) {
         const insertUser = db.prepare(`
-            INSERT INTO users (displayName, points, wins, losses) 
+            INSERT INTO users (displayName, points, wins, losses)
             VALUES (?, ?, ?, ?)
         `);
 
@@ -88,7 +88,7 @@ function seedUsers() {
                 wins: 0,
                 losses: 0
             },
-            
+
         ];
 
         const insertMany = db.transaction((users: any[]) => {
@@ -114,7 +114,7 @@ function seedTournament() {
 
     if (checkTournaments.count === 0) {
         const insertTournament = db.prepare(`
-            INSERT INTO tournaments (totalPlayers, totalMatches, winner) 
+            INSERT INTO tournaments (totalPlayers, totalMatches, winner)
             VALUES (?, ?, ?)
         `);
 
@@ -144,8 +144,8 @@ function seedTournament() {
                 totalMatches: 5,
                 winner: 'Allesson',
             },
- 
-            
+
+
         ];
 
         const insertMany = db.transaction((tournaments: any[]) => {

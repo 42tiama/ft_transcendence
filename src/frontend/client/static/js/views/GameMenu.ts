@@ -47,7 +47,7 @@ export default class GameMenu extends AbstractView {
           versus!.innerHTML = '&#x25b6;';
         else
           versus!.innerHTML = '';
-        
+
         if (this.selectedMode.versusPlayer)
           tournament!.innerHTML = '&#x25b6;';
         else
@@ -57,34 +57,28 @@ export default class GameMenu extends AbstractView {
           tournament!.innerHTML = '&#x25b6;';
         else
           tournament!.innerHTML = '';
-    } else if (e.code === "Enter") {
-      if (this.selectedMode.versusAi) {
-        this.onUnmount()
-        versusAiLink!.click();
-      }
-      else if (this.selectedMode.versusPlayer) {
-        this.onUnmount()
-        versusPlayerLink!.click();
-      }
-      else if (this.selectedMode.tournament) {
-        this.onUnmount()
-        tournamentLink!.click();
-      }
-    }
-  } 
+    } //else if (e.code === "enter") {
+      //if (this.selectedMode.versus) {
+        // startVersusMatch();
+      //}
+      //else if (this.selectedMode.tournament) {
+        // startNewTournament();
+      //}
+    //}
+  }
 
   async onMount(gameContext: TiamaPong, appElement: Element) {
     if (this.keyHandler) {
       document.removeEventListener("keydown", this.keyHandler);
     }
-    
+
     this.keyHandler = (event: KeyboardEvent) => {
       this.moveCursor(event, gameContext);
     };
 
     document.addEventListener("keydown", this.keyHandler);
   }
-  
+
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
     return true;
   }

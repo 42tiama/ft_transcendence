@@ -112,6 +112,9 @@ export default class ChangePass extends AbstractView {
 				alert("Change successful!");
 				form.reset();
 				if (use2faToggle && totpDiv) totpDiv.style.display = use2faToggle.checked ? '' : 'none';
+				// === SPA Navigation to /profile===
+				window.history.pushState({}, '', '/profile');
+				window.dispatchEvent(new PopStateEvent('popstate'));
 			} catch (error) {
 				// catch and log any unexpected errors
 				alert("An unexpected error occurred.");

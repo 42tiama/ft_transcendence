@@ -4,7 +4,7 @@ import TiamaPong from '../../../game/entities/TiamaPong.js';
 // set the API base URL to the API gateway for all authentication requests
 const API_BASE = 'https://localhost:8044';
 
-// check if login JWT is valid 
+// check if login JWT is valid
 function isJwtValid(token: string | null): boolean {
 	if (!token) return false;
 	try {
@@ -20,7 +20,6 @@ function isJwtValid(token: string | null): boolean {
 }
 
 // parse JWT and return its payload or null
-// iury: exporting to use on other places
 export function parseJwt(token: string | null): any | null {
 	if (!token) return null;
 	try {
@@ -31,56 +30,17 @@ export function parseJwt(token: string | null): any | null {
 	}
 }
 
-// return time remaining (as string) until JWT expiration
-function getJwtTimeRemaining(token: string | null): string {
-	const payload = parseJwt(token);
-	if (!payload || !payload.exp) return "N/A";
-	const now = Math.floor(Date.now() / 1000);
-	const remainingSec = payload.exp - now;
-	if (remainingSec <= 0) return "Expired";
-	const min = Math.floor(remainingSec / 60);
-	const sec = remainingSec % 60;
-	return `${min}m ${sec}s`;
-}
-
-// break a long JWT string into 4 lines
-function formatJwtForDisplay(jwt: string | null): string {
-	if (!jwt) return "";
-	const partLength = Math.ceil(jwt.length / 4);
-	const lines = [];
-	for (let i = 0; i < 4; i++) {
-		lines.push(jwt.slice(i * partLength, (i + 1) * partLength));
-	}
-	return lines.join('\n');
-}
-
-// update the header after login (true = User || false = Log In)
-export function updateHeaderUserLink(isLoggedIn: boolean) {
-	const navLinks = document.querySelectorAll('header nav a');
-	navLinks.forEach(link => {
-		// if logged in, change "Log In" → "User"
-		if (isLoggedIn && link.textContent?.trim().toLowerCase() === "log in") {
-			link.textContent = "User";
-		}
-		// if logged out, change "User" → "Log In"
-		else if (!isLoggedIn && link.textContent?.trim().toLowerCase() === "user") {
-			link.textContent = "Log In";
-		}
-	});
-}
-
-
-// handle sign-in with Google
+// handles sign-in with Google
 async function handleGoogleCredential(response: any) {
-	
-	// prevent login if already logged in
+
+	// prevents login if already logged in
 	const existingJwt = localStorage.getItem('jwt');
 	if (isJwtValid(existingJwt)) {
 		alert('You are already logged in. Please log out first to switch accounts.');
 		return;
 	}
-	
-	// receive the Google credential (JWT) from the Google sign-in button
+
+	// receives the Google credential (JWT) from the Google sign-in button
 	const credential = response.credential; // The JWT
 
 	// store the Google ID token in localStorage for later inspection
@@ -99,7 +59,6 @@ async function handleGoogleCredential(response: any) {
 			// on success: store app’s JWT in localStorage and show a success alert
 			localStorage.setItem('jwt', data.token);
 			alert('Google login successful!');
-			updateHeaderUserLink(true);
 			// SPA navigation to /home
         	window.history.pushState({}, '', '/');
         	window.dispatchEvent(new PopStateEvent('popstate'));
@@ -135,98 +94,7 @@ export default class Login extends AbstractView {
 		}
 	}
 
-	async onMount() {
-		
-		const existingJwt = localStorage.getItem('jwt');
-		const appDiv = document.getElementById('app');
-
-		if (isJwtValid(existingJwt)) {
-
-			// try to find the header element that says "Login" and change it
-			const navLinks = document.querySelectorAll('header nav a');
-			navLinks.forEach(link => {
-				// compare link text ignoring case and whitespace
-				if (link.textContent?.trim().toLowerCase() === "log in") {
-					link.textContent = "User";
-				}
-			});
-
-			// hide login form and Google button
-			const loginForm = document.getElementById('login-form');
-			const googleBtn = document.getElementById('google-signin-button');
-			if (loginForm) loginForm.style.display = 'none';
-			if (googleBtn) googleBtn.style.display = 'none';
-
-			// extract email, display name and JWT and time remaining from payload (assume standard claims)
-			const payload = parseJwt(existingJwt);
-			const timeRemaining = getJwtTimeRemaining(existingJwt);
-			const email = payload?.email || 'N/A';
-			const name = payload?.name || payload?.displayName || payload?.preferred_username || 'N/A';
-
-			// format JWT for 4-line display
-			const formattedJwt = formatJwtForDisplay(existingJwt);
-
-			// render logout and change password button
-			if (appDiv) {		
-				appDiv.innerHTML = `
-					<div class="flex flex-col items-center py-6">
-						<p style="margin-top: 38px;" class="text-white mb-0">You are already logged in.</p>
-						<button id="changepass-btn"
-							class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-8 rounded transition"
-							style="margin-top: 38px;">
-							Change Profile
-						</button>
-						<button id="logout-btn"
-							class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-8 rounded transition"
-							style="margin-top: 38px;">
-							Log Out
-						</button>
-						<div class="bg-white rounded p-4 mt-10 w-full max-w-xl" style="margin-top: 38px;">
-							<h2 class="text-lg font-semibold mb-2 text-black">Session Info</h2>
-							<div class="overflow-x-auto text-black text-sm mb-2">
-								<strong>JWT:</strong>
-								<pre class="bg-gray-200 p-1 rounded text-xs break-all mb-1" style="white-space: pre-line; min-width: 200px;">${formattedJwt}</pre>
-								<strong>Expires in:</strong> <span id="jwt-expires">${timeRemaining}</span><br>
-								<strong>Email:</strong> <span id="jwt-email">${email}</span><br>
-								<strong>Display Name:</strong> <span id="jwt-name">${name}</span>
-							</div>
-						</div>
-					</div>
-				`;
-
-				// add event listener for change password
-				const changepassBtn = document.getElementById('changepass-btn');
-				if (changepassBtn) {
-					changepassBtn.addEventListener('click', () => {
-						// SPA navigation to /changepass
-						window.history.pushState({}, '', '/changepass');
-						window.dispatchEvent(new PopStateEvent('popstate'));
-					});
-				}
-			
-				// add event listener for logout
-				const logoutBtn = document.getElementById('logout-btn');
-				if (logoutBtn) {
-					logoutBtn.addEventListener('click', () => {
-						localStorage.removeItem('jwt');
-						localStorage.removeItem('google_jwt');
-						updateHeaderUserLink(false);
-						window.location.reload();
-					});
-				}
-
-				// live update the JWT expiration countdown
-				const expiresSpan = document.getElementById('jwt-expires');
-				if (expiresSpan && payload?.exp) {
-					const interval = setInterval(() => {
-						const time = getJwtTimeRemaining(existingJwt);
-						expiresSpan.textContent = time;
-						if (time === "Expired") clearInterval(interval);
-					}, 1000);
-				}
-			}
-			return;
-		}
+	async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
 
 		// add 2FA toggle if not present in the HTML template
 		let twofaToggle = document.getElementById('use2fa-login') as HTMLInputElement | null;
@@ -275,22 +143,22 @@ export default class Login extends AbstractView {
 		// find the login form with ID login-form
 		const form = document.getElementById('login-form') as HTMLFormElement | null;
 		if (form) {
-		
-			// add a submit event listener
+
+			// adds a submit event listener
 			form.addEventListener('submit', async (e) => {
-			
-				// prevent default form submission
+
+				// prevents default form submission
 				e.preventDefault();
-			
-				// prevent new login if already logged in
+
+				// prevents new login if already logged in
 				const existingJwt = localStorage.getItem('jwt');
 				if (isJwtValid(existingJwt)) {
 					alert('You are already logged in. Please log out first to switch accounts.');
 					e.preventDefault();
 					return;
 				}
-			
-				// grab input values for email, TOTP code, and new password
+
+				// grabs input values for email, TOTP code, and new password
 				const emailInput = document.getElementById('email') as HTMLInputElement;
 				const passwordInput = document.getElementById('password') as HTMLInputElement;
 				const totpInput = document.getElementById('totp') as HTMLInputElement;
@@ -334,8 +202,7 @@ export default class Login extends AbstractView {
 					// on success: store the JWT in localStorage and alerts success
 					if (data.token) {
 						localStorage.setItem('jwt', data.token);
-						localStorage.removeItem('google_jwt'); // invalidate previous Google ID token
-						updateHeaderUserLink(true);
+						localStorage.removeItem('google_jwt'); // Invalidate previous Google ID token
 					}
 
 					alert('Login successful!');

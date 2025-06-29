@@ -5,7 +5,7 @@ export default class User implements UserInterface {
     id: number;
     displayName: string;
     points: number;
-    wins : number; 
+    wins : number;
     losses: number;
 
     constructor(game: TiamaPong, id: number = 42, displayName: string, email: string) {

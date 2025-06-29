@@ -9,9 +9,8 @@ import VersusPlayerSelection from './static/js/views/versusPlayerSelection.js';
 import Tournament from './static/js/views/Tournament.js';
 import TiamaPong from './game/entities/TiamaPong.js';
 import ChangePass from './static/js/views/ChangePass.js'; // to change the password
-import Profile from './static/js/views/Profile.js'; // to check the JWT
 import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
-import { updateHeaderUserLink } from './static/js/views/Login.js';
+import Profile from './static/js/views/Profile.js';
 
 export default class SpaRouter {
   public gameContext: TiamaPong;
@@ -75,8 +74,6 @@ export default class SpaRouter {
         localStorage.removeItem('jwt');
         localStorage.removeItem('google_jwt');
 
-        updateHeaderUserLink(false); // <-- update header to "Log In"
-
         // Redirect to login page (SPA navigation)
         if (window.location.pathname !== '/login') {
           history.pushState({}, '', '/login');
@@ -112,6 +109,20 @@ export default class SpaRouter {
     });
   }
 
+  // updates the header when loggedIn (true = User || false = Log In)
+  updateHeaderUserLink(isLoggedIn: boolean) {
+  	const loginLink = document.querySelector('a[href="/login"]');
+  	const profileLink = document.querySelector('a[href="/profile"]');
+
+  	if (isLoggedIn) {
+  		if (loginLink) loginLink.classList.add('hidden');
+  		if (profileLink) profileLink.classList.remove('hidden');
+  	} else {
+  		if (loginLink) loginLink.classList.remove('hidden');
+  		if (profileLink) profileLink.classList.add('hidden');
+  	}
+  }
+
   navigateTo = (url: string) => {
     history.pushState(null, '', url);
     void this.router();
@@ -132,6 +143,7 @@ export default class SpaRouter {
       { path: '/tournament-player-selection', view: PlayerSelection },
       { path: '/versus-player-selection', view: VersusPlayerSelection },
       { path: '/tournament', view: Tournament },
+      { path: '/profile', view: Profile},
     ];
 
     const protectedRoutes = [
@@ -140,6 +152,14 @@ export default class SpaRouter {
 
     const jwt = localStorage.getItem('jwt');
     const isLoggedIn = this.isJwtValid(jwt);
+
+    //update User/Log In Header
+    if (isLoggedIn) {
+      this.updateHeaderUserLink(true); // <-- update header to "User"
+    }
+    else {
+      this.updateHeaderUserLink(false); // <-- update header to "Log In"
+    }
 
     // If not logged in and trying to visit a protected route, redirect to /login
     if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
@@ -209,6 +229,5 @@ export default class SpaRouter {
     } catch (error) {
       console.error('Error rendering view:', error);
     }
-    this.hideLinksIfNotLoggedIn();
   };
 }
