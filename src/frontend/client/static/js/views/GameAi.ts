@@ -129,4 +129,7 @@ export default class GameAi extends AbstractView {
   async beforeMount(gameContext: TiamaPong): Promise<boolean> {
     return true;
   }
+
+  async onUnMount() {
+  }
 }

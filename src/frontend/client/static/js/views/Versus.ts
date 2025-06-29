@@ -139,4 +139,8 @@ export default class Versus extends AbstractView {
   async onMount(gameContext: TiamaPong) {
     await this.runPvp(gameContext);
   }
+
+  async onUnMount() {
+  }
+  
 }

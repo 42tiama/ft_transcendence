@@ -401,4 +401,7 @@ async function getMatchHistory(userId: number): Promise<any> {
 		console.error('Error fetching matches for History:', error);
 		return null;
 	}
+
+	async onUnMount() {
+  	}
 }

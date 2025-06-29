@@ -20,4 +20,7 @@ export default class Settings extends AbstractView {
     return true;
   }
 
+  async onUnMount() {
+  }
+
 }
