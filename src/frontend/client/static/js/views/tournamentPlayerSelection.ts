@@ -5,11 +5,15 @@ import TiamaPong from '../../../game/entities/TiamaPong.js';
 export default class PlayerSelection extends AbstractView {
   public gameContext: TiamaPong | null = null;
   private availablePlayers: User[] = [];
+  private boundPlayerSelection: (e: MouseEvent) => void;
+  private boundBeforeUnload: () => void;
   // public  selectedPlayers: User[] = [];
 
   constructor() {
     super();
     this.setTitle("Player selection");
+    this.boundPlayerSelection = (e: MouseEvent) => this.playerSelection(e);
+    this.boundBeforeUnload = () => this.onUnMount();
   }
 
   async getHtml(): Promise<string> {
@@ -32,15 +36,24 @@ export default class PlayerSelection extends AbstractView {
       const h3 = e.target.closest(".player")?.querySelector("h3");
 
       if (h3) {
-        this.gameContext!.preTournamentSelection.push(
-          this.gameContext!.users.find(
-            (user) => user.displayName === h3.textContent!.trim()
-          )!
-        );
-        const index = this.availablePlayers.findIndex(player => player.displayName === h3.textContent?.trim())
-        this.availablePlayers.splice(index, 1);
+        const foundUser = this.availablePlayers.find((user) => user.displayName === h3.textContent!.trim(), this.availablePlayers)!;
+        if (foundUser != undefined) {
+          this.gameContext!.preTournamentSelection.push(foundUser);
+          const index = this.availablePlayers.findIndex(player => player.displayName === h3.textContent?.trim())
+          this.availablePlayers.splice(index, 1);
+          console.log("player inside pretournamentSelection array: ", h3.textContent?.trim());
+        } else {
+          const foundUser = this.gameContext?.preTournamentSelection.find((user) => user.displayName === h3.textContent!.trim())!;
+          if (foundUser != undefined) {
+            this.availablePlayers.push(foundUser);
+            const index = this.gameContext?.preTournamentSelection.findIndex(player => player.displayName === h3.textContent?.trim())
+            if (index != null && index >= 0) {
+              this.gameContext!.preTournamentSelection.splice(index, 1);
+              console.log("player inside availablePlayers array: ", h3.textContent?.trim());
+            }
+          }
+        }
         this.renderPlayerCard();
-        console.log("player inside playerSelection function: ", h3.textContent?.trim());
       }
     }
   }
@@ -56,11 +69,12 @@ export default class PlayerSelection extends AbstractView {
     this.availablePlayers.forEach(player => {
       // Create the main player card div
       const playerCard = document.createElement('div');
-      playerCard.className = 'player bg-yellow-500 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
+      playerCard.className = 'min-w-34 min-h-38 player bg-yellow-500 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
       
       // Create the avatar div
       const avatarDiv = document.createElement('div');
-      avatarDiv.className = 'w-14 h-14 bg-white rounded-full mb-2';
+      avatarDiv.className = 'w-14 h-14 text-5xl bg-white text-center font-extrabold bg-red rounded-full mb-2';
+      avatarDiv.innerHTML = player.displayName.charAt(0);
       
       // Create the name h3 element
       const nameH3 = document.createElement('h3');
@@ -78,11 +92,12 @@ export default class PlayerSelection extends AbstractView {
     this.gameContext!.preTournamentSelection.forEach(player => {
       // Create the main player card div
       const playerCard = document.createElement('div');
-      playerCard.className = 'player bg-yellow-500 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
+      playerCard.className = 'min-w-34 min-h-38 player bg-yellow-500 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
       
       // Create the avatar div
       const avatarDiv = document.createElement('div');
-      avatarDiv.className = 'w-14 h-14 bg-white rounded-full mb-2';
+      avatarDiv.className = 'w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-2';
+      avatarDiv.innerHTML = player.displayName.charAt(0);
       
       // Create the name h3 element
       const nameH3 = document.createElement('h3');
@@ -102,11 +117,21 @@ export default class PlayerSelection extends AbstractView {
     return true;
   }
 
-  async onMount(gameContext: TiamaPong, appElement: Element | null) {
-    document.body.addEventListener("click", (e: MouseEvent) => this.playerSelection(e));
+  async onMount(gameContext: TiamaPong) {
+    document.body.addEventListener("click", this.boundPlayerSelection);
+    window.addEventListener("beforeunload", this.boundBeforeUnload);
     this.gameContext = gameContext;
-    this.availablePlayers = gameContext.users; // Iury, Andre, aqui eu chamaria o metodo get pra fazer o fetch dos usuarios do banco, 
+    this.availablePlayers = [...gameContext.users]; // Iury, Andre, aqui eu chamaria o metodo get pra fazer o fetch dos usuarios do banco, 
     // em vez de fazer isso no TiamaPong e passar por contexto, vai para os bugs na selecao dos players qdo sair da pagina, refresh etc....
     this.renderPlayerCard();
   }
+
+  async onUnMount() {
+    document.body.removeEventListener("click", this.boundPlayerSelection);
+    window.removeEventListener("beforeunload", this.boundBeforeUnload);
+    this.gameContext!.preTournamentSelection = [];
+    this.gameContext = null;
+    this.availablePlayers = [];
+  }
+
 }

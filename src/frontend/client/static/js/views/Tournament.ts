@@ -35,6 +35,9 @@ export default class Tournament extends AbstractView {
   }
 
   async onMount(gameContext: TiamaPong, appElement: Element) {
-    gameContext.tournamentHistory[0].runTournament(appElement);
+    gameContext.tournamentHistory[gameContext.tournamentHistory.length - 1].runTournament(appElement);
+  }
+
+  async onUnMount() {
   }
 }

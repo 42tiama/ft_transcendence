@@ -3,6 +3,7 @@ import Login from './static/js/views/Login.js';
 import Register from './static/js/views/Register.js';
 import Versus from './static/js/views/Versus.js';
 import NotFound from './static/js/views/404.js';
+import AbstractView from './static/js/views/AbstractView.js';
 import GameMenu from './static/js/views/GameMenu.js';
 import PlayerSelection from './static/js/views/tournamentPlayerSelection.js';
 import VersusPlayerSelection from './static/js/views/versusPlayerSelection.js';
@@ -14,6 +15,7 @@ import Profile from './static/js/views/Profile.js';
 
 export default class SpaRouter {
   public gameContext: TiamaPong;
+  private currentView: AbstractView | null = null;
 
   constructor(gameContext: TiamaPong) {
     this.gameContext = gameContext;
@@ -178,18 +180,24 @@ export default class SpaRouter {
 
     try {
       const view = new match.route.view() as any;
+
+      //validate phase
+      if (match.route.path === '/tournament' && !(await view.beforeMount(this.gameContext))) {
+        return false;
+      }
+      else if (match.route.path === '/versus' && !(await view.beforeMount(this.gameContext))) {
+        return false;
+      }
+
+      if (this.currentView && typeof this.currentView.onUnMount === 'function') {
+        this.currentView.onUnMount();
+      }
+
+      this.currentView = view;
       const appElement = document.querySelector('#app') as HTMLElement;
 
       if (appElement) {
         const html = await view.getHtml();
-
-        //validate phase
-        if (match.route.path === '/tournament' && !(await view.beforeMount(this.gameContext))) {
-          return false;
-        }
-        else if (match.route.path === '/versus' && !(await view.beforeMount(this.gameContext))) {
-          return false;
-        }
 
         //render the view page
         appElement.innerHTML = html;
