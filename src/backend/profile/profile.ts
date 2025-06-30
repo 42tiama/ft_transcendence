@@ -244,6 +244,67 @@ app.post('/friend-delete', async (request: FastifyRequest<{ Body: {userId: numbe
 	}
 });
 
+//updates the user`s last seen
+app.post('/heartbeat/:userId', async (request: FastifyRequest<{ Params: {userId: number}}>, reply) => {
+	const { userId } = request.params;
+
+	if (!userId) {
+		app.log.warn(`Missing fields in register request: ${JSON.stringify(request.params)}`);
+		reply.code(400).send({ error: "Missing required fields." });
+		return;
+	}
+
+  	try {
+		const db = app.betterSqlite3;
+  	  	const stmt = db.prepare(`
+  	    	UPDATE users SET lastSeen = CURRENT_TIMESTAMP WHERE id = ?
+  	  	`);
+
+  	  	const result = stmt.run(userId);
+
+  		if (result.changes === 0) {
+			reply.code(404).send({ error: 'User not found' });
+			return;
+  		}
+
+  	  	reply.send({ status: 'ok' });
+  	} catch (err) {
+  	  	app.log.error('Error updating lastSeen:', err);
+		reply.code(500).send({ error: "Failed to update lastSeen." });
+  	}
+});
+
+//check if a user is considered online based on lastSeen timestamp
+app.get('/online-status/:userId', async (request: FastifyRequest<{ Params: { userId: number } }>, reply) => {
+	const { userId } = request.params;
+
+	if (!userId) {
+		app.log.warn(`Missing fields in register request: ${JSON.stringify(request.params)}`);
+		reply.code(400).send({ error: "Missing required fields." });
+		return;
+	}
+
+	try {
+		const db = app.betterSqlite3;
+		const stmt = db.prepare(`
+			SELECT lastSeen >= DATETIME('now', '-10 seconds') AS isOnline
+			FROM users
+			WHERE id = ?
+		`);
+
+		const result = stmt.get(userId) as {isOnline : boolean};
+
+		if (!result) {
+			return reply.code(404).send({ error: "User not found." });
+		}
+
+		reply.send({ userId, online: result.isOnline });
+	} catch (err) {
+	  app.log.error('Error checking online status:', err);
+	  reply.code(500).send({ error: "Failed to check online status." });
+	}
+});
+
 // Get user Match Stat
 //TODO - move to game-service
 app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
@@ -374,6 +435,7 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
             displayName TEXT UNIQUE NOT NULL,
             avatarUrl TEXT,
             cardColor TEXT DEFAULT '#ffba00',
+			lastSeen DATETIME,
 			createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 		)
 	`).run();

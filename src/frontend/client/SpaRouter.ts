@@ -13,6 +13,9 @@ import ChangePass from './static/js/views/ChangePass.js'; // to change the passw
 import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import Profile from './static/js/views/Profile.js';
 
+// sets the API base URL to the API gateway for all authentication requests.
+const API_BASE = 'https://localhost:8044';
+
 export default class SpaRouter {
   public gameContext: TiamaPong;
   private currentView: AbstractView | null = null;
@@ -48,6 +51,7 @@ export default class SpaRouter {
       if (typeof window !== "undefined" && typeof document !== "undefined") {
         this.autoLogoutOnJwtExpiry();
       }
+      this.startHeartbeats();
     });
   }
 
@@ -95,6 +99,32 @@ export default class SpaRouter {
         this.hideLinksIfNotLoggedIn();
       }
     }, 1000); // check every second
+  }
+
+  // Call the send heartbeat function in a set interval (default 5 sec)
+  startHeartbeats(intervalMs = 5000) {
+    const sendHeartbeat = () => {
+      const jwt = localStorage.getItem('jwt');
+      if (jwt && this.isJwtValid(jwt)) {
+        const userId = localStorage.getItem('userId');
+        if(userId) {
+          const response = fetch(`${API_BASE}/heartbeat/${userId}`, {
+          	method: 'POST'
+          }).catch(err => {
+            console.error('Failed to send heartbeat:', err);
+          });
+        }
+      }
+    };
+
+    // Send one immediately
+    sendHeartbeat();
+
+    // Set interval to send repeatedly
+    const intervalId = window.setInterval(sendHeartbeat, intervalMs);
+
+    // Return a stop function so caller can stop heartbeats
+    return () => clearInterval(intervalId);
   }
 
   hideLinksIfNotLoggedIn() {

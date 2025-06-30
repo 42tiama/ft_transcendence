@@ -90,6 +90,12 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
+	prefix: '/heartbeat',
+	rewritePrefix: '/heartbeat'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
 	prefix: '/match-stat',
 	rewritePrefix: '/match-stat'
 });
