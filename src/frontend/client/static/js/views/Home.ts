@@ -22,7 +22,7 @@ export default class Home extends AbstractView {
 
   async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
   }
-  
+
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
     return true;
   }

@@ -1,10 +1,142 @@
-<div class="text-white min-h-screen flex items-center justify-center px-4">
-  <div class="bg-[#23272a] rounded-lg shadow-lg flex flex-col items-center p-8 w-full max-w-xl">
-    <h2 class="text-2xl font-bold mb-6">Profile Info</h2>
-    <button id="show-profile-btn"
-      class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 px-6 rounded transition mb-6">
-      Show My JWT & Info
-    </button>
-    <div id="profile-info" class="w-full"></div>
+<div class="text-white min-h-screen p-6 bg-[#2c2f33]">
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <!-- 🧍‍♂ Profile Section -->
+    <section class="bg-[#23272a] rounded-lg shadow p-6 relative">
+      <!-- Logout Button -->
+      <button id="logout-btn"
+        class="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded text-sm transition">
+        Log Out
+      </button>
+
+      <h2 class="text-2xl font-bold mb-4">My Profile</h2>
+      <div class="flex flex-col md:flex-row gap-6 items-center">
+        <div class="flex flex-col items-center bg-gray-700 p-4 rounded-lg">
+          <img id="avatar-preview" src="/images/TIAMA-logo.png" alt="Avatar"
+            class="w-24 h-24 rounded-full mb-2 border-2 border-white object-cover shadow-lg" />
+          <input type="file" id="avatar-upload" accept="image/*"
+            class="text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
+        </div>
+        <form id="update-profile-form" class="flex-1 space-y-3 w-full">
+          <div>
+            <label class="block text-sm mb-1">Display Name</label>
+            <input id="display-name-input" type="text" value="${displayName}"
+              class="w-full p-2 rounded border border-gray-400 bg-gray-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Card Color</label>
+            <input id="card-color-input" type="color"
+              class="w-16 h-10 p-1 border border-gray-400 rounded bg-white" />
+          </div>
+          <div class="flex gap-4 mt-4">
+            <button type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">
+              Update Profile
+            </button>
+            <button id="changepass-btn" type="button"
+              class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded transition">
+              Change Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 🔽 Grid for Remaining Sections -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- LEFT COLUMN -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Stats -->
+        <section class="bg-[#23272a] rounded-lg shadow p-6">
+          <h2 class="text-2xl font-bold mb-4">Stats</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div><p class="text-lg font-semibold">Wins</p><p id="wins-count" class="text-amber-400 text-xl">0</p></div>
+            <div><p class="text-lg font-semibold">Losses</p><p id="losses-count" class="text-amber-400 text-xl">0</p></div>
+            <div><p class="text-lg font-semibold">Win Rate</p><p id="win-rate" class="text-amber-400 text-xl">0%</p></div>
+            <div><p class="text-lg font-semibold">Total Matches</p><p id="total-matches" class="text-amber-400 text-xl">0</p></div>
+          </div>
+        </section>
+
+        <!-- Match History -->
+        <section class="bg-[#23272a] rounded-lg shadow p-6">
+          <h2 class="text-2xl font-bold mb-4">Match History</h2>
+          <div class="overflow-y-auto h-40">
+            <table class="w-full table-auto text-sm">
+              <thead>
+                <tr class="border-b border-gray-600 text-center">
+                  <th class="py-2 text-center">Date</th>
+                  <th class="py-2 text-center">Type</th>
+                  <th class="py-2 text-center">Opponent</th>
+                  <th class="py-2 text-center">Score</th>
+                  <th class="py-2 text-center">Result</th>
+                </tr>
+              </thead>
+              <tbody id="match-history-table" class="text-center">
+                <!-- Dynamically filled with matches -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Session Info -->
+        <section class="bg-[#23272a] rounded-lg shadow p-6">
+          <h2 class="text-2xl font-bold mb-4">Session Info</h2>
+          <div class="overflow-x-auto text-white text-sm space-y-2">
+            <div>
+              <strong class="text-gray-300">JWT:</strong>
+              <pre id="jwt-formatted" class="bg-gray-900 p-3 rounded text-xs text-green-400 break-all whitespace-pre-wrap">${formattedJwt}</pre>
+            </div>
+            <div><strong class="text-gray-300">Expires in:</strong> <span id="jwt-expires"  class="text-white">${timeRemaining}</span></div>
+            <div><strong class="text-gray-300">Email:</strong> <span id="jwt-email" class="text-white">${email}</span></div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="space-y-6">
+
+        <!-- Friends Section -->
+        <section class="bg-[#23272a] rounded-lg shadow p-6 h-full flex flex-col">
+          <h2 class="text-2xl font-bold mb-4">Friends</h2>
+
+          <!-- Follow Stats -->
+          <div class="mb-4 flex gap-6 text-white text-sm">
+            <div>
+              <span id="following-count" class="font-bold text-lg">0</span><br />
+              <span class="text-gray-400">Following</span>
+            </div>
+            <div>
+              <span id="followers-count" class="font-bold text-lg">0</span><br />
+              <span class="text-gray-400">Followers</span>
+            </div>
+          </div>
+
+          <!-- Add Friend -->
+          <div class="mb-4 flex gap-2">
+            <input id="friend-display-name" type="text" placeholder="Friend's display name"
+              class="flex-1 p-2 rounded border border-gray-400 bg-gray-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            <button id="add-friend-btn"
+              class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-white transition">
+              Add
+            </button>
+          </div>
+          <p id="add-friend-message" class="text-sm h-4 text-green-400"></p>
+
+          <!-- Divider -->
+          <hr class="border-gray-600 my-2" />
+
+          <!-- Friends List -->
+          <div class="flex-1 overflow-y-auto max-h-110">
+            <ul id="friends-list" class="space-y-2">
+              <!-- Dynamically filled with friends -->
+            </ul>
+          </div>
+        </section>
+
+      </div>
+    </div>
   </div>
 </div>

@@ -29,7 +29,7 @@ services:
             SINGLE_CONTAINER: "false"
         volumes:
             - ./certs/api-gateway:/build/certs/api-gateway
-    
+
     game-service:
         restart: always
         build:
@@ -86,6 +86,16 @@ services:
             SINGLE_CONTAINER: "false"
         ports:
             - "8042:8042"
+
+    profile:
+        restart: always
+        build:
+            context: .
+            dockerfile: containers/profile/Dockerfile
+        volumes:
+            - ./certs/profile:/build/certs/profile
+        env_file:
+            - .env
 
     elasticsearch:
         restart: always

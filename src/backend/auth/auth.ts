@@ -121,7 +121,7 @@ const app = fastify({
 	https: httpsOptions
 });
 
-// if in devContainer, create database in relative path 
+// if in devContainer, create database in relative path
 if (SINGLE_CONTAINER === 'true'){
 	app.register(fastifyBetterSqlite3, {
 		"pathToDb": './data/users.db',
@@ -178,15 +178,15 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 	const db = app.betterSqlite3;
 	try {
-		
+
 		// check for duplicate displayName before insert
 		const existingDisplayName = db.prepare('SELECT 1 FROM users WHERE displayName = ?').get(displayName);
 		if (existingDisplayName) {
 			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
 			return;
 		}
-		
-		// hashe the password with bcrypt
+
+		// hash the password with bcrypt
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		// determine if 2FA is enabled (default: true = enable; false = disable)
@@ -207,7 +207,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 		);
 		const result = stmt.run(email, displayName, hashedPassword, encryptedTotp, use2fa ? 1 : 0);
 
-		//if insertion was OK, send POST to game-service so that it can add to its own database
+		//if insertion was OK, send POST to game-service and profile so that they can add to their own database
 		if (result.changes === 1){
 			const profilePayload = {
 				id: result.lastInsertRowid,
@@ -228,7 +228,25 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 			})
 			.catch((err) => {
 				app.log.error('Could not reach game-service:', err);
-				})
+			})
+
+			//Insert user into profile-service DB
+			try {
+				const profileResponse = await fetch('https://profile:8046/profile-register', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify(profilePayload)
+				});
+
+				if (!profileResponse.ok) {
+					app.log.warn(`Profile service failed for user ID ${profilePayload.id}`);
+				}
+				else {
+					app.log.info(`Profile service registered user ID ${profilePayload.id}`)
+				}
+			} catch (err) {
+				app.log.error('Could not reach profile service:', err);
+			}
 		}
 
 		// only return totpSecret if 2FA is enabled
@@ -455,8 +473,8 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 			}, { expiresIn: '12h' });
 		}
 
-		reply.code(200).send({ 
-			success: true, 
+		reply.code(200).send({
+			success: true,
 			message: "Change successful.",
 			token: newToken // will be undefined if only password changed
 		});
@@ -518,7 +536,25 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 				})
 				.catch((err) => {
 					app.log.error('Could not reach game-service:', err);
-					})
+				})
+
+				//sync user with profile-service users table
+				try {
+					const profileResponse = await fetch('https://profile:8046/profile-register', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify(profilePayload)
+					});
+
+					if (!profileResponse.ok) {
+						app.log.warn(`Profile service failed for user ID ${profilePayload.id}`);
+					}
+					else {
+						app.log.info(`Profile service registered user ID ${profilePayload.id}`)
+					}
+				} catch (err) {
+					app.log.error('Could not reach profile service:', err);
+				}
 			}
 
 		}
@@ -537,28 +573,25 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 	}
 });
 
-
-// --- GET /profile (Protected Route) ---
-app.get('/profile', { preValidation: [app.authenticate] }, async (request, reply) => {
-	// extract JWT from Authorization header
-	const authHeader = request.headers['authorization'] || request.headers['Authorization'];
-	let jwt = '';
-	if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
-		jwt = authHeader.substring(7);
-	}
-	reply.send({
-		jwt,                 // the raw JWT
-		json: request.user,  // the decoded JWT payload
-		status: 'ok'
-	});
-});
-
+// // --- GET /token (Protected Route) ---
+// app.get('/token', { preValidation: [app.authenticate] }, async (request, reply) => {
+// 	// Extracts JWT from Authorization header
+// 	const authHeader = request.headers['authorization'] || request.headers['Authorization'];
+// 	let jwt = '';
+// 	if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+// 		jwt = authHeader.substring(7);
+// 	}
+// 	reply.send({
+// 		jwt,                 // the raw JWT
+// 		json: request.user,  // the decoded JWT payload
+// 		status: 'ok'
+// 	});
+// });
 
 // health check
 app.get('/', (request, reply) => {
 	reply.send("Hello from auth service");
 });
-
 
 // on startup creates users table if not exists, log errors and aborts on failure
 // and listens on 0.0.0.0:8043

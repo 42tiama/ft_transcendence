@@ -38,24 +38,24 @@ export default class Game {
         gameConfig.boardHeight / 2,
         gameConfig, this.ball);
         this.inputHandler = new InputHandler(this.player1, this.player2);
-        
+
         if (this.match.matchType === 'versus-ai') {
             this.updatePlayer2 = (config) => this.player2.aiMode(config);
         } else {
             this.updatePlayer2 = (config) => this.player2.update(config);
         }
-        
-        // this.inputHandler = new InputHandler(this.player1);  
-        
+
+        // this.inputHandler = new InputHandler(this.player1);
+
         const context = this.canvas.getContext("2d");
         if (!context) {
             throw new Error("Could not get 2D context from canvas");
         }
         this.context = context;
-        
+
         this.renderer = new Renderer(this.context, gameConfig);
     }
-        
+
     // start(match : TiamaMatch, resolve: (()=> void) | null): void {
     //     this.gameLoop(match, resolve);
     // }
@@ -127,7 +127,7 @@ export default class Game {
         // Draw everything
         this.drawGameElements(match);
     }
-    
+
     private checkScore(match : TiamaMatch, resolve: (()=> void) | null): void {
         if (this.ball.isOutOfBoundsLeft()) {
             match.player2Score++;
@@ -136,8 +136,8 @@ export default class Game {
             match.player1Score++;
             this.ball.reset(-1, gameConfig);
         }
-        
-        if (match.player1Score - match.player2Score > 1 
+
+        if (match.player1Score - match.player2Score > 1
             || match.player2Score - match.player1Score > 1)
         {
             match.winner =  match.player1Score > match.player2Score ? match.player1 : match.player2;

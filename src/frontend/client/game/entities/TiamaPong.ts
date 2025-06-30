@@ -15,23 +15,23 @@ export default class TiamaPong {
     public preVersusSelection: User | null = null;
     public sessionUser: User;
     public gameServices: Partial<GameServices> = { user: undefined };
-    
+
     constructor() {
         this.initGameServices();
         this.loadUsers();
         this.sessionUser = new User(this, 42, 'DevUser', 'devuser@dev.com');
     }
-    
+
     private initGameServices() {
         this.gameServices.user = new PlayerService;
     }
-    
+
     private async loadUsers() {
         this.users = await this.gameServices.user!.getAllPlayers();
     }
 
     public createTournament() {
-        let size: number = this.tournamentHistory.push(new TiamaTournament(this)); 
+        let size: number = this.tournamentHistory.push(new TiamaTournament(this));
         // createTournament(this.tournamentHistory[size - 1]) api method
         this.tournamentHistory[size - 1].tournamentId = (size - 1).toString();
         // this.tournamentHistory[size - 1].debugPrintRoundArray();

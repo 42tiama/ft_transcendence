@@ -42,17 +42,65 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://auth:8043',
-	prefix: '/profile',
-	rewritePrefix: '/profile'
-});
-
-server.register(fastifyHttpProxy, {
-	upstream: 'https://auth:8043',
 	prefix: '/google-login',
 	rewritePrefix: '/google-login'
 });
 
-server.get('/', (req: any, reply: any)=> {
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/profile-register',
+	rewritePrefix: '/profile-register'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/profile-by-id',
+	rewritePrefix: '/profile-by-id'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/profile-by-displayname',
+	rewritePrefix: '/profile-by-displayname'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/follow-stat',
+	rewritePrefix: '/follow-stat'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/friend-register',
+	rewritePrefix: '/friend-register'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/friend-delete',
+	rewritePrefix: '/friend-delete'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/friend-list',
+	rewritePrefix: '/friend-list'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/match-stat',
+	rewritePrefix: '/match-stat'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/match-hist',
+	rewritePrefix: '/match-hist'
+});
+
+server.get('/', (req, reply)=> {
     req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});
 });

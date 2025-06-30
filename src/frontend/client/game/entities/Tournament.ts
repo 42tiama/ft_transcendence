@@ -128,7 +128,7 @@ export default class Tournament {
       startButton.style.backgroundColor = "#00bc7d";
       startButton.innerHTML = 'Press Start to Play';
     }
-    
+
     if (startButton) {
       return new Promise<void>((resolve) => {
         const clickHandler = (event: MouseEvent) => {
@@ -263,19 +263,19 @@ export default class Tournament {
       totalMatches: this.totalMatches,
       winner: this.tournamentWinner
     }
-    
-    // const tournamentServiceResponse = await this.gameServices.tournament!.updateTournamentHistory(tournamentInfo);
-    // if (tournamentServiceResponse.success) {
-    //   // server.log.info('Tournament history saved successfully!');
-    // } else {
-    //   // server.log.error('Failed to save the tournament log');
-    // }
-    
-    // const matchServiceResponse = await this.gameServices.match!.updateMatchHistory(this.matchLog);
-    // if (matchServiceResponse.success) {
-    //   // server.log.info('Matches saved successfully!');
-    // } else {
-    //   // server.log.error('Failed to save matches');
-    // }
+
+    const tournamentServiceResponse = await this.gameServices.tournament!.updateTournamentHistory(tournamentInfo);
+    if (tournamentServiceResponse.success) {
+      // server.log.info('Tournament history saved successfully!');
+    } else {
+      // server.log.error('Failed to save the tournament log');
+    }
+
+    const matchServiceResponse = await this.gameServices.match!.updateMatchHistory(this.matchLog);
+    if (matchServiceResponse.success) {
+      // server.log.info('Matches saved successfully!');
+    } else {
+      // server.log.error('Failed to save matches');
+    }
   }
 }

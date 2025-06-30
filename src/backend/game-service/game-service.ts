@@ -40,7 +40,7 @@ if (SINGLE_CONTAINER === 'true'){
   pathToDb = '/data/game-service.db';
 }
 
-const app = fastify({ 
+const app = fastify({
     logger: loggerOptions,
     https: httpsOptions
  });
