@@ -74,6 +74,14 @@ export default class Game {
         })
     }
 
+    public cancelGame(): void {
+        this.isGameRunning = false;
+        if (this.animationId !== null) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+
     public endGame(): void {
         this.isGameRunning = false;
         console.log(`match type: ${this.match.matchType}`);
@@ -98,6 +106,31 @@ export default class Game {
             this.animationId = null;
         }
 
+		//if AI match, send specific payload
+		if (this.match.matchType === 'versus-ai'){
+			const aiMatchPayload = {
+				player1Id : this.match.player1.id,
+				player1Score : this.match.player1Score,
+				player2Score : this.match.player2Score,
+				winner : this.match.winner?.id ?? null //coercing to null if this.match.winner is null (it would be undefined otherwise)
+			};
+
+			fetch('https://localhost:8044/register-ai-match', {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(aiMatchPayload)
+			})
+			.then((gameServiceResponse) => {
+				if (!gameServiceResponse.ok) {
+					console.error(`POST to game-service failed: ${gameServiceResponse.status}`);
+				} else {
+					console.log(`POST succeeded`);
+				}
+			})
+			.catch((err) => {
+					console.error(err);
+			})
+        }
     }
 
     private gameLoop(match : TiamaMatch, resolve: (()=> void) | null) {
