@@ -88,8 +88,8 @@ rebuild-game:
 rebuild-auth:
 	docker compose up --detach --build auth
 
-rebuild-apigame:
-	docker compose up --detach --build game-service
+rebuild-profile:
+	docker compose up --detach --build profile
 
 #clean entire build folder
 bclean:
