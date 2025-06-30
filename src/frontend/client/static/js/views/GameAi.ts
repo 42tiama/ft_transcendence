@@ -4,11 +4,13 @@ import TiamaPong from "../../../game/entities/TiamaPong";
 import Match from '../../../game/entities/Match.js';
 import User from '../../../game/entities/User.js';
 import { parseJwt } from '../views/Login.js'
+import TournamentService from '../../../services/TournamentService.js';
 
 export default class GameAi extends AbstractView {
 
   private selectedDifficulty: number = 0.5;
   private game: Game | null = null;
+  private tournamentId: number | null = null;
 
   constructor() {
     super();
@@ -88,7 +90,7 @@ export default class GameAi extends AbstractView {
         }
       });
     }
-  }
+	}
 
   private showElement(name: string, on_off: boolean = true): void {
     const displayStyle = on_off ? 'flex' : 'none';
@@ -99,7 +101,14 @@ export default class GameAi extends AbstractView {
     }
   }
 
+	
+
   async onMount(gameContext: TiamaPong) {
+  // this.tournamentId = await TournamentService.createTournament();
+  // if (this.tournamentId) {
+  // 	const info = await TournamentService.getTournamentsById(this.tournamentId);
+	// console.log(`Tournament info: ${JSON.stringify(info)}`);
+  // }
     this.showElement('ai-player', false);
     this.showElement('human-player', false);
     this.showElement('difficulty-group', false);

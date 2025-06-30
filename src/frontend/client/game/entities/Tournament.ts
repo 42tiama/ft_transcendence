@@ -5,7 +5,7 @@ import Game from "./Game.js";
 import { TournamentInfo, GameServices } from "../types.js";
 import TournamentService from '../../services/TournamentService.js'
 import MatchService from '../../services/MatchService.js'
-import { Server } from "http";
+// import { Server } from "http";
 
 export default class Tournament {
   tournamentId: string = '0';
@@ -264,18 +264,18 @@ export default class Tournament {
       winner: this.tournamentWinner
     }
 
-    const tournamentServiceResponse = await this.gameServices.tournament!.updateTournamentHistory(tournamentInfo);
-    if (tournamentServiceResponse.success) {
-      // server.log.info('Tournament history saved successfully!');
-    } else {
-      // server.log.error('Failed to save the tournament log');
-    }
+    // const tournamentServiceResponse = await this.gameServices.tournament!.updateTournamentHistory(tournamentInfo);
+    // if (tournamentServiceResponse.success) {
+    //   // server.log.info('Tournament history saved successfully!');
+    // } else {
+    //   // server.log.error('Failed to save the tournament log');
+    // }
 
-    const matchServiceResponse = await this.gameServices.match!.updateMatchHistory(this.matchLog);
-    if (matchServiceResponse.success) {
-      // server.log.info('Matches saved successfully!');
-    } else {
-      // server.log.error('Failed to save matches');
-    }
+    // const matchServiceResponse = await this.gameServices.match!.updateMatchHistory(this.matchLog);
+    // if (matchServiceResponse.success) {
+    //   // server.log.info('Matches saved successfully!');
+    // } else {
+    //   // server.log.error('Failed to save matches');
+    // }
   }
 }

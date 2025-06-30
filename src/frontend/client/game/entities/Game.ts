@@ -6,6 +6,8 @@ import { InputHandler } from '../services/InputHandler.js';
 import { Renderer } from '../services/Renderer.js';
 import { gameConfig } from '../gameConfig.js';
 import TiamaMatch from './Match.js';
+import MatchService from '../../services/MatchService.js';
+import { MatchData } from '../../services/types.js';
 
 export default class Game {
     private canvas: HTMLCanvasElement;
@@ -74,37 +76,29 @@ export default class Game {
 
     public endGame(): void {
         this.isGameRunning = false;
+        console.log(`match type: ${this.match.matchType}`);
+        if (this.match.matchType === 'versus-ai' || this.match.matchType === 'versus-player') {
+            const matchPayload : MatchData = {
+                matchType : this.match.matchType,
+                tournamentId : null,
+                player1 : this.match.player1.id,
+                // player1: 1,
+                player2: this.match.matchType === 'versus-ai' ? null : this.match.player2!.id,
+                player1Score : this.match.player1Score,
+                player2Score : this.match.player2Score,
+                winner : this.match.player1Score > this.match.player2Score ? 1 : this.match.matchType === 'versus-ai' ? null : this.match.player2!.id
+            };
+
+            const match = new MatchService();
+            match.createMatch(matchPayload);
+        }
+
         if (this.animationId !== null) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
         }
 
-		//if AI match, send specific payload
-		if (this.match.matchType === 'versus-ai'){
-			const aiMatchPayload = {
-				player1Id : this.match.player1.id,
-				player1Score : this.match.player1Score,
-				player2Score : this.match.player2Score,
-				winner : this.match.winner?.id ?? null //coercing to null if this.match.winner is null (it would be undefined otherwise)
-			};
-
-			fetch('https://localhost:8044/register-ai-match', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify(aiMatchPayload)
-			})
-			.then((gameServiceResponse) => {
-				if (!gameServiceResponse.ok) {
-					console.error(`POST to game-service failed: ${gameServiceResponse.status}`);
-				} else {
-					console.log(`POST succeeded`);
-				}
-			})
-			.catch((err) => {
-					console.error(err);
-			})
     }
-}
 
     private gameLoop(match : TiamaMatch, resolve: (()=> void) | null) {
         this.animationId = requestAnimationFrame(() => this.gameLoop(match, resolve));
