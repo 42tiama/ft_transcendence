@@ -27,7 +27,7 @@ export default class MatchService {
                 console.log(`Match successfully registered, id: ${result.data}`);
                 return result.data;
             }
-            console.log(`Failed to create match: ${response.status} ${response.statusText}`);
+            console.log(`Failed to create match: ${response.status} ${response.statusText} - ${result.data}`);
         } catch (err) {
             console.log(`Could not reach game-service: ${err}`);
         }
@@ -89,6 +89,31 @@ export default class MatchService {
             console.log(`Could not reach game-service: ${err}`);
         }
         return false;
+    }
+
+    public async getMatchesByTournamentId(tournamentId: number): Promise<MatchData[]> {
+        const tournamentIdString = tournamentId.toString();
+        let response = {} as Response;
+
+        const request = {
+            route: `${this.API_GATEWAY}${tournamentIdString}/matches`, 
+            options: {
+                method: 'GET'
+            }
+        };
+
+        try {
+            response = await fetch(request.route, request.options);
+            const result: ApiResponse<MatchData[]> = await response.json();
+
+            if (response.ok && result.data) {
+                return result.data;
+            }
+            console.log(`Failed to get matches: ${response.status} ${response.statusText}`);
+        } catch (err) {
+            console.log(`Could not reach game-service: ${err}`);
+        }
+        return [];
     }
 }
 

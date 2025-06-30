@@ -7,12 +7,14 @@ export interface ApiResponse<T> {
 }
 
 export interface MatchData {
-    matchId: string;
+    matchId?: string;
     matchType: string;
-    tournamentId?: number;
+    tournamentId: number | null;
     player1: number;
-    player2?: number;
-    winner?: number;
+    player2: number | null;
+    player1Score: number;
+    player2Score: number;
+    winner: number | null;
 }
 
 export interface MatchResult {
@@ -25,9 +27,9 @@ export interface MatchResult {
 export interface PlayerData {
     id: number;
     displayName: string;
-    points?: number;
-    wins?: number;
-    losses?: number;
+    points: number;
+    wins: number;
+    losses: number;
 }
 
 export interface TournamentData {

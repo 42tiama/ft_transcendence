@@ -296,7 +296,7 @@ async function tournamentInfoById(
 
 // MATCH FUNCTIONS
 
-async function addMach(
+async function addMatch(
 	request: FastifyRequest<{ Body: MatchPayload }>,
 	reply: FastifyReply
 ){
@@ -305,17 +305,28 @@ async function addMach(
 		tournamentId,
 		player1,
 		player2,
+		player1Score,
+		player2Score,
+		winner
 	} = request.body;
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
 			INSERT INTO 
-				matches (matchType, tournamentId, player1, player2)
+				matches (matchType, tournamentId, player1, player2, player1Score, player2Score, winner)
 			VALUES
-				(?, ?, ?, ?)
+				(?, ?, ?, ?, ?, ?, ?)
 		`);
 
-		const result = query.run(matchType, tournamentId, player1, player2);
+		const result = query.run(
+			matchType,
+			tournamentId ?? null,
+			player1,
+			player2 ?? null,
+			player1Score,
+			player2Score,
+			winner ?? null
+		);
 
 		request.server.log.info(`Match with ID ${result.lastInsertRowid} added.`);
 		reply.code(201).send({
@@ -326,7 +337,16 @@ async function addMach(
 	} catch (err: any) {
 		request.log.error(err, `Error adding match: ${err.message}`);
 		reply.code(500).send({
-			error: 'Internal server Error'
+			error: 'Internal server Error',
+			data: {
+				matchType,
+				tournamentId,
+				player1,
+				player2,
+				player1Score,
+				player2Score,
+				winner
+			}
 		});
 	}
 }
@@ -412,6 +432,52 @@ async function addResultMatch(
 	}
 }
 
+async function matchInfoByIdTornament(
+	request: FastifyRequest<{ Params: { tournamentId: string } }>,
+	reply: FastifyReply
+){
+	const tournamentId = request.params.tournamentId;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			SELECT 
+				id, 
+				matchType, 
+				tournamentId, 
+				player1, 
+				player2, 
+				player1Score, 
+				player2Score, 
+				winner 
+			FROM 
+				matches 
+			WHERE 
+				tournamentId = ?
+		`);
+
+		const matches = query.all(tournamentId);
+
+		if (matches.length > 0) {
+			reply.send({
+				success: true,
+				message: `Matches for tournament ID ${tournamentId} found`,
+				data: matches
+			});
+		} else {
+			reply.code(404).send({
+				error: `No matches found for tournament ID ${tournamentId}`,
+				sucess: false
+			});
+		}
+	} catch (err) {
+		request.log.error(err, `Error fetching matches for tournament ID ${tournamentId}`);
+		reply.code(500).send({
+			error: 'Internal server Error',
+			success: false
+		});
+	}
+}
+
 /////////////////// ROUTE HANDLERS //////////////////
 
 /* POST */
@@ -422,7 +488,7 @@ app.post('/tournament/register', addTournament);
 app.post('/tournament/winner/:id', addTournament);
 
 // Match
-app.post('/match/register', addMach );
+app.post('/match/register', addMatch );
 app.post('/match/:id/info', addResultMatch);
 
 // Player
@@ -438,7 +504,7 @@ app.get('/tournament/:id/info', tournamentInfoById);
 
 // Match
 app.get('/match/:id/info', matchInfoById);
-// app.get('/match/)
+app.get('/match/:tournamentId/matches', matchInfoByIdTornament);
 
 // Player
 app.get('/player/:id/info', playerInfoById);
