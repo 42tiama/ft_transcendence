@@ -81,8 +81,8 @@ export default class Game {
             const matchPayload : MatchData = {
                 matchType : this.match.matchType,
                 tournamentId : null,
-                // player1 : this.match.player1.id,
-                player1: 1,
+                player1 : this.match.player1.id,
+                // player1: 1,
                 player2: this.match.matchType === 'versus-ai' ? null : this.match.player2!.id,
                 player1Score : this.match.player1Score,
                 player2Score : this.match.player2Score,
