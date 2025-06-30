@@ -1,5 +1,5 @@
 #Step 1: dependencies
-FROM node:22.14 AS deps
+FROM node:22.14-slim AS deps
 
 COPY /src /src
 WORKDIR /src
@@ -7,12 +7,12 @@ WORKDIR /src
 RUN npm install 
 
 #step2: building
-FROM node:22.14 AS builder-profile
+FROM node:22.14-slim AS builder-profile
 COPY --from=deps /src /src
 WORKDIR /src
 RUN npm run build --workspace=backend/profile
 
-FROM node:22.14
+FROM node:22.14-slim
 RUN apt update && apt install vim -y #for development purposes
 WORKDIR /build
 COPY --from=builder-profile /src/build/profile.js .
