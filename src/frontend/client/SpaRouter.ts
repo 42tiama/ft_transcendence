@@ -19,6 +19,7 @@ const API_BASE = 'https://localhost:8044';
 export default class SpaRouter {
   public gameContext: TiamaPong;
   private currentView: AbstractView | null = null;
+  private stopHeartbeats?: () => void;
 
   constructor(gameContext: TiamaPong) {
     this.gameContext = gameContext;
@@ -51,7 +52,8 @@ export default class SpaRouter {
       if (typeof window !== "undefined" && typeof document !== "undefined") {
         this.autoLogoutOnJwtExpiry();
       }
-      this.startHeartbeats();
+      // Start heartbeat, store stop function for later use
+      this.stopHeartbeats = this.startHeartbeats();
     });
   }
 
@@ -79,6 +81,7 @@ export default class SpaRouter {
       if (jwt && !this.isJwtValid(jwt)) {
         localStorage.removeItem('jwt');
         localStorage.removeItem('google_jwt');
+        localStorage.removeItem('userId');
 
         // Redirect to login page (SPA navigation)
         if (window.location.pathname !== '/login') {
@@ -108,7 +111,7 @@ export default class SpaRouter {
       if (jwt && this.isJwtValid(jwt)) {
         const userId = localStorage.getItem('userId');
         if(userId) {
-          const response = fetch(`${API_BASE}/heartbeat/${userId}`, {
+          fetch(`${API_BASE}/heartbeat/${userId}`, {
           	method: 'POST'
           }).catch(err => {
             console.error('Failed to send heartbeat:', err);
@@ -116,14 +119,11 @@ export default class SpaRouter {
         }
       }
     };
-
     // Send one immediately
     sendHeartbeat();
-
     // Set interval to send repeatedly
     const intervalId = window.setInterval(sendHeartbeat, intervalMs);
-
-    // Return a stop function so caller can stop heartbeats
+    // Return a function that stops the interval
     return () => clearInterval(intervalId);
   }
 
@@ -190,6 +190,11 @@ export default class SpaRouter {
     // If not logged in and trying to visit a protected route, redirect to /login
     if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
       history.replaceState({}, '', '/login');
+    }
+
+    // Stop heartbeats if user is not logged in
+    if (!isLoggedIn) {
+      this.stopHeartbeats?.();
     }
 
     const potentialMatches = routes.map(route => {

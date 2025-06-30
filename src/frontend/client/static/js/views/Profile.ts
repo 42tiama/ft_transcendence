@@ -73,6 +73,7 @@ export default class Profile extends AbstractView {
 			logoutBtn.addEventListener('click', () => {
 				localStorage.removeItem('jwt');
 				localStorage.removeItem('google_jwt');
+        		localStorage.removeItem('userId');
 				alert('You have been logged out successfully!');
 				// === SPA Navigation to /login ===
 				window.history.pushState({}, '', '/login');
