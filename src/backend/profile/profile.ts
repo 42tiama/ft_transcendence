@@ -216,6 +216,34 @@ app.get('/friend-list/:userId', async (request: FastifyRequest<{ Params: { userI
 	}
 });
 
+//Deletes a friend
+app.post('/friend-delete', async (request: FastifyRequest<{ Body: {userId: number, friendId: number}}>, reply) => {
+	const { userId, friendId } = request.body;
+	if (!userId || !friendId) {
+		app.log.warn(`Missing fields in register request: ${JSON.stringify(request.body)}`);
+		reply.code(400).send({ error: "Missing required fields." });
+		return;
+	}
+
+	app.log.info(`Received request for user id=${userId} to delete friend id=${friendId}`);
+
+	try {
+		const db = app.betterSqlite3;
+		const deleteFriend = db.prepare(`
+		    DELETE FROM friends
+      		WHERE (userId = ? AND friendId = ?)
+		`);
+		const result = deleteFriend.run(userId, friendId);
+		if (result.changes === 0) {
+  			return reply.code(404).send({ error: "Friendship not found." });
+		}
+ 		reply.code(200).send({ success: true, message: "Friend deleted successfully." });
+	} catch (err: any) {
+		app.log.error('Error deleting friend:', err);
+		reply.code(500).send({ error: "Failed to delete friend." });
+	}
+});
+
 // Get user Match Stat
 //TODO - move to game-service
 app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
@@ -238,7 +266,7 @@ app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string
 		const totalMatches = wins.count + losses.count;
 		if (totalMatches === 0) {
 			app.log.info('No matches found for Match Stat');
-			reply.send({
+			return reply.send({
 				success: true,
 				data: null
 			});

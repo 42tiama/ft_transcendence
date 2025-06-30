@@ -189,6 +189,39 @@ export default class Profile extends AbstractView {
 		// list friends added by user
 		await updateFriendList(userId);
 
+		// add event listener for deleting friends
+		const friendsList = document.getElementById('friends-list');
+		if (friendsList) {
+			friendsList.addEventListener('click', async (e) => {
+				const button = (e.target as HTMLElement).closest('button');
+				if (!button) return;
+
+				const friendCard = button.closest('li');
+				const friendId = friendCard?.dataset.friendId;
+				if (!friendId) return;
+
+				const confirmed = confirm('Remove this friend?');
+				if (!confirmed) return;
+
+				button.disabled = true;
+
+				try {
+					const res = await fetch(`${API_BASE}/friend-delete`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ userId, friendId})
+					});
+
+					if (!res.ok) throw new Error('Failed to delete friend. Try again.');
+					await updateFollowStats(userId);
+					await updateFriendList(userId);
+				} catch (err) {
+					console.error(err);
+					alert('Could not remove friend.');
+					button.disabled = false;
+				}
+			});
+		}
 		return;
 	}
 
@@ -224,8 +257,7 @@ function formatJwtForDisplay(jwt: string | null): string {
 async function getUserProfileById(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/profile-by-id/${userId}`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
+			method: 'GET'
 		});
 
 		if (!response.ok) {
@@ -294,13 +326,13 @@ async function updateFriendList(userId: number) {
 		const response = await fetch(`${API_BASE}/friend-list/${userId}`);
 		const data = await response.json();
 		const friends = data.data as Friend[];
+		const list = document.getElementById('friends-list');
 
-		if (friends) {
-			const list = document.getElementById('friends-list');
-			if (list) {
-				// Clear list first
-				list.innerHTML = '';
+		if (list) {
+			// Clear list first
+			list.innerHTML = '';
 
+			if (friends) {
 				// Create list item for each friend
 				friends.forEach(friend => {
 					const avatar = friend.avatarUrl
@@ -309,9 +341,11 @@ async function updateFriendList(userId: number) {
  					    	${friend.displayName.charAt(0)}
  					   	   </div>`;
 					const li = document.createElement('li');
-					li.className = 'flex items-center gap-3 p-2 bg-gray-700 rounded';
+					li.className = 'relative flex items-center gap-3 p-2 bg-gray-700 rounded';
+					li.dataset.friendId = friend.id.toString();
 
 					li.innerHTML = `
+					    <button class="absolute top-0 right-3 text-red-400 hover:text-red-600 text-lg cursor-pointer" title="Remove friend">&times;</button>
 						${avatar}
 					  	<span class="text-white">${friend.displayName}</span>
 					`;
@@ -334,8 +368,7 @@ async function updateFriendList(userId: number) {
 async function getMatchStat(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match-stat/${userId}`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
+			method: 'GET'
 		});
 
 		const data = await response.json();
@@ -355,8 +388,7 @@ async function getMatchStat(userId: number): Promise<any> {
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match-hist/${userId}`, {
-			method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
+			method: 'GET'
 		});
 
 		const data = await response.json();
