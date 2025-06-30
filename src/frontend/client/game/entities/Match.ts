@@ -1,3 +1,4 @@
+import MatchService from 'services/MatchService';
 import TiamaPong from './TiamaPong';
 import TiamaTournament from './Tournament'
 import User from './User';

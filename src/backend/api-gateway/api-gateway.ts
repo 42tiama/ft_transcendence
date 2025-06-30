@@ -59,20 +59,20 @@ server.get('/', (req: any, reply: any)=> {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://game-service:8045',
-	prefix: '/register-ai-match',
-	rewritePrefix: '/register-ai-match'
+	prefix: '/player/',
+	rewritePrefix: '/player/',
 });
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://game-service:8045',
-	prefix: '/tournament-history',
-	rewritePrefix: '/tournament-history'
+	prefix: '/tournament/',
+	rewritePrefix: '/tournament/'
 });
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://game-service:8045',
-	prefix: '/match-history',
-	rewritePrefix: '/match-history'
+	prefix: '/match/',
+	rewritePrefix: '/match/'
 });
 
 //business logic
