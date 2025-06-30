@@ -1,21 +1,5 @@
 services:
 
-# Serviço de desenvolvimento
-    # dev:
-    #     restart: always
-    #     build:
-    #         context: .
-    #         dockerfile: .devcontainer/Dockerfile
-    #     volumes:
-    #         # - ./docker/dev/scripts:/start
-    #         - ./src:/src
-    #         - ./:/fullbase:cached
-    #         - nvim-data:/home/node/.local
-    #     ports:
-    #         - "8043:8043"
-    #     env_file:
-    #         - .env
-
     api-gateway:
         restart: always
         build:
@@ -44,19 +28,6 @@ services:
         volumes:
             - ./certs/game-service:/build/certs/game-service
             - game-service-data:/data
-
-    # api-game:
-    #     restart: always
-    #     build:
-    #       context: .
-    #       dockerfile: containers/api-game/Dockerfile
-    #     ports:
-    #         - "8045:8045"
-    #     env_file:
-    #         - .env
-    #     volumes:
-    #         - ./certs/api-game:/build/certs/api-game
-    #         - api-game-data:/data
 
     auth:
         restart: always
@@ -94,15 +65,18 @@ services:
             dockerfile: containers/profile/Dockerfile
         volumes:
             - ./certs/profile:/build/certs/profile
+            - ./certs/ca:/build/certs/ca
+            - profile-data:/data
         env_file:
             - .env
+        environment: #in production, overrides value of env var set for development
+            SINGLE_CONTAINER: "false"
 
     elasticsearch:
         restart: always
         build:
             context: ./containers/elk-logs/elasticsearch
             dockerfile: Dockerfile
-        container_name: elasticsearch
         volumes:
             - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
             - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
@@ -127,7 +101,6 @@ services:
         build:
             context: ./containers/elk-logs/logstash
             dockerfile: Dockerfile
-        container_name: logstash
         volumes:
             - ./certs/logstash:/usr/share/logstash/config/certs
             - ./certs/ca:/usr/share/logstash/config/certs/ca
@@ -146,7 +119,6 @@ services:
         build:
             context: ./containers/elk-logs/kibana
             dockerfile: Dockerfile
-        container_name: kibana
         volumes:
             - ./certs/kibana:/usr/share/kibana/config/certs
             - ./certs/ca:/usr/share/kibana/config/certs/ca
@@ -165,7 +137,6 @@ services:
         build:
             context: ./containers/elk-logs/filebeat
             dockerfile: Dockerfile
-        container_name: filebeat
         user: root
         volumes:
             - ./certs/filebeat:/usr/share/filebeat/config/certs
@@ -179,3 +150,4 @@ volumes:
   auth-data:
   elastic-data:
   game-service-data:
+  profile-data:
