@@ -78,6 +78,12 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
+	prefix: '/friend-delete',
+	rewritePrefix: '/friend-delete'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
 	prefix: '/friend-list',
 	rewritePrefix: '/friend-list'
 });
