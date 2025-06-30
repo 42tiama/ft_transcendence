@@ -94,7 +94,7 @@ export default class Game {
                 player2: this.match.matchType === 'versus-ai' ? null : this.match.player2!.id,
                 player1Score : this.match.player1Score,
                 player2Score : this.match.player2Score,
-                winner : this.match.player1Score > this.match.player2Score ? 1 : this.match.matchType === 'versus-ai' ? null : this.match.player2!.id
+                winner : this.match.player1Score > this.match.player2Score ? this.match.player1.id : this.match.matchType === 'versus-ai' ? null : this.match.player2!.id
             };
 
             const match = new MatchService();
