@@ -41,7 +41,6 @@ services:
         env_file:
             - .env
         environment: #in production, overrides value of env var set for development
-          NODE_EXTRA_CA_CERTS: /build/certs/ca/rootCA.pem
           SINGLE_CONTAINER: "false"
 
     client:
