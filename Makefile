@@ -21,7 +21,7 @@ setup:
 	./mkcert -cert-file ./certs/game-service/cert.pem -key-file ./certs/game-service/key.pem localhost game-service
 	./mkcert -cert-file ./certs/auth/cert.pem -key-file ./certs/auth/key.pem localhost auth
 	./mkcert -cert-file ./certs/client/cert.pem -key-file ./certs/client/key.pem localhost
-	./mkcert -cert-file ./certs/profile/cert.pem -key-file ./certs/profile/key.pem localhost
+	./mkcert -cert-file ./certs/profile/cert.pem -key-file ./certs/profile/key.pem localhost profile
 	./mkcert -cert-file ./certs/elasticsearch/cert.pem -key-file ./certs/elasticsearch/key.pem localhost elasticsearch
 	./mkcert -cert-file ./certs/kibana/cert.pem -key-file ./certs/kibana/key.pem localhost kibana
 	./mkcert -cert-file ./certs/logstash/cert.pem -key-file ./certs/logstash/key.pem localhost logstash
@@ -70,7 +70,7 @@ clean:
 
 fclean: clean
 	rm -rf certs
-	rm mkcert
+	rm -f mkcert
 	docker system prune --all --volumes --force
 
 re: fclean
@@ -88,8 +88,8 @@ rebuild-game:
 rebuild-auth:
 	docker compose up --detach --build auth
 
-rebuild-apigame:
-	docker compose up --detach --build game-service
+rebuild-profile:
+	docker compose up --detach --build profile
 
 #clean entire build folder
 bclean:

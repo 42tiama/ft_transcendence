@@ -1,17 +1,23 @@
-#Step 1: build
-FROM node:22.14 AS builder
+#Step 1: dependencies
+FROM node:22.14-slim AS deps
 
 COPY /src /src
 WORKDIR /src
 
-RUN npm install --workspace=backend/api-gateway && npm run build --workspace=backend/api-gateway
+RUN npm install 
 
-FROM node:22.14
+#step2: building
+FROM node:22.14-slim AS builder-api
+COPY --from=deps /src /src
+WORKDIR /src
+RUN npm run build --workspace=backend/api-gateway
+
+FROM node:22.14-slim
 RUN apt update && apt install vim -y #for development purposes
 WORKDIR /build
-COPY --from=builder /src/build/api-gateway.js .
-COPY --from=builder /src/backend/api-gateway/package.json .
-COPY --from=builder /src/node_modules ./node_modules
+COPY --from=builder-api /src/build/api-gateway.js .
+COPY --from=deps /src/backend/api-gateway/package.json .
+COPY --from=deps /src/node_modules ./node_modules
 
 ENTRYPOINT ["node", "api-gateway.js"]
 # CMD sleep infinity

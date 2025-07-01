@@ -32,7 +32,7 @@ if (SINGLE_CONTAINER === 'true'){
 	});
 } else {
 	app.register(fastifyBetterSqlite3, {
-		"pathToDb": './data/profile.db',
+		"pathToDb": '/data/profile.db',
 		"verbose": console.log
 	});
 }
