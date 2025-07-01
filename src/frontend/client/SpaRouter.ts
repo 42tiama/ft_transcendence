@@ -13,9 +13,13 @@ import ChangePass from './static/js/views/ChangePass.js'; // to change the passw
 import GameAi from './static/js/views/GameAi.js'; // to play the game against AI
 import Profile from './static/js/views/Profile.js';
 
+// sets the API base URL to the API gateway for all authentication requests.
+const API_BASE = 'https://localhost:8044';
+
 export default class SpaRouter {
   public gameContext: TiamaPong;
   private currentView: AbstractView | null = null;
+  private stopHeartbeats?: () => void;
 
   constructor(gameContext: TiamaPong) {
     this.gameContext = gameContext;
@@ -75,6 +79,7 @@ export default class SpaRouter {
       if (jwt && !this.isJwtValid(jwt)) {
         localStorage.removeItem('jwt');
         localStorage.removeItem('google_jwt');
+        localStorage.removeItem('userId');
 
         // Redirect to login page (SPA navigation)
         if (window.location.pathname !== '/login') {
@@ -95,6 +100,26 @@ export default class SpaRouter {
         this.hideLinksIfNotLoggedIn();
       }
     }, 1000); // check every second
+  }
+
+  // Call the send heartbeat function in a set interval (default 5 sec)
+  startHeartbeats(intervalMs = 5000) {
+    const sendHeartbeat = () => {
+      const userId = localStorage.getItem('userId');
+      if(userId) {
+        fetch(`${API_BASE}/heartbeat/${userId}`, {
+        	method: 'POST'
+        }).catch(err => {
+          console.error('Failed to send heartbeat:', err);
+        });
+      }
+    };
+    // Send one immediately
+    sendHeartbeat();
+    // Set interval to send repeatedly
+    const intervalId = window.setInterval(sendHeartbeat, intervalMs);
+    // Return a function that stops the interval
+    return () => clearInterval(intervalId);
   }
 
   hideLinksIfNotLoggedIn() {
@@ -160,6 +185,13 @@ export default class SpaRouter {
     // If not logged in and trying to visit a protected route, redirect to /login
     if (!isLoggedIn && window.location.pathname !== '/login' && window.location.pathname !== '/register') {
       history.replaceState({}, '', '/login');
+    }
+
+    if (!isLoggedIn) { // Stop heartbeats if user is not logged in and clears the reference so it can restart later
+      this.stopHeartbeats?.();
+      this.stopHeartbeats = undefined;
+    } else if (!this.stopHeartbeats) { // Restart heartbeat when user relogs (is logged in and not already running)
+      this.stopHeartbeats = this.startHeartbeats();
     }
 
     const potentialMatches = routes.map(route => {

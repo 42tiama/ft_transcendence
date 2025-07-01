@@ -56,8 +56,9 @@ async function handleGoogleCredential(response: any) {
 		const data = await res.json();
 
 		if (res.ok) {
-			// on success: store app’s JWT in localStorage and show a success alert
+			// on success: store app’s JWT and userId in localStorage and show a success alert
 			localStorage.setItem('jwt', data.token);
+			localStorage.setItem('userId', data.id);
 			alert('Google login successful!');
 			// SPA navigation to /home
         	window.history.pushState({}, '', '/');
@@ -199,9 +200,10 @@ export default class Login extends AbstractView {
 						return;
 					}
 
-					// on success: store the JWT in localStorage and alerts success
+					// on success: store the JWT and userId in localStorage and show a success alert
 					if (data.token) {
 						localStorage.setItem('jwt', data.token);
+						localStorage.setItem('userId', data.id);
 						localStorage.removeItem('google_jwt'); // Invalidate previous Google ID token
 					}
 

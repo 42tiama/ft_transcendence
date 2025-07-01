@@ -344,6 +344,7 @@ app.post('/login', async (request: FastifyRequest<{ Body: LoginRequestBody }>, r
 
 		reply.code(200).send({
 			success: true,
+			id: user.id,
 			email: user.email,
 			displayName: user.displayName,
 			token
@@ -566,7 +567,7 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 			displayName: user!.displayName
 		}, { expiresIn: '10h' });
 
-		reply.send({ token, email: user!.email, displayName: user!.displayName });
+		reply.send({ token, id: user!.id, email: user!.email, displayName: user!.displayName });
 	} catch (err) {
 		// handle errors
 		reply.code(500).send({ error: 'Google login failed.' });

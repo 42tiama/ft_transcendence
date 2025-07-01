@@ -1,10 +1,12 @@
 import AbstractView from './AbstractView.js';
 import TiamaPong from '../../../game/entities/TiamaPong.js';
 import { parseJwt } from '../views/Login.js'
-import { resourceLimits } from 'worker_threads';
 
 // sets the API base URL to the API gateway for all authentication requests.
 const API_BASE = 'https://localhost:8044';
+
+// keep track of id to stop periodically updating the friend list
+let friendListIntervalId: number | null = null;
 
 export default class Profile extends AbstractView {
 	constructor() {
@@ -73,6 +75,8 @@ export default class Profile extends AbstractView {
 			logoutBtn.addEventListener('click', () => {
 				localStorage.removeItem('jwt');
 				localStorage.removeItem('google_jwt');
+        		localStorage.removeItem('userId');
+				stopFriendListRefresh();
 				alert('You have been logged out successfully!');
 				// === SPA Navigation to /login ===
 				window.history.pushState({}, '', '/login');
@@ -188,6 +192,7 @@ export default class Profile extends AbstractView {
 
 		// list friends added by user
 		await updateFriendList(userId);
+		startFriendListRefresh(userId);
 
 		// add event listener for deleting friends
 		const friendsList = document.getElementById('friends-list');
@@ -336,34 +341,78 @@ async function updateFriendList(userId: number) {
 			list.innerHTML = '';
 
 			if (friends) {
+				//check if friends updated lastSeen in the last 10 seconds
+				const statuses = await Promise.all(friends.map(friend => getOnlineStatus(friend.id)));
+
 				// Create list item for each friend
-				friends.forEach(friend => {
+				friends.forEach((friend, index) => {
 					const avatar = friend.avatarUrl
 						? `<img src="${friend.avatarUrl}" class="w-8 h-8 rounded-full object-cover" alt="${friend.displayName}">`
 						: `<div class="w-8 h-8 rounded-full bg-white text-gray-700 font-extrabold text-center flex items-center justify-center text-lg">
  					    	${friend.displayName.charAt(0)}
  					   	   </div>`;
+					const isOnline = statuses[index];
+					const statusDot = `<span class="w-2 h-2 rounded-full ${isOnline ? 'bg-green-400' : 'bg-gray-400'}"></span>`;
+					const statusText = `<span class="text-sm ${isOnline ? 'text-green-400' : 'text-gray-400'}">${isOnline ? 'Online' : 'Offline'}</span>`;
+
 					const li = document.createElement('li');
-					li.className = 'relative flex items-center gap-3 p-2 bg-gray-700 rounded';
+					li.className = 'relative flex justify-between p-2 pl-3 pr-3 bg-gray-700 rounded min-h-[48px]';
+
 					li.dataset.friendId = friend.id.toString();
 
 					li.innerHTML = `
-					    <button class="absolute top-0 right-3 text-red-400 hover:text-red-600 text-lg cursor-pointer" title="Remove friend">&times;</button>
-						${avatar}
-					  	<span class="text-white">${friend.displayName}</span>
+						<button class="absolute top-0 right-3 text-red-400 hover:text-red-600 text-lg cursor-pointer" title="Remove friend">&times;</button>
+
+						<!-- Left side: avatar and name, vertically centered -->
+						<div class="flex items-center gap-3">
+							${avatar}
+							<span class="text-white font-medium">${friend.displayName}</span>
+						</div>
+
+						<!-- Right side: status, aligned bottom -->
+						<div class="flex flex-col justify-between items-end ml-auto" style="height: 100%; min-height: 48px;">
+							<div></div> <!-- empty spacer to push status down -->
+							<div class="flex items-center gap-2">
+								${statusDot}
+								${statusText}
+							</div>
+						</div>
 					`;
 
 					list.appendChild(li);
 				});
 			}
-		} else {
-			console.info("User hasn't added any friends.");
 		}
 		return friends;
 	} catch (error) {
 		console.error('Error fetching list of friends:', error);
 		return null;
 	}
+}
+
+async function getOnlineStatus(friendId: number): Promise<any> {
+	try {
+		const response = await fetch(`${API_BASE}/online-status/${friendId}`);
+		const data = await response.json();
+		return data.online;
+	} catch (error) {
+		console.error(`Failed to fetch status for friend ${friendId}`, error);
+		return false;
+	}
+}
+
+// Periodically update the friend list
+function startFriendListRefresh(userId: number, intervalMs = 10000) {
+  friendListIntervalId = window.setInterval(() => {
+    updateFriendList(userId);
+  }, intervalMs);
+}
+
+function stopFriendListRefresh() {
+  if (friendListIntervalId !== null) {
+    clearInterval(friendListIntervalId);
+    friendListIntervalId = null;
+  }
 }
 
 // fetches match stat from game service
