@@ -53,12 +53,12 @@ export default class PlayerSelection extends AbstractView {
             }
           }
         }
-        this.renderPlayerCard();
+        this.renderPlayerCard(this.gameContext);
       }
     }
   }
 
-  renderPlayerCard() {
+  renderPlayerCard(gameContext: TiamaPong | null) {
     const availablePlayersContainer = document.getElementById('available-players')!;
     const selectedPlayersContainer = document.getElementById('selected-players')!;
 
@@ -67,26 +67,28 @@ export default class PlayerSelection extends AbstractView {
 
     // Render each player
     this.availablePlayers.forEach(player => {
-      // Create the main player card div
-      const playerCard = document.createElement('div');
-      playerCard.className = 'min-w-34 min-h-38 player bg-yellow-500 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
-      
-      // Create the avatar div
-      const avatarDiv = document.createElement('div');
-      avatarDiv.className = 'w-14 h-14 text-5xl bg-white text-center font-extrabold bg-red rounded-full mb-2';
-      avatarDiv.innerHTML = player.displayName.charAt(0);
-      
-      // Create the name h3 element
-      const nameH3 = document.createElement('h3');
-      nameH3.className = 'font-bold';
-      nameH3.textContent = player.displayName;
-      
-      // Append avatar and name to the player card
-      playerCard.appendChild(avatarDiv);
-      playerCard.appendChild(nameH3);
-      
-      // Append the player card to the container
-      availablePlayersContainer.appendChild(playerCard);
+      if (player && player.id != gameContext!.sessionUser!.id ) {
+        // Create the main player card div
+        const playerCard = document.createElement('div');
+        playerCard.className = 'min-w-34 min-h-38 player bg-yellow-500 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
+        
+        // Create the avatar div
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'w-14 h-14 text-5xl bg-white text-center font-extrabold bg-red rounded-full mb-2';
+        avatarDiv.innerHTML = player.displayName.charAt(0);
+        
+        // Create the name h3 element
+        const nameH3 = document.createElement('h3');
+        nameH3.className = 'font-bold';
+        nameH3.textContent = player.displayName;
+        
+        // Append avatar and name to the player card
+        playerCard.appendChild(avatarDiv);
+        playerCard.appendChild(nameH3);
+        
+        // Append the player card to the container
+        availablePlayersContainer.appendChild(playerCard);
+      }
     });
 
     this.gameContext!.preTournamentSelection.forEach(player => {
@@ -123,7 +125,7 @@ export default class PlayerSelection extends AbstractView {
     this.gameContext = gameContext;
     this.availablePlayers = [...gameContext.users]; // Iury, Andre, aqui eu chamaria o metodo get pra fazer o fetch dos usuarios do banco, 
     // em vez de fazer isso no TiamaPong e passar por contexto, vai para os bugs na selecao dos players qdo sair da pagina, refresh etc....
-    this.renderPlayerCard();
+    this.renderPlayerCard(gameContext);
   }
 
   async onUnMount() {
