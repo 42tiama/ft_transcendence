@@ -7,21 +7,25 @@
       <section class="bg-[#23272a] rounded-lg shadow p-6 flex-1 relative">
         <h2 class="text-2xl font-bold mb-4">My Profile</h2>
         <div class="flex flex-col md:flex-row gap-6 items-center">
-          <div class="flex flex-col items-center bg-gray-700 p-6 rounded-lg">
-            <img id="avatar-preview" src="/images/TIAMA-logo.png" alt="Avatar"
-              class="w-42 h-42 rounded-full mb-4 border-2 border-white object-cover shadow-lg" />
-            <input type="file" id="avatar-upload" accept="image/*"
-              class="mt-2 text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700" />
+          <div id="card-color-preview" class="flex flex-col items-center bg-gray-700 p-6 rounded-lg">
+            <div id="avatar-preview-container" class="w-42 h-42 rounded-full overflow-hidden mb-4 border-2 border-white shadow-lg flex items-center justify-center bg-white text-gray-700 text-7xl font-extrabold">
+              <!-- avatar will be inserted here -->
+            </div>
           </div>
 
           <form id="update-profile-form" class="flex-1 space-y-3 w-full">
             <div>
-              <label class="block text-sm mb-1">Display Name</label>
+              <label class="block text-sm mb-1 text-gray-300 font-semibold">Display Name:</label>
               <input id="display-name-input" type="text" value="${displayName}"
                 class="w-full p-2 rounded border border-gray-400 bg-gray-100 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400" />
             </div>
             <div>
-              <label class="block text-sm mb-1">Card Color</label>
+              <label class="block text-sm mb-1 text-gray-300 font-semibold">Avatar:</label>
+              <input type="file" id="avatar-upload" accept="image/*"
+                class="text-sm text-white file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:border-white file:bg-amber-500 file:text-white hover:file:bg-amber-600" />
+            </div>
+            <div>
+              <label class="block text-sm mb-1 text-gray-300 font-semibold">Card Color:</label>
               <input id="card-color-input" type="color"
                 class="w-16 h-10 p-1 border border-gray-400 rounded bg-white" />
             </div>
@@ -56,7 +60,7 @@
         <!-- Change password -->
         <div class="mt-6 flex flex-col gap-2">
           <button id="changepass-btn"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition w-full">
+            class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded transition w-full">
             Change Password
           </button>
         </div>

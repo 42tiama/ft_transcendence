@@ -33,42 +33,97 @@ export default class Profile extends AbstractView {
 		// extract userId, JWT and time remaining from payload (assume standard claims)
 		const payload = parseJwt(existingJwt);
 		const userId = payload?.id;
-		console.log(payload);
 
 		// Fetch user profile from database
 		let userProfile = null;
 		if (userId) {
 			userProfile = await getUserProfileById(userId);
 		}
-		console.log(userProfile);
-		// const name = userProfile?.name || payload?.preferred_username || 'N/A';
-		const displayName = userProfile?.display_name;
-		console.log(displayName);
-		// const email = userProfile?.email || 'N/A';
 
-		// Set current avatar (fallback to default)
-		// const avatarImg = document.getElementById('avatar-preview') as HTMLImageElement;
-		// if (avatarImg) {
-		// 	const avatarUrl = userProfile?.avatar_url || 'https://localhost:8044/uploads/avatars/TIAMA-logo.png';
-		// 	avatarImg.src = avatarUrl;
-		// }
+		// Fill out current values
+		const avatarUpload = document.getElementById("avatar-upload") as HTMLInputElement;
+	    const avatarContainer = document.getElementById("avatar-preview-container") as HTMLDivElement;
+		if (avatarUpload && avatarContainer) {
+	    	avatarContainer.innerHTML = ""; // clear previous content
 
-		// // Avatar upload preview and POST
-		// const avatarInput = document.getElementById('avatar-upload') as HTMLInputElement;
-		// trace(avatarInput);
+			//set initial values
+	    	if (userProfile.avatarUrl) {
+	    		const img = document.createElement("img");
+	    		img.src = userProfile.avatarUrl;
+	    		img.className = "w-full h-full object-cover rounded-full";
+	    		avatarContainer.appendChild(img);
+	    	} else {
+	    	  	avatarContainer.textContent = userProfile.displayName.charAt(0);
+	    	}
 
-		// ----ACCOUNT ACTIONS----
-		// add event listener for change password
-		const changepassBtn = document.getElementById('changepass-btn');
-		if (changepassBtn) {
-			changepassBtn.addEventListener('click', () => {
-				// SPA navigation - you may need to trigger your router here
-				window.history.pushState({}, '', '/changepass');
-				// If you have a SPA router, trigger it to load the view
-				window.dispatchEvent(new PopStateEvent('popstate'));
+			avatarUpload?.addEventListener("change", () => {
+				const file = avatarUpload.files?.[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = (e) => {
+					  	avatarContainer.innerHTML = `
+					    	<img src="${e.target?.result}" alt="Avatar Preview"
+					        class="w-full h-full object-contain rounded-full bg-white" />
+					  	`;
+					};
+				reader.readAsDataURL(file);
+				}
 			});
 		}
 
+		const displayName = document.getElementById('display-name-input') as HTMLInputElement;
+		if (displayName) {
+			displayName.value = userProfile.displayName;
+		}
+
+		const cardColorPicker = document.getElementById('card-color-input') as HTMLInputElement;
+		const cardColorPreview = document.getElementById("card-color-preview");
+		if (cardColorPicker && cardColorPreview) {
+			//set initial values
+			cardColorPicker.value = userProfile.cardColor;
+			cardColorPreview.style.backgroundColor = userProfile.cardColor;
+
+			//update card preview when the user picks a new one
+			cardColorPicker.addEventListener("input", (e) => {
+				const newColor = (e.target as HTMLInputElement).value;
+			    cardColorPreview.style.backgroundColor = newColor;
+			});
+		}
+
+		// profile update form input
+		const form = document.getElementById('update-profile-form') as HTMLFormElement;
+		if (!form) return;
+
+		form.addEventListener('submit', async (e) => {
+			// prevent default form submission
+			e.preventDefault();
+
+		});
+
+		// ----SESSION INFO----
+		// Format JWT for 6-line display
+		const jwtDisplay = document.getElementById('jwt-formatted');
+		if (jwtDisplay) {
+			const formattedJwt = formatJwtForDisplay(existingJwt);
+			jwtDisplay.textContent = formattedJwt;
+		}
+
+		// live update the JWT expiration countdown
+		const expiresSpan = document.getElementById('jwt-expires');
+		if (expiresSpan && payload?.exp) {
+			const interval = setInterval(() => {
+				const time = getJwtTimeRemaining(existingJwt);
+				expiresSpan.textContent = time;
+				if (time === "Expired") clearInterval(interval);
+			}, 1000);
+		}
+
+		const jwtEmail = document.getElementById('jwt-email');
+		if (jwtEmail) {
+			jwtEmail.textContent = payload?.email;
+		}
+
+		// ----ACCOUNT ACTIONS----
 		// add event listener for logout
 		const logoutBtn = document.getElementById('logout-btn');
 		if (logoutBtn) {
@@ -80,6 +135,17 @@ export default class Profile extends AbstractView {
 				alert('You have been logged out successfully!');
 				// === SPA Navigation to /login ===
 				window.history.pushState({}, '', '/login');
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			});
+		}
+
+		// add event listener for change password
+		const changepassBtn = document.getElementById('changepass-btn');
+		if (changepassBtn) {
+			changepassBtn.addEventListener('click', () => {
+				// SPA navigation - you may need to trigger your router here
+				window.history.pushState({}, '', '/changepass');
+				// If you have a SPA router, trigger it to load the view
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			});
 		}
@@ -129,29 +195,6 @@ export default class Profile extends AbstractView {
       				matchTable.appendChild(row);
 				});
 			}
-		}
-
-		// ----SESSION INFO----
-		// Format JWT for 6-line display
-		const jwtDisplay = document.getElementById('jwt-formatted');
-		if (jwtDisplay) {
-			const formattedJwt = formatJwtForDisplay(existingJwt);
-			jwtDisplay.textContent = formattedJwt;
-		}
-
-		// live update the JWT expiration countdown
-		const expiresSpan = document.getElementById('jwt-expires');
-		if (expiresSpan && payload?.exp) {
-			const interval = setInterval(() => {
-				const time = getJwtTimeRemaining(existingJwt);
-				expiresSpan.textContent = time;
-				if (time === "Expired") clearInterval(interval);
-			}, 1000);
-		}
-
-		const jwtEmail = document.getElementById('jwt-email');
-		if (jwtEmail) {
-			jwtEmail.textContent = payload?.email;
 		}
 
 		// ----FRIENDS----
@@ -238,6 +281,31 @@ export default class Profile extends AbstractView {
   	}
 }
 
+// fetches user profile data from profile service
+async function getUserProfileById(userId: number): Promise<any> {
+	try {
+		const response = await fetch(`${API_BASE}/profile-by-id/${userId}`, {
+			method: 'GET'
+		});
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		return data.data;
+	} catch (error) {
+		console.error('Error fetching user profile:', error);
+		return null;
+	}
+}
+
+// function to validate display name (max 9 chars, not empty)
+function isValidDisplayName(displayName: string): boolean {
+	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 9;
+}
+
 // returns time remaining (as string) until JWT expiration
 function getJwtTimeRemaining(token: string | null): string {
 	const payload = parseJwt(token);
@@ -259,26 +327,6 @@ function formatJwtForDisplay(jwt: string | null): string {
 		lines.push(jwt.slice(i * partLength, (i + 1) * partLength));
 	}
 	return lines.join('\n');
-}
-
-// fetches user profile data from profile service
-async function getUserProfileById(userId: number): Promise<any> {
-	try {
-		const response = await fetch(`${API_BASE}/profile-by-id/${userId}`, {
-			method: 'GET'
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const data = await response.json();
-		return data.data;
-	} catch (error) {
-		console.error('Error fetching user profile:', error);
-		return null;
-	}
 }
 
 //get follow stats
