@@ -44,7 +44,7 @@ export default class Login extends AbstractView {
 	}
 
 	// check if login JWT is valid
-	isJwtValid(token: string | null): boolean {
+	public isJwtValid(token: string | null): boolean {
 		if (!token) return false;
 		try {
 			const [, payloadB64] = token.split('.');
@@ -262,7 +262,7 @@ export default class Login extends AbstractView {
 		if (GOOGLE_CLIENT_ID) {
 			window.google.accounts.id.initialize({
 				client_id: GOOGLE_CLIENT_ID,
-				callback: this.handleGoogleCredential,
+				callback: this.handleGoogleCredential.bind(this),
 				context: "signin",
 				ux_mode: "popup",
 				login_uri: "http://localhost:8042/",
