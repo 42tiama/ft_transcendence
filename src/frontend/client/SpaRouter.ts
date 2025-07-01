@@ -237,7 +237,7 @@ export default class SpaRouter {
         //after html view rendered
         if (match.route.path === '/login' || match.route.path === '/register'
           || match.route.path === '/changepass' || match.route.path === '/profile') {
-          await view.onMount();
+          await view.onMount(this.gameContext);
         }
         else if (match.route.path === '/game-menu') {
           await view.onMount(this.gameContext);

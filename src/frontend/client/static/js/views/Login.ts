@@ -6,21 +6,6 @@ const API_BASE = 'https://localhost:8044';
 
 let GOOGLE_CLIENT_ID: string | null = null;
 
-// check if login JWT is valid
-function isJwtValid(token: string | null): boolean {
-	if (!token) return false;
-	try {
-		const [, payloadB64] = token.split('.');
-		const payload = JSON.parse(atob(payloadB64));
-		if (!payload || !payload.exp) return false;
-		// JWT expiry is in seconds since epoch
-		const now = Math.floor(Date.now() / 1000);
-		return payload.exp > now;
-	} catch {
-		return false;
-	}
-}
-
 // parse JWT and return its payload or null
 export function parseJwt(token: string | null): any | null {
 	if (!token) return null;
@@ -32,55 +17,16 @@ export function parseJwt(token: string | null): any | null {
 	}
 }
 
-// handles sign-in with Google
-async function handleGoogleCredential(response: any) {
-
-	// prevents login if already logged in
-	const existingJwt = localStorage.getItem('jwt');
-	if (isJwtValid(existingJwt)) {
-		alert('You are already logged in. Please log out first to switch accounts.');
-		return;
-	}
-
-	// receives the Google credential (JWT) from the Google sign-in button
-	const credential = response.credential; // The JWT
-
-	// store the Google ID token in localStorage for later inspection
-	localStorage.setItem('google_jwt', credential);
-
-	try {
-		// send Google credential (JWT) to the backend at /google-login (via API gateway).
-		const res = await fetch(`${API_BASE}/google-login`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ credential }),
-		});
-		const data = await res.json();
-
-		if (res.ok) {
-			// on success: store app’s JWT and userId in localStorage and show a success alert
-			localStorage.setItem('jwt', data.token);
-			localStorage.setItem('userId', data.id);
-			alert('Google login successful!');
-			// SPA navigation to /home
-        	window.history.pushState({}, '', '/');
-        	window.dispatchEvent(new PopStateEvent('popstate'));
-		} else {
-			alert(data.error || 'Google login failed.');
-		}
-	} catch (err) {
-		alert('Connection error.');
-	}
-}
-
 // this make Login a view that can be loaded by SPA router
 export default class Login extends AbstractView {
+	private gameContext: TiamaPong | null = null;
+
 	constructor() {
 		super();
 		// set the page title to "Login" when the view is constructed.
 		this.setTitle('Login');
 	}
-
+	
 	async getHtml(): Promise<string> {
 		try {
 			// fetch the HTML template from build/static/html/login.html
@@ -97,7 +43,66 @@ export default class Login extends AbstractView {
 		}
 	}
 
-	async onMount(gameContext: TiamaPong | null, appElement: Element | null) {
+	// check if login JWT is valid
+	isJwtValid(token: string | null): boolean {
+		if (!token) return false;
+		try {
+			const [, payloadB64] = token.split('.');
+			const payload = JSON.parse(atob(payloadB64));
+			if (!payload || !payload.exp) return false;
+			// JWT expiry is in seconds since epoch
+			const now = Math.floor(Date.now() / 1000);
+			return payload.exp > now;
+		} catch {
+			return false;
+		}
+	}
+	
+	// handles sign-in with Google
+	async handleGoogleCredential(response: any) {
+	
+		// prevents login if already logged in
+		const existingJwt = localStorage.getItem('jwt');
+		if (this.isJwtValid(existingJwt)) {
+			alert('You are already logged in. Please log out first to switch accounts.');
+			return;
+		}
+	
+		// receives the Google credential (JWT) from the Google sign-in button
+		const credential = response.credential; // The JWT
+	
+		// store the Google ID token in localStorage for later inspection
+		localStorage.setItem('google_jwt', credential);
+	
+		try {
+			// send Google credential (JWT) to the backend at /google-login (via API gateway).
+			const res = await fetch(`${API_BASE}/google-login`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ credential }),
+			});
+			const data = await res.json();
+	
+			if (res.ok) {
+				// on success: store app’s JWT and userId in localStorage and show a success alert
+				localStorage.setItem('jwt', data.token);
+				localStorage.setItem('userId', data.id);
+				this.gameContext!.sessionUser = await this.gameContext!.gameServices.user!.getPlayerById(data.id);
+				this.gameContext?.loadUsers();
+				alert('Google login successful!');
+				// SPA navigation to /home
+				window.history.pushState({}, '', '/');
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			} else {
+				alert(data.error || 'Google login failed.');
+			}
+		} catch (err) {
+			alert('Connection error.');
+		}
+	}
+	
+	async onMount(gameContext: TiamaPong, appElement: Element | null) {
+		this.gameContext = gameContext;
 
 		// add 2FA toggle if not present in the HTML template
 		let twofaToggle = document.getElementById('use2fa-login') as HTMLInputElement | null;
@@ -155,7 +160,7 @@ export default class Login extends AbstractView {
 
 				// prevents new login if already logged in
 				const existingJwt = localStorage.getItem('jwt');
-				if (isJwtValid(existingJwt)) {
+				if (this.isJwtValid(existingJwt)) {
 					alert('You are already logged in. Please log out first to switch accounts.');
 					e.preventDefault();
 					return;
@@ -206,6 +211,8 @@ export default class Login extends AbstractView {
 					if (data.token) {
 						localStorage.setItem('jwt', data.token);
 						localStorage.setItem('userId', data.id);
+						gameContext.sessionUser = await gameContext.gameServices.user!.getPlayerById(data.id);
+						gameContext?.loadUsers();
 						localStorage.removeItem('google_jwt'); // Invalidate previous Google ID token
 					}
 
@@ -255,7 +262,7 @@ export default class Login extends AbstractView {
 		if (GOOGLE_CLIENT_ID) {
 			window.google.accounts.id.initialize({
 				client_id: GOOGLE_CLIENT_ID,
-				callback: handleGoogleCredential,
+				callback: this.handleGoogleCredential,
 				context: "signin",
 				ux_mode: "popup",
 				login_uri: "http://localhost:8042/",
