@@ -109,11 +109,11 @@ export default class Tournament {
     nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
   }
 
-  private async renderFreezeTimeModalInfo(appElement: Element): Promise<void> {
+  private async renderFreezeTimeModalInfo(appElement: Element, currentMatch: Match): Promise<void> {
     const displayNameP1 = appElement.querySelector('#player1')!;
     const displayNameP2 = appElement.querySelector('#player2')!;
-    displayNameP1.textContent = this.currentRound[0].player1.displayName;
-    displayNameP2.textContent = this.currentRound[0].player2!.displayName;
+    displayNameP1.textContent = currentMatch.player1.displayName;
+    displayNameP2.textContent = currentMatch.player2!.displayName;
 
     const startButton = appElement.querySelector('#start-button')! as HTMLButtonElement;
     const modal = appElement.querySelector('#freeze-time-modal')! as HTMLElement;
@@ -154,7 +154,7 @@ export default class Tournament {
 
   private async renderTournamentInfo(appElement: Element, currentMatch: Match, nextMatch: Match | null) {
     this.renderPageInfo(appElement, currentMatch, nextMatch);
-    await this.renderFreezeTimeModalInfo(appElement);
+    await this.renderFreezeTimeModalInfo(appElement, currentMatch);
   }
 
   private async renderMatchWinner(appElement: Element, match: Match): Promise<void> {

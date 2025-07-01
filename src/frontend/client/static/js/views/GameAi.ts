@@ -40,7 +40,7 @@ export default class GameAi extends AbstractView {
           this.showElement('start', false);
           this.onClickDifficultyButton(gameContext);
         }
-      });
+      }, { once: true});
     }
   }
 
@@ -81,12 +81,13 @@ export default class GameAi extends AbstractView {
 			      const payload = parseJwt(existingJwt);
 			      const id = payload.id;
 
+            // aqui vai precisar consultar os dados do usuario pelo id antes de instanciar o terminatorX
             const terminatorX = new User(gameContext, id, 'TerminatorX', 'terminatorX@uol.com.br')
 
             this.game = new Game(new Match('versus-ai', null, terminatorX, null), 'board');
             this.game.setSelectedDifficulty(this.selectedDifficulty);
             this.renderGame(gameContext);
-          });
+          }, { once: true });
         }
       });
     }
@@ -128,5 +129,9 @@ export default class GameAi extends AbstractView {
 
   async beforeMount(gameContext: TiamaPong): Promise<boolean> {
     return true;
+  }
+
+  async onUnMount() {
+    this.game?.cancelGame();
   }
 }

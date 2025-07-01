@@ -14,4 +14,6 @@ export default abstract class AbstractView {
   abstract beforeMount(gameContext: TiamaPong | null): Promise<boolean> 
 
   abstract onMount(gameContext: TiamaPong | null, appElement: Element | null): Promise<void> 
+  
+  abstract onUnMount(): Promise<void>
 }

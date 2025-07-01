@@ -125,4 +125,7 @@ export default class ChangePass extends AbstractView {
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
 		return true;
 	}
+
+	async onUnMount() {
+  	}
 }
