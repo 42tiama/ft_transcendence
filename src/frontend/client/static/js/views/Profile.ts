@@ -132,7 +132,7 @@ export default class Profile extends AbstractView {
 		}
 
 		// ----SESSION INFO----
-		// Format JWT for 3-line display
+		// Format JWT for 6-line display
 		const jwtDisplay = document.getElementById('jwt-formatted');
 		if (jwtDisplay) {
 			const formattedJwt = formatJwtForDisplay(existingJwt);
@@ -250,12 +250,12 @@ function getJwtTimeRemaining(token: string | null): string {
 	return `${min}m ${sec}s`;
 }
 
-// breaks a long JWT string into 3 lines
+// breaks a long JWT string into 6 lines
 function formatJwtForDisplay(jwt: string | null): string {
 	if (!jwt) return "";
-	const partLength = Math.ceil(jwt.length / 3);
+	const partLength = Math.ceil(jwt.length / 6);
 	const lines = [];
-	for (let i = 0; i < 3; i++) {
+	for (let i = 0; i < 6; i++) {
 		lines.push(jwt.slice(i * partLength, (i + 1) * partLength));
 	}
 	return lines.join('\n');
@@ -356,7 +356,7 @@ async function updateFriendList(userId: number) {
 					const statusText = `<span class="text-sm ${isOnline ? 'text-green-400' : 'text-gray-400'}">${isOnline ? 'Online' : 'Offline'}</span>`;
 
 					const li = document.createElement('li');
-					li.className = 'relative flex justify-between p-2 pl-3 pr-3 bg-gray-700 rounded min-h-[48px]';
+					li.className = 'relative flex justify-between p-2 pl-3 pr-3 bg-gray-700 rounded min-h-[42px]';
 
 					li.dataset.friendId = friend.id.toString();
 
@@ -370,7 +370,7 @@ async function updateFriendList(userId: number) {
 						</div>
 
 						<!-- Right side: status, aligned bottom -->
-						<div class="flex flex-col justify-between items-end ml-auto" style="height: 100%; min-height: 48px;">
+						<div class="flex flex-col justify-between items-end ml-auto" style="height: 100%; min-height: 42px;">
 							<div></div> <!-- empty spacer to push status down -->
 							<div class="flex items-center gap-2">
 								${statusDot}
