@@ -7,6 +7,7 @@ import dotenv from 'dotenv'; // loads environment variables from .env
 dotenv.config();
 
 const SINGLE_CONTAINER = process.env.SINGLE_CONTAINER;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 const httpsOptions = {
 	key: readFileSync("certs/client/key.pem"),
@@ -16,6 +17,13 @@ const httpsOptions = {
 const server = fastify({
 	logger: true,
 	https: httpsOptions
+});
+
+// Expose GOOGLE_CLIENT_ID to frontend
+server.get('/gocorinthians', (request, reply) => {
+	reply.send({
+		GOOGLE_CLIENT_ID
+	});
 });
 
 if (SINGLE_CONTAINER === 'true'){
