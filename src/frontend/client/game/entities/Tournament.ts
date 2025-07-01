@@ -117,7 +117,7 @@ export default class Tournament {
 
     const startButton = appElement.querySelector('#start-button')! as HTMLButtonElement;
     const modal = appElement.querySelector('#freeze-time-modal')! as HTMLElement;
-    let countDown: number = 3;
+    let countDown: number = 1;
 
     if (modal.classList.contains('hidden')) {
       modal.classList.replace('hidden', 'flex');
@@ -147,7 +147,7 @@ export default class Tournament {
             countDown--;
           }, 1000);
         };
-        startButton.addEventListener('click', clickHandler);
+        startButton.addEventListener('click', clickHandler, { once: true });
       });
     };
   }
@@ -169,7 +169,7 @@ export default class Tournament {
       nextMatchButton.addEventListener('click', (event: MouseEvent) => {
         matchWinnerModal.classList.replace('flex', 'hidden');
         resolve();
-      })
+      }, { once: true })
     })
   }
 
@@ -185,7 +185,7 @@ export default class Tournament {
       transcendButton.addEventListener('click', (event: MouseEvent) => {
         championModal.classList.replace('flex', 'hidden');
         resolve();
-      })
+      }, { once: true })
     })
   }
 

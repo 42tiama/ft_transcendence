@@ -5,6 +5,7 @@ import User from '../../../game/entities/User.js';
 export default class VersusPlayerSelection extends AbstractView {
   
     private availablePlayers: User[] = [];
+    private boundPlayerSelection: (e: MouseEvent) => void = () => {};
 
   constructor() {
     super();
@@ -74,8 +75,9 @@ export default class VersusPlayerSelection extends AbstractView {
 
   async onMount(gameContext: TiamaPong, appElement: Element | null) {
     this.availablePlayers = gameContext!.users; // Iury, Andre, aqui também precisar chamar o metodo get que faz o fetch dos users
-    const availablePlayers = document.getElementById('available-players');
-    availablePlayers!.addEventListener("click", (e: MouseEvent) => this.playerSelection(e, gameContext));
+    this.boundPlayerSelection = (e: MouseEvent) => this.playerSelection(e, gameContext);
+    const availablePlayersContainer = document.getElementById('available-players');
+    availablePlayersContainer!.addEventListener("click", (e: MouseEvent) => this.playerSelection(e, gameContext));
     this.renderPlayerCard();
   }
 
@@ -84,6 +86,6 @@ export default class VersusPlayerSelection extends AbstractView {
   }
 
   async onUnMount() {
+    document.getElementById('available-players')?.removeEventListener("click", this.boundPlayerSelection);
   }
-  
 }
