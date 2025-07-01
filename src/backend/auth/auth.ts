@@ -558,6 +558,8 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 				}
 			}
 
+			// fetch the newly inserted user
+			user = app.betterSqlite3.prepare('SELECT * FROM users WHERE email = ?').get(email) as User;
 		}
 
 		// issue app JWT (expires in 10 hours), returns with user info.
