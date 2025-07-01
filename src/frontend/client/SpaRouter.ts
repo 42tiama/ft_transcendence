@@ -52,8 +52,6 @@ export default class SpaRouter {
       if (typeof window !== "undefined" && typeof document !== "undefined") {
         this.autoLogoutOnJwtExpiry();
       }
-      // Start heartbeat, store stop function for later use
-      this.stopHeartbeats = this.startHeartbeats();
     });
   }
 
@@ -107,16 +105,13 @@ export default class SpaRouter {
   // Call the send heartbeat function in a set interval (default 5 sec)
   startHeartbeats(intervalMs = 5000) {
     const sendHeartbeat = () => {
-      const jwt = localStorage.getItem('jwt');
-      if (jwt && this.isJwtValid(jwt)) {
-        const userId = localStorage.getItem('userId');
-        if(userId) {
-          fetch(`${API_BASE}/heartbeat/${userId}`, {
-          	method: 'POST'
-          }).catch(err => {
-            console.error('Failed to send heartbeat:', err);
-          });
-        }
+      const userId = localStorage.getItem('userId');
+      if(userId) {
+        fetch(`${API_BASE}/heartbeat/${userId}`, {
+        	method: 'POST'
+        }).catch(err => {
+          console.error('Failed to send heartbeat:', err);
+        });
       }
     };
     // Send one immediately
@@ -192,9 +187,11 @@ export default class SpaRouter {
       history.replaceState({}, '', '/login');
     }
 
-    // Stop heartbeats if user is not logged in
-    if (!isLoggedIn) {
+    if (!isLoggedIn) { // Stop heartbeats if user is not logged in and clears the reference so it can restart later
       this.stopHeartbeats?.();
+      this.stopHeartbeats = undefined;
+    } else if (!this.stopHeartbeats) { // Restart heartbeat when user relogs (is logged in and not already running)
+      this.stopHeartbeats = this.startHeartbeats();
     }
 
     const potentialMatches = routes.map(route => {

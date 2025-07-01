@@ -287,18 +287,22 @@ app.get('/online-status/:userId', async (request: FastifyRequest<{ Params: { use
 	try {
 		const db = app.betterSqlite3;
 		const stmt = db.prepare(`
-			SELECT lastSeen >= DATETIME('now', '-10 seconds') AS isOnline
-			FROM users
-			WHERE id = ?
+  		    SELECT CASE
+  		        WHEN lastSeen IS NOT NULL
+  		         AND lastSeen >= DATETIME('now', '-10 seconds')
+  		        THEN 1
+  		        ELSE 0
+  		      END AS onlineStatus
+  		    FROM users
+  		    WHERE id = ?
 		`);
 
-		const result = stmt.get(userId) as {isOnline : boolean};
-
+		const result = stmt.get(userId) as {onlineStatus: number};
 		if (!result) {
 			return reply.code(404).send({ error: "User not found." });
 		}
-
-		reply.send({ userId, online: result.isOnline });
+		const isOnline = result.onlineStatus === 1? true : false;
+		reply.send({ online: isOnline });
 	} catch (err) {
 	  app.log.error('Error checking online status:', err);
 	  reply.code(500).send({ error: "Failed to check online status." });
