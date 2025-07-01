@@ -77,7 +77,6 @@ interface ChangePassRequestBody {
 	currentPassword: string;
 	totp?: string;
 	newPassword?: string;
-	newDisplayName?: string;
 }
 
 // user interface: DB user row type.
@@ -357,10 +356,10 @@ app.post('/login', async (request: FastifyRequest<{ Body: LoginRequestBody }>, r
 
 // --- POST /changepass ---
 app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequestBody }>, reply) => {
-	const { email, currentPassword, totp, newPassword, newDisplayName } = request.body;
+	const { email, currentPassword, totp, newPassword } = request.body;
 
 	// validate inputs
-	if (!email || !currentPassword || (!newPassword && !newDisplayName)) {
+	if (!email || !currentPassword || !newPassword) {
 		reply.code(400).send({ error: "Missing required fields: email, current password, and at least one of new password or new display name." });
 		return;
 	}
@@ -374,12 +373,6 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 	// validate password format
 	if (newPassword && !isValidPassword(newPassword)) {
 		reply.code(400).send({ error: "Password too weak. Must be 8+ chars, include upper and lower case, number, special char." });
-		return;
-	}
-
-	// validate displayName format
-	if (newDisplayName && !isValidDisplayName(newDisplayName)) {
-		reply.code(400).send({ error: "Display Name must be 1 to 9 characters." });
 		return;
 	}
 
@@ -431,15 +424,6 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 		}
 	}
 
-	// if changing display name: check for duplicates
-	if (newDisplayName) {
-		const otherUser = db.prepare(`SELECT 1 FROM users WHERE displayName = ? AND email != ?`).get(newDisplayName, email);
-		if (otherUser) {
-			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
-			return;
-		}
-	}
-
 	// build update statement
 	const updates: string[] = [];
 	const params: any[] = [];
@@ -447,10 +431,6 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 		const hashedPassword = await bcrypt.hash(newPassword, 10);
 		updates.push("password = ?");
 		params.push(hashedPassword);
-	}
-	if (newDisplayName) {
-		updates.push("displayName = ?");
-		params.push(newDisplayName);
 	}
 	params.push(email);
 
@@ -463,21 +443,9 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 	try {
 		db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE email = ?`).run(...params);
 
-		// return new JWT if display name changed
-		let newToken: string | undefined = undefined;
-		if (newDisplayName) {
-			const updatedUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as User;
-			newToken = app.jwt.sign({
-				id: updatedUser.id,
-				email: updatedUser.email,
-				displayName: updatedUser.displayName,
-			}, { expiresIn: '12h' });
-		}
-
 		reply.code(200).send({
 			success: true,
 			message: "Change successful.",
-			token: newToken // will be undefined if only password changed
 		});
 	} catch (err: any) {
 		let message = err.message;
@@ -575,21 +543,6 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 		reply.code(500).send({ error: 'Google login failed.' });
 	}
 });
-
-// // --- GET /token (Protected Route) ---
-// app.get('/token', { preValidation: [app.authenticate] }, async (request, reply) => {
-// 	// Extracts JWT from Authorization header
-// 	const authHeader = request.headers['authorization'] || request.headers['Authorization'];
-// 	let jwt = '';
-// 	if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
-// 		jwt = authHeader.substring(7);
-// 	}
-// 	reply.send({
-// 		jwt,                 // the raw JWT
-// 		json: request.user,  // the decoded JWT payload
-// 		status: 'ok'
-// 	});
-// });
 
 // health check
 app.get('/', (request, reply) => {
