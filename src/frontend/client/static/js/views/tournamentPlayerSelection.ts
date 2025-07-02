@@ -126,8 +126,8 @@ export default class PlayerSelection extends AbstractView {
     window.addEventListener("beforeunload", this.boundBeforeUnload);
     const userId = localStorage.getItem('userId');
     this.gameContext = gameContext;
-    this.availablePlayers = [...await gameContext.gameServices.user!.getAllPlayers()];
-    gameContext.sessionUser = await gameContext.gameServices.user!.getPlayerById(parseInt(userId!));
+    this.availablePlayers = [...await gameContext.gameServices.player!.getAllPlayers()];
+    gameContext.sessionUser = await gameContext.gameServices.player!.getPlayerById(parseInt(userId!));
     if (!gameContext.preTournamentSelection.find(id => id.id === gameContext.sessionUser!.id)) {
       gameContext.preTournamentSelection.push(gameContext.sessionUser!);
     }

@@ -77,8 +77,8 @@ export default class VersusPlayerSelection extends AbstractView {
 
   async onMount(gameContext: TiamaPong, appElement: Element | null) {
     const userId = localStorage.getItem('userId');
-    this.availablePlayers = [...await gameContext.gameServices.user!.getAllPlayers()];
-    gameContext.sessionUser = await gameContext.gameServices.user!.getPlayerById(parseInt(userId!));
+    this.availablePlayers = [...await gameContext.gameServices.player!.getAllPlayers()];
+    gameContext.sessionUser = await gameContext.gameServices.player!.getPlayerById(parseInt(userId!));
     this.boundPlayerSelection = (e: MouseEvent) => this.playerSelection(e, gameContext);
     const availablePlayersContainer = document.getElementById('available-players');
     availablePlayersContainer!.addEventListener("click", (e: MouseEvent) => this.playerSelection(e, gameContext));

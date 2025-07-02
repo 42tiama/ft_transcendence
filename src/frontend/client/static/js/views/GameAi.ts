@@ -4,13 +4,14 @@ import TiamaPong from "../../../game/entities/TiamaPong";
 import Match from '../../../game/entities/Match.js';
 import User from '../../../game/entities/User.js';
 import { parseJwt } from '../views/Login.js'
-import TournamentService from '../../../services/TournamentService.js';
+import PlayerService from '../../../services/PlayerService.js';
+import { PlayerData } from '../../../services/types.js';
 
 export default class GameAi extends AbstractView {
 
   private selectedDifficulty: number = 0.5;
   private game: Game | null = null;
-  private tournamentId: number | null = null;
+  private user?: PlayerData;
 
   constructor() {
     super();
@@ -69,23 +70,12 @@ export default class GameAi extends AbstractView {
         const diffButton = document.getElementById(diff.id);
 
         if (diffButton) {
-          diffButton.addEventListener('click', () => {
+          diffButton.addEventListener('click', async () => {
             this.showElement('difficulty-group', false);
             this.showElement('difficulty-container', false);
             this.showElement('board');
 
             this.selectedDifficulty = diff.value;
-
-			      //get id from jwt
-			      const existingJwt = localStorage.getItem('jwt');
-			      const payload = parseJwt(existingJwt);
-			      const id = payload.id;
-
-            // aqui vai precisar consultar os dados do usuario pelo id antes de instanciar o terminatorX
-            const terminatorX = new User(gameContext, id, 'TerminatorX', 'terminatorX@uol.com.br')
-
-            this.game = new Game(new Match('versus-ai', null, terminatorX, null), 'board');
-            this.game.setSelectedDifficulty(this.selectedDifficulty);
             this.renderGame(gameContext);
           }, { once: true });
         }
@@ -105,11 +95,6 @@ export default class GameAi extends AbstractView {
 	
 
   async onMount(gameContext: TiamaPong) {
-  // this.tournamentId = await TournamentService.createTournament();
-  // if (this.tournamentId) {
-  // 	const info = await TournamentService.getTournamentsById(this.tournamentId);
-	// console.log(`Tournament info: ${JSON.stringify(info)}`);
-  // }
     this.showElement('ai-player', false);
     this.showElement('human-player', false);
     this.showElement('difficulty-group', false);
@@ -120,6 +105,9 @@ export default class GameAi extends AbstractView {
 
   async renderGame(gameContext: TiamaPong) {
     try {
+      this.user = new User(gameContext, gameContext.sessionUser!.id, gameContext.sessionUser!.displayName, "");
+      this.game = new Game(new Match('versus-ai', null, this.user, null), 'board');
+      this.game.setSelectedDifficulty(this.selectedDifficulty);
       await this.game!.startMatch(this.game!.match);
       await this.showAfterMatchModal();
     } catch (error) {

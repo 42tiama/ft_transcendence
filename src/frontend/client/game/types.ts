@@ -49,6 +49,7 @@ export interface Tournament {
 }
 
 export interface TournamentInfo {
+    tournamentId?: number;
     totalPlayers: number;
     totalMatches: number;
     winner: User | null;
@@ -74,7 +75,7 @@ export interface ApiResponse<T> {
 }
 
 export interface GameServices {
-    user: PlayerService;
+    player: PlayerService;
     tournament: TournamentService;
     match: MatchService;
 }
