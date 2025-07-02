@@ -213,7 +213,7 @@ export default class SpaRouter {
     try {
       const view = new match.route.view() as any;
 
-      //validate phase
+      //validation phase
       if (match.route.path === '/tournament' && !(await view.beforeMount(this.gameContext))) {
         return false;
       }
@@ -222,7 +222,7 @@ export default class SpaRouter {
       }
 
       if (this.currentView && typeof this.currentView.onUnMount === 'function') {
-        this.currentView.onUnMount();
+        this.currentView.onUnMount(this.gameContext);
       }
 
       this.currentView = view;
@@ -237,7 +237,7 @@ export default class SpaRouter {
         //after html view rendered
         if (match.route.path === '/login' || match.route.path === '/register'
           || match.route.path === '/changepass' || match.route.path === '/profile') {
-          await view.onMount();
+          await view.onMount(this.gameContext);
         }
         else if (match.route.path === '/game-menu') {
           await view.onMount(this.gameContext);

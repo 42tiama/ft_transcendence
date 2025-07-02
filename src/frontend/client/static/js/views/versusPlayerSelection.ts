@@ -5,6 +5,7 @@ import User from '../../../game/entities/User.js';
 export default class VersusPlayerSelection extends AbstractView {
   
     private availablePlayers: User[] = [];
+    private boundPlayerSelection: (e: MouseEvent) => void = () => {};
 
   constructor() {
     super();
@@ -48,35 +49,40 @@ export default class VersusPlayerSelection extends AbstractView {
     }
   }
 
-  renderPlayerCard() {
+  renderPlayerCard(gameContext: TiamaPong) {
     const availablePlayersContainer = document.getElementById('available-players')!;
 
     availablePlayersContainer.innerHTML = '';
 
     this.availablePlayers.forEach(player => {
-      const playerCard = document.createElement('div');
-      playerCard.className = 'player bg-yellow-500 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
-      
-      const avatarDiv = document.createElement('div');
-      avatarDiv.className = 'w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-2';
-      avatarDiv.innerHTML = player.displayName.charAt(0);
-      
-      const nameH3 = document.createElement('h3');
-      nameH3.className = 'font-bold';
-      nameH3.textContent = player.displayName;
-      
-      playerCard.appendChild(avatarDiv);
-      playerCard.appendChild(nameH3);
-      
-      availablePlayersContainer.appendChild(playerCard);
+      if (player && player.id != gameContext.sessionUser?.id) {
+        const playerCard = document.createElement('div');
+        playerCard.className = 'player bg-yellow-500 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
+        
+        const avatarDiv = document.createElement('div');
+        avatarDiv.className = 'w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-2';
+        avatarDiv.innerHTML = player.displayName.charAt(0);
+        
+        const nameH3 = document.createElement('h3');
+        nameH3.className = 'font-bold';
+        nameH3.textContent = player.displayName;
+        
+        playerCard.appendChild(avatarDiv);
+        playerCard.appendChild(nameH3);
+        
+        availablePlayersContainer.appendChild(playerCard);
+      }
     });
   }
 
   async onMount(gameContext: TiamaPong, appElement: Element | null) {
-    this.availablePlayers = gameContext!.users; // Iury, Andre, aqui também precisar chamar o metodo get que faz o fetch dos users
-    const availablePlayers = document.getElementById('available-players');
-    availablePlayers!.addEventListener("click", (e: MouseEvent) => this.playerSelection(e, gameContext));
-    this.renderPlayerCard();
+    const userId = localStorage.getItem('userId');
+    this.availablePlayers = [...await gameContext.gameServices.user!.getAllPlayers()];
+    gameContext.sessionUser = await gameContext.gameServices.user!.getPlayerById(parseInt(userId!));
+    this.boundPlayerSelection = (e: MouseEvent) => this.playerSelection(e, gameContext);
+    const availablePlayersContainer = document.getElementById('available-players');
+    availablePlayersContainer!.addEventListener("click", (e: MouseEvent) => this.playerSelection(e, gameContext));
+    this.renderPlayerCard(gameContext);
   }
 
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
@@ -84,6 +90,6 @@ export default class VersusPlayerSelection extends AbstractView {
   }
 
   async onUnMount() {
+    document.getElementById('available-players')?.removeEventListener("click", this.boundPlayerSelection);
   }
-  
 }

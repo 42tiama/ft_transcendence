@@ -13,20 +13,19 @@ export default class TiamaPong {
     public users: User[] = [];
     public preTournamentSelection: User[] = [];
     public preVersusSelection: User | null = null;
-    public sessionUser: User;
+    public sessionUser: User | null = null;
     public gameServices: Partial<GameServices> = { user: undefined };
 
     constructor() {
         this.initGameServices();
         this.loadUsers();
-        this.sessionUser = new User(this, 42, 'DevUser', 'devuser@dev.com');
     }
 
     private initGameServices() {
         this.gameServices.user = new PlayerService;
     }
 
-    private async loadUsers() {
+    public async loadUsers() {
         this.users = await this.gameServices.user!.getAllPlayers();
     }
 

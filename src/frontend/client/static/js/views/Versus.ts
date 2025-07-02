@@ -7,7 +7,7 @@ export default class Versus extends AbstractView {
   private game: Game | null = null;
 
   constructor() {
-    super();
+    super(); 
     this.setTitle('Versus');
   }
 
@@ -64,7 +64,7 @@ export default class Versus extends AbstractView {
 
     const startButton = document.querySelector('#start-button')! as HTMLButtonElement;
     const modal = document.querySelector('#freeze-time-modal')! as HTMLElement;
-    let countDown: number = 3;
+    let countDown: number = 1;
 
     if (modal.classList.contains('hidden')) {
       modal.classList.replace('hidden', 'flex');
@@ -94,7 +94,7 @@ export default class Versus extends AbstractView {
             countDown--;
           }, 1000);
         };
-        startButton.addEventListener('click', clickHandler);
+        startButton.addEventListener('click', clickHandler, { once: true });
       });
     };
   }
@@ -116,13 +116,13 @@ export default class Versus extends AbstractView {
       reMatchButton.addEventListener('click', (event: MouseEvent) => {
         matchWinnerModal.classList.replace('flex', 'hidden');
         resolve(true);
-      })
+      }, { once: true })
     })
   }
 
   async runPvp(gameContext: TiamaPong): Promise<void> {
     let isRunning = true;
-    let currentMatch = new Match('versus-player', null, gameContext.sessionUser, gameContext.preVersusSelection);
+    let currentMatch = new Match('versus-player', null, gameContext.sessionUser!, gameContext.preVersusSelection);
     
     while (isRunning) {
       await this.renderPvpInfo(currentMatch);
@@ -132,7 +132,7 @@ export default class Versus extends AbstractView {
       let retry = await this.renderMatchWinner(currentMatch);
       if (!retry)
         isRunning = false;
-      currentMatch = new Match('versus-player', null, gameContext.sessionUser, gameContext.preVersusSelection);
+      currentMatch = new Match('versus-player', null, gameContext.sessionUser!, gameContext.preVersusSelection);
     }
   }
 
@@ -141,6 +141,7 @@ export default class Versus extends AbstractView {
   }
 
   async onUnMount() {
+    this.game?.cancelGame();
   }
   
 }
