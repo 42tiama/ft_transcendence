@@ -33,35 +33,25 @@ export default class Profile extends AbstractView {
 		// extract userId, JWT and time remaining from payload (assume standard claims)
 		const payload = parseJwt(existingJwt);
 		const userId = payload?.id;
-
-		// Fetch user profile from database
-		let userProfile = null;
-		if (userId) {
-			userProfile = await getUserProfileById(userId);
+		if (!userId) {
+			console.warn("No userId found in JWT payload.");
+			window.location.href = "/login";
+			return;
 		}
 
-		// Fill out current values
+		// Update current profile avatar, display name and card color from database
+		await loadProfile(userId);
+
+		//update avatar preview when the user picks a new one
 		const avatarUpload = document.getElementById("avatar-upload") as HTMLInputElement;
-	    const avatarContainer = document.getElementById("avatar-preview-container") as HTMLDivElement;
-		if (avatarUpload && avatarContainer) {
-	    	avatarContainer.innerHTML = ""; // clear previous content
-
-			//set initial values
-	    	if (userProfile.avatarUrl) {
-	    		const img = document.createElement("img");
-	    		img.src = userProfile.avatarUrl;
-	    		img.className = "w-full h-full object-cover rounded-full";
-	    		avatarContainer.appendChild(img);
-	    	} else {
-	    	  	avatarContainer.textContent = userProfile.displayName.charAt(0);
-	    	}
-
+	    const avatarPreviewContainer = document.getElementById("avatar-preview-container") as HTMLDivElement;
+		if (avatarUpload && avatarPreviewContainer) {
 			avatarUpload?.addEventListener("change", () => {
 				const file = avatarUpload.files?.[0];
 				if (file) {
 					const reader = new FileReader();
 					reader.onload = (e) => {
-					  	avatarContainer.innerHTML = `
+					  	avatarPreviewContainer.innerHTML = `
 					    	<img src="${e.target?.result}" alt="Avatar Preview"
 					        class="w-full h-full object-contain rounded-full bg-white" />
 					  	`;
@@ -71,19 +61,10 @@ export default class Profile extends AbstractView {
 			});
 		}
 
-		const displayName = document.getElementById('display-name-input') as HTMLInputElement;
-		if (displayName) {
-			displayName.value = userProfile.displayName;
-		}
-
+		//update card preview when the user picks a new one
 		const cardColorPicker = document.getElementById('card-color-input') as HTMLInputElement;
 		const cardColorPreview = document.getElementById("card-color-preview");
 		if (cardColorPicker && cardColorPreview) {
-			//set initial values
-			cardColorPicker.value = userProfile.cardColor;
-			cardColorPreview.style.backgroundColor = userProfile.cardColor;
-
-			//update card preview when the user picks a new one
 			cardColorPicker.addEventListener("input", (e) => {
 				const newColor = (e.target as HTMLInputElement).value;
 			    cardColorPreview.style.backgroundColor = newColor;
@@ -93,11 +74,29 @@ export default class Profile extends AbstractView {
 		// profile update form input
 		const form = document.getElementById('update-profile-form') as HTMLFormElement;
 		if (!form) return;
-
 		form.addEventListener('submit', async (e) => {
 			// prevent default form submission
 			e.preventDefault();
 
+			// grab input values for avatar, card color and display name
+			const newDisplayName = (document.getElementById('display-name-input') as HTMLInputElement)?.value.trim();
+			const newAvatar = (document.getElementById('avatar-upload') as HTMLInputElement)?.value;
+			const newCardColor = (document.getElementById('card-color-input') as HTMLInputElement)?.value;
+
+			// validate the new displayName format;
+			if (newDisplayName && !isValidDisplayName(newDisplayName)) {
+				alert("Display Name must be 1 to 20 characters.");
+				return;
+			}
+
+			const result = await postUpdateProfile(userId, newDisplayName, newAvatar, newCardColor);
+			if (result && result.success) {
+				alert("Profile updated successfully!");
+				await loadProfile(userId);
+			}
+			else {
+				alert("There was an error updating your profile. Try again.");
+			}
 		});
 
 		// ----SESSION INFO----
@@ -213,7 +212,7 @@ export default class Profile extends AbstractView {
 
 				const result = await postFriend(userId, friendDisplayName);
 
-				if (result.success) {
+				if (result && result.success) {
 		    		addFriendMessage.textContent = `✅ ${result.message}`;
 					addFriendMessage.classList.remove('text-red-400');
 					addFriendMessage.classList.add('text-green-400');
@@ -289,7 +288,6 @@ async function getUserProfileById(userId: number): Promise<any> {
 		});
 
 		if (!response.ok) {
-			const errorText = await response.text();
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 
@@ -301,9 +299,67 @@ async function getUserProfileById(userId: number): Promise<any> {
 	}
 }
 
-// function to validate display name (max 9 chars, not empty)
+//get the current avatar, diplay name and card color
+async function loadProfile(userId: number) {
+	const userProfile = await getUserProfileById(userId);
+	if (!userProfile) return;
+
+	// === Avatar ===
+	const avatarPreviewContainer = document.getElementById("avatar-preview-container") as HTMLDivElement;
+	if (avatarPreviewContainer) {
+		avatarPreviewContainer.innerHTML = "";
+
+		if (userProfile.avatarUrl) {
+			const img = document.createElement("img");
+			img.src = userProfile.avatarUrl;
+			img.className = "w-full h-full object-cover rounded-full";
+			avatarPreviewContainer.appendChild(img);
+		} else {
+			avatarPreviewContainer.textContent = userProfile.displayName.charAt(0);
+		}
+	}
+
+	// === Display Name ===
+	const displayNameInput = document.getElementById("display-name-input") as HTMLInputElement;
+	if (displayNameInput) {
+		displayNameInput.value = userProfile.displayName;
+	}
+
+	// === Card Color ===
+	const cardColorPicker = document.getElementById("card-color-input") as HTMLInputElement;
+	const cardColorPreview = document.getElementById("card-color-preview");
+	if (cardColorPicker) {
+		cardColorPicker.value = userProfile.cardColor;
+	}
+	if (cardColorPreview) {
+		cardColorPreview.style.backgroundColor = userProfile.cardColor;
+	}
+}
+
+// function to validate display name (max 20 chars, not empty)
 function isValidDisplayName(displayName: string): boolean {
-	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 9;
+	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 20;
+}
+
+//post update profile
+async function postUpdateProfile(userId: number, displayName: string, avatar: string, cardColor: string): Promise<any> {
+	try {
+	    const response = await fetch(`${API_BASE}/profile-update`, {
+	    	method: 'POST',
+	    	headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ userId, displayName, avatar, cardColor })
+    	});
+
+	    const result = await response.json();
+
+		if (!response.ok) {
+			throw new Error(result.error || "Failed to update profile");
+		}
+		return result;
+	} catch (error) {
+		console.error('Error updating profile:', error);
+		return null;
+	}
 }
 
 // returns time remaining (as string) until JWT expiration
@@ -472,7 +528,7 @@ async function getMatchStat(userId: number): Promise<any> {
 		});
 
 		const data = await response.json();
-		if (!data.data) {
+		if (data && !data.data) {
 			console.info(`User has no Match Stat.`);
 			return null;
 		}
@@ -492,7 +548,7 @@ async function getMatchHistory(userId: number): Promise<any> {
 		});
 
 		const data = await response.json();
-		if (data.data.length === 0) {
+		if (data && data.data.length === 0) {
 			console.info(`User has no Match History.`);
 			return null;
 		}

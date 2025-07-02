@@ -103,9 +103,9 @@ function isValidPassword(password: string): boolean {
 	return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
 }
 
-// display name validation (max 9 chars, not empty)
+// display name validation (max 20 chars, not empty)
 function isValidDisplayName(displayName: string): boolean {
-	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 9;
+	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 20;
 }
 
 // read the SSL/TLS certificate and private key
@@ -165,7 +165,7 @@ app.post('/register', async (request: FastifyRequest<{ Body: UserRequestBody }>,
 
 	// validate display name
 	if (!isValidDisplayName(displayName)) {
-		reply.code(400).send({ error: "Display Name must be 1 to 9 characters." });
+		reply.code(400).send({ error: "Display Name must be 1 to 20 characters." });
 		return;
 	}
 
