@@ -10,6 +10,7 @@ import MatchService from '../../services/MatchService.js'
 export default class Tournament {
   tournamentId: string = '0';
   currentRound: Match[] = [];
+  currentGame: Game | null = null;
   totalPlayers: number = 0;
   totalMatches: number = 0;
   nextPowerOf2: number = 0;
@@ -199,10 +200,10 @@ export default class Tournament {
         this.matchTitle = 'LAST ROUND MATCH!';
       }
       for (let i : number = 0; i < this.currentRound.length; i++) {
-        const currentGame = new Game(this.currentRound[i], 'board');
+        this.currentGame = new Game(this.currentRound[i], 'board');
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
         // this.debugPrintRoundArray();
-        await currentGame.startMatch(this.currentRound[i]);
+        await this.currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
           this.matchLog.push(...this.currentRound);
           this.tournamentWinner = this.currentRound[i].winner;

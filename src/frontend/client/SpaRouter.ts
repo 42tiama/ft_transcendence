@@ -213,7 +213,7 @@ export default class SpaRouter {
     try {
       const view = new match.route.view() as any;
 
-      //validate phase
+      //validation phase
       if (match.route.path === '/tournament' && !(await view.beforeMount(this.gameContext))) {
         return false;
       }
@@ -222,7 +222,7 @@ export default class SpaRouter {
       }
 
       if (this.currentView && typeof this.currentView.onUnMount === 'function') {
-        this.currentView.onUnMount();
+        this.currentView.onUnMount(this.gameContext);
       }
 
       this.currentView = view;

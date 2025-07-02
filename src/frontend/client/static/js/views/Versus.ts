@@ -7,7 +7,7 @@ export default class Versus extends AbstractView {
   private game: Game | null = null;
 
   constructor() {
-    super();
+    super(); 
     this.setTitle('Versus');
   }
 
@@ -141,6 +141,7 @@ export default class Versus extends AbstractView {
   }
 
   async onUnMount() {
+    this.game?.cancelGame();
   }
   
 }
