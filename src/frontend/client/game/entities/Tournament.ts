@@ -5,10 +5,11 @@ import Game from "./Game.js";
 import { TournamentInfo, GameServices } from "../types.js";
 import TournamentService from '../../services/TournamentService.js'
 import MatchService from '../../services/MatchService.js'
+import { TournamentData } from "services/types.js";
 // import { Server } from "http";
 
 export default class Tournament {
-  tournamentId: string = '0';
+  tournamentId: number = 0;
   currentRound: Match[] = [];
   totalPlayers: number = 0;
   totalMatches: number = 0;
@@ -33,6 +34,18 @@ export default class Tournament {
     this.gameServices.match = new MatchService();
   }
 
+  private async registerTournament() {
+    this.gameServices.tournament = new TournamentService();
+
+    if (this.gameServices.tournament) {
+        const tournamentInfo: TournamentData = {
+          totalMatches: this.totalMatches,
+          totalPlayers: this.totalPlayers,
+      };
+      this.tournamentId = await this.gameServices.tournament.createTournament(tournamentInfo);
+    }
+  }
+
   private tournamentInit(gameContext: TiamaPong) {
     this.totalPlayers = gameContext.preTournamentSelection.length;
     this.totalMatches = this.totalPlayers - 1;
@@ -48,6 +61,7 @@ export default class Tournament {
             totalByes: ${this.totalByes}\n
             firstRoundTotalParticipants: ${this.firstRoundTotalParticipants}\n
             totalRounds: ${this.totalRounds}`);
+    this.registerTournament();
     this.createFirstRound(gameContext);
     // this.debugPrintRoundArray();
   }

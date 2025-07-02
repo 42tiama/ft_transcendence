@@ -4,7 +4,7 @@ import { ApiResponse, TournamentData } from './types';
 export default class TournamentService {
 	private API_GATEWAY = 'https://localhost:8044/tournament/';
 
-	public async addTournament(tournamentData: TournamentData): Promise<number> {
+	public async createTournament(tournamentData: TournamentData): Promise<number> {
 		const tournamentPayload: TournamentData = tournamentData;
 		let response = {} as Response;
 

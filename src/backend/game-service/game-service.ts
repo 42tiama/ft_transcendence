@@ -152,7 +152,12 @@ async function playerInfoById(
 	try {
 		const query = request.server.betterSqlite3.prepare(`
 			SELECT 
-				id, userId, displayName, points, wins, losses 
+				id,
+				userId,
+				displayName,
+				points,
+				wins,
+				losses 
 			FROM 
 				players 
 			WHERE 
@@ -181,7 +186,7 @@ async function playerInfoById(
 }
 
 
-async function uploadDisplayName(
+async function updateDisplayName(
 	request: FastifyRequest<{ Params: { id: string }, Body: UserPayload }>,
 	reply: FastifyReply
 ){
@@ -211,6 +216,84 @@ async function uploadDisplayName(
 		request.log.error(err, `Error updating player with ID ${userId}`);
 		reply.code(500).send({
 			error: 'Internal server Error'
+		});
+	}
+}
+
+async function updateWinStat(
+	request: FastifyRequest<{ Params: { id: string }, Body: UserPayload }>,
+	reply: FastifyReply
+){
+	const userId = request.params.id;
+	const {
+		points
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			UPDATE 
+				players
+			SET 
+				points = points + ?,
+				wins = wins + ?
+			WHERE 
+				id = ?
+		`);
+
+		query.run(points, 1, userId);
+
+		request.server.log.info(`Player with ID ${userId} stats updated.`);
+		reply.code(200).send({
+			success: true,
+			message: 'Player stats updated'
+		});
+	} catch (err) {
+		request.log.error(err, `Error updating player with ID ${userId}`);
+		reply.code(500).send({
+			error: 'Internal server Error',
+			data: {
+				points: points,
+				userId: userId
+			}
+		});
+	}
+}
+
+async function updateLossStat(
+	request: FastifyRequest<{ Params: { id: string }, Body: UserPayload }>,
+	reply: FastifyReply
+){
+	const userId = request.params.id;
+	const {
+		points
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			UPDATE 
+				players
+			SET 
+				points = points + ?,
+				losses = losses + ?
+			WHERE 
+				id = ?
+		`);
+
+		query.run(points, 1, userId);
+
+		request.server.log.info(`Player with ID ${userId} losses updated.`);
+		reply.code(200).send({
+			success: true,
+			message: 'Player losses updated'
+		});
+	} catch (err) {
+		request.log.error(err, `Error updating player with ID ${userId}`);
+		reply.code(500).send({
+			error: 'Internal server Error',
+			data: {
+				points: points,
+				userId: userId
+			}
 		});
 	}
 }
@@ -523,7 +606,9 @@ app.post('/match/:id/info', addResultMatch);
 
 // Player
 app.post('/player/register', addUser);
-app.post('/player/:id/info', uploadDisplayName);
+app.post('/player/:id/info/display-name', updateDisplayName);
+app.post('/player/:id/info/wins', updateWinStat);
+app.post('/player/:id/info/losses', updateLossStat);
 
 
 /* GET */

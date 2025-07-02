@@ -5,7 +5,7 @@ import User from './User';
 
 export default class Match {
     matchType: string;
-    tournamentId: string | null = null;
+    tournamentId: number | null;
     player1: User;
     player2: User | null = null;
     player1Score: number = 0;

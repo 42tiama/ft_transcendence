@@ -53,7 +53,7 @@ export default class Versus extends AbstractView {
     p1Wins!.innerHTML = `Wins: ${currentMatch.player1.wins.toString()}`;
     p1Losses!.innerHTML = `Losses: ${currentMatch.player1.losses.toString()}`;
     p2Wins!.innerHTML = `Wins: ${currentMatch.player2!.wins.toString()}`;
-    p2Losses!.innerHTML = `Losses: ${currentMatch.player2!.losses.toString()}`;
+    p2Losses!.innerHTML = `Losses: ${currentMatch.player2!.losses.toString() || '0'}`;
   };
 
   private async renderFreezeTimeModalInfo(currentMatch: Match): Promise<void> {
@@ -122,7 +122,7 @@ export default class Versus extends AbstractView {
 
   async runPvp(gameContext: TiamaPong): Promise<void> {
     let isRunning = true;
-    let currentMatch = new Match('versus-player', null, gameContext.sessionUser, gameContext.preVersusSelection);
+    let currentMatch = new Match('versus-player', null, gameContext.sessionUser!, gameContext.preVersusSelection);
     
     while (isRunning) {
       await this.renderPvpInfo(currentMatch);
@@ -132,7 +132,7 @@ export default class Versus extends AbstractView {
       let retry = await this.renderMatchWinner(currentMatch);
       if (!retry)
         isRunning = false;
-      currentMatch = new Match('versus-player', null, gameContext.sessionUser, gameContext.preVersusSelection);
+      currentMatch = new Match('versus-player', null, gameContext.sessionUser!, gameContext.preVersusSelection);
     }
   }
 

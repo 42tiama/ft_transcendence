@@ -4,13 +4,14 @@ import TiamaPong from "../../../game/entities/TiamaPong";
 import Match from '../../../game/entities/Match.js';
 import User from '../../../game/entities/User.js';
 import { parseJwt } from '../views/Login.js'
-import TournamentService from '../../../services/TournamentService.js';
+import PlayerService from '../../../services/PlayerService.js';
+import { PlayerData } from '../../../services/types.js';
 
 export default class GameAi extends AbstractView {
 
   private selectedDifficulty: number = 0.5;
   private game: Game | null = null;
-  private tournamentId: number | null = null;
+  private user?: PlayerData;
 
   constructor() {
     super();
@@ -49,6 +50,33 @@ export default class GameAi extends AbstractView {
     modal?.classList.replace('hidden', 'flex');
   }
 
+  private async playerSessionData(gameContext: TiamaPong) {
+    const existingJwt = localStorage.getItem('jwt');
+    if (!existingJwt) {
+      return ;
+    }
+    const payload = parseJwt(existingJwt);
+    const gameServices = new PlayerService();
+
+    const data: PlayerData = await gameServices.getPlayerById(payload.id).then((data: PlayerData) => {
+      if (data.id === 0) {
+        console.error('No player data found for the given ID.');
+        console.log('Payload:', payload);
+        return {} as PlayerData;
+      }
+      return data;
+    }).catch((error) => {
+      console.error('Error fetching player data:', error);
+      return {} as PlayerData;
+    });
+    if (!data || !data.id) {
+      console.error('Invalid player data received:', data);
+      return;
+    }
+    console.log('Player data fetched successfully:', data);
+    this.user = new User(gameContext, data.id, data.displayName, payload.email); 
+  }
+
   private onClickDifficultyButton(gameContext: TiamaPong) {
 
     const difficulties = [
@@ -69,22 +97,20 @@ export default class GameAi extends AbstractView {
         const diffButton = document.getElementById(diff.id);
 
         if (diffButton) {
-          diffButton.addEventListener('click', () => {
+          diffButton.addEventListener('click', async () => {
             this.showElement('difficulty-group', false);
             this.showElement('difficulty-container', false);
             this.showElement('board');
 
             this.selectedDifficulty = diff.value;
 
-			      //get id from jwt
-			      const existingJwt = localStorage.getItem('jwt');
-			      const payload = parseJwt(existingJwt);
-			      const id = payload.id;
+            await this.playerSessionData(gameContext);
+            if (!this.user) {
+              console.error('User data is not available.');
+              return;
+            }
 
-            // aqui vai precisar consultar os dados do usuario pelo id antes de instanciar o terminatorX
-            const terminatorX = new User(gameContext, id, 'TerminatorX', 'terminatorX@uol.com.br')
-
-            this.game = new Game(new Match('versus-ai', null, terminatorX, null), 'board');
+            this.game = new Game(new Match('versus-ai', null, this.user, null), 'board');
             this.game.setSelectedDifficulty(this.selectedDifficulty);
             this.renderGame(gameContext);
           }, { once: true });
@@ -105,11 +131,6 @@ export default class GameAi extends AbstractView {
 	
 
   async onMount(gameContext: TiamaPong) {
-  // this.tournamentId = await TournamentService.createTournament();
-  // if (this.tournamentId) {
-  // 	const info = await TournamentService.getTournamentsById(this.tournamentId);
-	// console.log(`Tournament info: ${JSON.stringify(info)}`);
-  // }
     this.showElement('ai-player', false);
     this.showElement('human-player', false);
     this.showElement('difficulty-group', false);

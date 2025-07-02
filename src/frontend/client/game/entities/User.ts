@@ -8,7 +8,7 @@ export default class User implements UserInterface {
     wins : number;
     losses: number;
 
-    constructor(game: TiamaPong, id: number = 42, displayName: string, email: string) {
+    constructor(game: TiamaPong, id: number, displayName: string, email: string) {
         this.id = id;
         this.displayName = displayName;
         this.points = 0;

@@ -8,6 +8,7 @@ import { gameConfig } from '../gameConfig.js';
 import TiamaMatch from './Match.js';
 import MatchService from '../../services/MatchService.js';
 import { MatchData } from '../../services/types.js';
+import PlayerService from '../../services/PlayerService.js';
 
 export default class Game {
     private canvas: HTMLCanvasElement;
@@ -82,15 +83,12 @@ export default class Game {
         }
     }
 
-    public endGame(): void {
-        this.isGameRunning = false;
-        console.log(`match type: ${this.match.matchType}`);
+    private async registerMatch(match: TiamaMatch): Promise<void> {
         if (this.match.matchType === 'versus-ai' || this.match.matchType === 'versus-player') {
             const matchPayload : MatchData = {
                 matchType : this.match.matchType,
                 tournamentId : null,
                 player1 : this.match.player1.id,
-                // player1: 1,
                 player2: this.match.matchType === 'versus-ai' ? null : this.match.player2!.id,
                 player1Score : this.match.player1Score,
                 player2Score : this.match.player2Score,
@@ -98,38 +96,37 @@ export default class Game {
             };
 
             const match = new MatchService();
-            match.createMatch(matchPayload);
+            const registred = await match.createMatch(matchPayload);
+
+            if (registred !== null) {
+                console.log(`Match registered successfully: ${JSON.stringify(matchPayload)}`);
+                const gameService = new PlayerService();
+                const points = matchPayload.player1Score > matchPayload.player2Score ? matchPayload.player1Score : matchPayload.player2Score;
+                const loserId = matchPayload.player1Score < matchPayload.player2Score ? matchPayload.player1: (matchPayload.player2 ? matchPayload.player2 : null);
+
+                if (matchPayload.winner) {
+                    const win = await gameService.addWinStat(matchPayload.winner, points)
+                        .catch(err => console.error(`Failed to update winner stats: ${err}`));   
+                }
+
+                if (loserId) {
+                    console.log(`AI match, no loser to update stats for. ${loserId}`);
+                    const loser = await gameService.addLossStat(loserId, points)
+                        .catch(err => console.error(`Failed to update loser stats: ${err}`));
+                }
+            }
         }
+    }
+
+    public endGame(): void {
+        this.isGameRunning = false;
+
+        console.log(`match type: ${this.match.matchType}`);
+        this.registerMatch(this.match);
 
         if (this.animationId !== null) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
-        }
-
-		//if AI match, send specific payload
-		if (this.match.matchType === 'versus-ai'){
-			const aiMatchPayload = {
-				player1Id : this.match.player1.id,
-				player1Score : this.match.player1Score,
-				player2Score : this.match.player2Score,
-				winner : this.match.winner?.id ?? null //coercing to null if this.match.winner is null (it would be undefined otherwise)
-			};
-
-			fetch('https://localhost:8044/register-ai-match', {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify(aiMatchPayload)
-			})
-			.then((gameServiceResponse) => {
-				if (!gameServiceResponse.ok) {
-					console.error(`POST to game-service failed: ${gameServiceResponse.status}`);
-				} else {
-					console.log(`POST succeeded`);
-				}
-			})
-			.catch((err) => {
-					console.error(err);
-			})
         }
     }
 

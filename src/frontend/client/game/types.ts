@@ -74,7 +74,7 @@ export interface ApiResponse<T> {
 }
 
 export interface GameServices {
-    user: PlayerService;
+    player: PlayerService;
     tournament: TournamentService;
     match: MatchService;
 }
