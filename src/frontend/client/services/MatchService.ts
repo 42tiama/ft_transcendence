@@ -34,6 +34,36 @@ export default class MatchService {
         return 0;
     }
 
+    public async createMatches(matchesData: MatchData[]): Promise<number[]> {
+        const matchesPayload: MatchData[] = matchesData;
+        let response = {} as Response;
+
+        const request = {
+            route: `${this.API_GATEWAY}register-many`,
+            options: {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ matches: matchesPayload })
+            }
+        };
+
+        try {
+            response = await fetch(request.route, request.options);
+            const result: ApiResponse<number[]> = await response.json();
+
+            if (response.ok && result.data) {
+                console.log(`Matches successfully registered, ids: ${result.data}`);
+                return result.data;
+            }
+            console.log(`Failed to create matches: ${response.status} ${response.statusText}`);
+        } catch (err) {
+            console.log(`Could not reach game-service: ${err}`);
+        }
+        return [];
+    }
+
     public async getMatchById(id: number): Promise<MatchData> {
         const idMatchString = id.toString();
         let response = {} as Response;

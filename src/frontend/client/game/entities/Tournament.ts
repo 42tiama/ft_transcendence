@@ -285,8 +285,8 @@ export default class Tournament {
     //   // server.log.error('Failed to save the tournament log');
     // }
 
-    // const matchServiceResponse = await this.gameServices.match!.updateMatchHistory(this.matchLog);
-    // if (matchServiceResponse.success) {
+    // const matchServiceResponse = await this.gameServices.match!.createMatches(this.matchLog);
+    // if (matchServiceResponse) {
     //   // server.log.info('Matches saved successfully!');
     // } else {
     //   // server.log.error('Failed to save matches');

@@ -128,7 +128,6 @@ export default class Versus extends AbstractView {
       await this.renderPvpInfo(currentMatch);
       this.game = new Game(currentMatch, 'board');
       await this.game.startMatch(currentMatch);
-      // Iury, Andre, enviar resultado da partida aqui, "currentMatch" ja tera o winner e o score salvo nesse momento.
       let retry = await this.renderMatchWinner(currentMatch);
       if (!retry)
         isRunning = false;

@@ -52,36 +52,6 @@ app.register(fastifyBetterSqlite3, {
 
 /////////////// CALLBACK FUNCTIONS ///////////////////////
 
-interface aiMatchPayload {
-	player1Id: number;
-	player1Score: number;
-	player2Score: number;
-	winner: number | null;
-}
-
-async function addAiMatch(
-	request: FastifyRequest<{ Body: aiMatchPayload }>,
-	reply: FastifyReply
-){
-	const {player1Id, player1Score, player2Score, winner} = request.body;
-
-	try {
-		const stmt = request.server.betterSqlite3.prepare(`
-			INSERT INTO matches (matchType, tournamentId, player1, player2,
-			player1Score, player2Score, winner)
-			VALUES (?, ?, ?, ?, ?, ?, ?)`);
-
-		stmt.run("vsAI", null, player1Id, null, player1Score, player2Score, winner);
-
-		request.server.log.info(`AI match added to matches table.`);
-		reply.code(201).send({message: 'AI match stored on backend'});
-	}
-	catch (err) {
-		request.log.error(err);
-		reply.code(500).send({error: 'Internal server Error'});
-	}
-}
-
 interface UserPayload {
 	id?: number;
 	displayName?: string;
@@ -93,7 +63,7 @@ interface UserPayload {
 interface MatchPayload {
   id?: number;
   matchType?: string;
-  tournamentId?: number;
+  tournamentId?: number | null;
   player1?: number;
   player2?: number | null;
   player1Score?: number;
@@ -106,6 +76,7 @@ interface TournamentPayload {
   totalPlayers?: number;
   totalMatches?: number;
   winner?: number | null;
+  finished?: boolean;
 }
 
 // PLAYER FUNCTIONS
@@ -298,7 +269,7 @@ async function updateLossStat(
 	}
 }
 
-async function getAllPlayers(
+async function playersList(
 	request: FastifyRequest,
 	reply: FastifyReply
 ){
@@ -367,6 +338,42 @@ async function addTournament(
 	}
 }
 
+async function updateTornamentWinner(
+	request: FastifyRequest<{ Params: { id: string }, Body: TournamentPayload }>,
+	reply: FastifyReply
+){
+	const tournamentId = request.params.id;
+	const {
+		winner,
+		finished
+	} = request.body;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			UPDATE 
+				tournaments
+			SET 
+				winner = ?
+				finished = ?
+			WHERE 
+				id = ?
+		`);
+
+		query.run(winner, finished, tournamentId);
+
+		request.server.log.info(`Tournament with ID ${tournamentId} updated.`);
+		reply.code(200).send({
+			success: true,
+			message: 'Tournament winner updated'
+		});
+	} catch (err) {
+		request.log.error(err, `Error updating tournament with ID ${tournamentId}`);
+		reply.code(500).send({
+			error: 'Internal server Error'
+		});
+	}
+}
+
 async function tournamentInfoById(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply
@@ -403,6 +410,48 @@ async function tournamentInfoById(
 		request.log.error(err, `Error fetching tournament with ID ${tournamentId}`);
 		reply.code(500).send({
 			error: 'Internal server Error'
+		});
+	}
+}
+
+async function tournamentListByWinner(
+	request: FastifyRequest<{ Params: { winnerId: string } }>,
+	reply: FastifyReply
+){
+	const winnerId = request.params.winnerId;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			SELECT 
+				id, 
+				totalPlayers, 
+				totalMatches, 
+				winner 
+			FROM 
+				tournaments 
+			WHERE 
+				winner = ?
+		`);
+
+		const tournaments = query.all(winnerId);
+
+		if (tournaments.length > 0) {
+			reply.send({
+				success: true,
+				message: `Tournaments for winner ID ${winnerId} found`,
+				data: tournaments
+			});
+		} else {
+			reply.code(404).send({
+				error: `No tournaments found for winner ID ${winnerId}`,
+				success: false
+			});
+		}
+	} catch (err) {
+		request.log.error(err, `Error fetching tournaments for winner ID ${winnerId}`);
+		reply.code(500).send({
+			error: 'Internal server Error',
+			success: false
 		});
 	}
 }
@@ -464,6 +513,59 @@ async function addMatch(
 	}
 }
 
+async function addMatches(
+	request: FastifyRequest<{ Body: { matches: MatchPayload[] } }>,
+	reply: FastifyReply
+) {
+	const matches = request.body.matches;
+
+	const db = request.server.betterSqlite3;
+	const insert = db.prepare(`
+		INSERT INTO 
+			matches (
+				matchType,
+				tournamentId,
+				player1,
+				player2,
+				player1Score,
+				player2Score,
+				winner
+		) VALUES 
+			(?, ?, ?, ?, ?, ?, ?)
+	`);
+
+	let insertedIds: number[] = [];
+
+	const insertMany = db.transaction((matches: MatchPayload[]) => {
+		for (const match of matches) {
+		const result = insert.run(
+			match.matchType,
+			match.tournamentId ?? null,
+			match.player1,
+			match.player2 ?? null,
+			match.player1Score,
+			match.player2Score,
+			match.winner ?? null
+		);
+		insertedIds.push(Number(result.lastInsertRowid));
+		}
+	});
+
+	try {
+		insertMany(matches);
+		reply.code(201).send({
+		success: true,
+		message: 'Matches created',
+		data: insertedIds
+		});
+	} catch (err) {
+		request.log.error(err, 'Error adding matches');
+		reply.code(500).send({
+		error: 'Internal server Error'
+		});
+  	}
+}
+
 async function matchInfoById(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply
@@ -504,6 +606,52 @@ async function matchInfoById(
 		request.log.error(err, `Error fetching match with ID ${matchId}`);
 		reply.code(500).send({
 			error: 'Internal server Error'
+		});
+	}
+}
+
+async function listMatchesByPlayer(
+	request: FastifyRequest<{ Params: { playerId: string } }>,
+	reply: FastifyReply
+){
+	const playerId = request.params.playerId;
+
+	try {
+		const query = request.server.betterSqlite3.prepare(`
+			SELECT 
+				id, 
+				matchType, 
+				tournamentId, 
+				player1, 
+				player2, 
+				player1Score, 
+				player2Score, 
+				winner 
+			FROM 
+				matches 
+			WHERE 
+				player1 = ? OR player2 = ?
+		`);
+
+		const matches = query.all(playerId, playerId);
+
+		if (matches.length > 0) {
+			reply.send({
+				success: true,
+				message: `Matches for player ID ${playerId} found`,
+				data: matches
+			});
+		} else {
+			reply.code(404).send({
+				error: `No matches found for player ID ${playerId}`,
+				success: false
+			});
+		}
+	} catch (err) {
+		request.log.error(err, `Error fetching matches for player ID ${playerId}`);
+		reply.code(500).send({
+			error: 'Internal server Error',
+			success: false
 		});
 	}
 }
@@ -598,11 +746,12 @@ app.post('/register-from-auth', addUser);
 
 // Tournament
 app.post('/tournament/register', addTournament);
-app.post('/tournament/winner/:id', addTournament);
+app.post('/tournament/winner/:id', updateTornamentWinner);
 
 // Match
 app.post('/match/register', addMatch );
 app.post('/match/:id/info', addResultMatch);
+app.post('/match/register-many', addMatches)
 
 // Player
 app.post('/player/register', addUser);
@@ -616,14 +765,16 @@ app.get('/', (request: any, reply: any) => { reply.send("Hello from game service
 
 // Tournament
 app.get('/tournament/:id/info', tournamentInfoById);
+app.get('/tournament/:winnerId/matches', tournamentListByWinner);
 
 // Match
 app.get('/match/:id/info', matchInfoById);
 app.get('/match/:tournamentId/matches', matchInfoByIdTornament);
+app.get('/match/:playerId/matches', listMatchesByPlayer);
 
 // Player
 app.get('/player/:id/info', playerInfoById);
-app.get('/player/players', getAllPlayers);
+app.get('/player/players', playersList);
 
 
 // Start app
