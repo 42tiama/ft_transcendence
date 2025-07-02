@@ -20,7 +20,7 @@ export default class Tournament {
   firstRoundTotalParticipants: number = 0;
   totalRounds: number = 0;
   tournamentFinished: boolean = false;
-  tournamentWinner: User | null = null;
+  tournamentWinner?: User | null;
   matchTitle: string = '';
   matchLog: Match[] = [];
   gameServices: Partial<GameServices> = { tournament: undefined, match: undefined };
@@ -277,19 +277,24 @@ export default class Tournament {
     const tournamentInfo: TournamentInfo = {
       totalPlayers: this.totalPlayers,
       totalMatches: this.totalMatches,
-      winner: this.tournamentWinner
+      winner: this.tournamentWinner!
     }
 
-    // const tournamentServiceResponse = await this.gameServices.tournament!.updateTournamentHistory(tournamentInfo);
-    // if (tournamentServiceResponse.success) {
-    //   // server.log.info('Tournament history saved successfully!');
-    // } else {
-    //   // server.log.error('Failed to save the tournament log');
-    // }
+    const tournamentServiceResponse = await this.gameServices.tournament!.registerTournamentResults({
+      tournamentId: this.tournamentId,
+      winner: this.tournamentWinner!.id,
+      finished: this.tournamentFinished ? 1 : 0,
+    });
+
+    if (tournamentServiceResponse) {
+      console.log('Tournament history saved successfully!');
+    } else {
+      console.error('Failed to save the tournament log');
+    }
 
     // const matchServiceResponse = await this.gameServices.match!.createMatches(this.matchLog);
     // if (matchServiceResponse) {
-    //   // server.log.info('Matches saved successfully!');
+    //   // server.log('Matches saved successfully!');
     // } else {
     //   // server.log.error('Failed to save matches');
     // }

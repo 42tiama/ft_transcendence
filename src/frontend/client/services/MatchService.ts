@@ -96,7 +96,7 @@ export default class MatchService {
         let response = {} as Response;
 
         const request = {
-            route: `${this.API_GATEWAY}${idMatchString}/info`, 
+            route: `${this.API_GATEWAY}${idMatchString}/result`, 
             options: {
                 method: 'POST',
                 headers: {
@@ -126,7 +126,7 @@ export default class MatchService {
         let response = {} as Response;
 
         const request = {
-            route: `${this.API_GATEWAY}${tournamentIdString}/matches`, 
+            route: `${this.API_GATEWAY}tournament/${tournamentIdString}/matches`, 
             options: {
                 method: 'GET'
             }

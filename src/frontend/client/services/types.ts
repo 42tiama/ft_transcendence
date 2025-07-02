@@ -34,7 +34,8 @@ export interface PlayerData {
 
 export interface TournamentData {
     tournamentId?: number;
-    totalMatches: number;
-    totalPlayers: number;
+    totalMatches?: number;
+    totalPlayers?: number;
     winner?: number;
+    finished?: number | null;
 }

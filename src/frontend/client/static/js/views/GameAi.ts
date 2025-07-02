@@ -50,33 +50,6 @@ export default class GameAi extends AbstractView {
     modal?.classList.replace('hidden', 'flex');
   }
 
-  private async playerSessionData(gameContext: TiamaPong) {
-    const existingJwt = localStorage.getItem('jwt');
-    if (!existingJwt) {
-      return ;
-    }
-    const payload = parseJwt(existingJwt);
-    const gameServices = new PlayerService();
-
-    const data: PlayerData = await gameServices.getPlayerById(payload.id).then((data: PlayerData) => {
-      if (data.id === 0) {
-        console.error('No player data found for the given ID.');
-        console.log('Payload:', payload);
-        return {} as PlayerData;
-      }
-      return data;
-    }).catch((error) => {
-      console.error('Error fetching player data:', error);
-      return {} as PlayerData;
-    });
-    if (!data || !data.id) {
-      console.error('Invalid player data received:', data);
-      return;
-    }
-    console.log('Player data fetched successfully:', data);
-    this.user = new User(gameContext, data.id, data.displayName, payload.email); 
-  }
-
   private onClickDifficultyButton(gameContext: TiamaPong) {
 
     const difficulties = [
@@ -103,15 +76,6 @@ export default class GameAi extends AbstractView {
             this.showElement('board');
 
             this.selectedDifficulty = diff.value;
-
-            await this.playerSessionData(gameContext);
-            if (!this.user) {
-              console.error('User data is not available.');
-              return;
-            }
-
-            this.game = new Game(new Match('versus-ai', null, this.user, null), 'board');
-            this.game.setSelectedDifficulty(this.selectedDifficulty);
             this.renderGame(gameContext);
           }, { once: true });
         }
@@ -141,6 +105,9 @@ export default class GameAi extends AbstractView {
 
   async renderGame(gameContext: TiamaPong) {
     try {
+      this.user = new User(gameContext, gameContext.sessionUser!.id, gameContext.sessionUser!.displayName, "");
+      this.game = new Game(new Match('versus-ai', null, this.user, null), 'board');
+      this.game.setSelectedDifficulty(this.selectedDifficulty);
       await this.game!.startMatch(this.game!.match);
       await this.showAfterMatchModal();
     } catch (error) {

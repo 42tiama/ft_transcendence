@@ -20,41 +20,13 @@ export default class TiamaPong {
     constructor() {
         this.initGameServices();
         this.loadUsers();
-        this.userSessionData();
-    }
-
-    private async userSessionData() {
-        const existingJwt = localStorage.getItem('jwt');
-        if (!existingJwt) {
-            return ;
-        }
-        const payload = parseJwt(existingJwt);
-        const gameServices = new PlayerService();
-
-        const data: PlayerData = await gameServices.getPlayerById(payload.id).then((data: PlayerData) => {
-            if (data.id === 0) {
-            console.error('No player data found for the given ID.');
-            console.log('Payload:', payload);
-            return {} as PlayerData;
-            }
-            return data;
-        }).catch((error) => {
-            console.error('Error fetching player data:', error);
-            return {} as PlayerData;
-        });
-        if (!data || !data.id) {
-            console.error('Invalid player data received:', data);
-            return;
-        }
-        console.log('Player data fetched successfully:', data);
-        this.sessionUser = new User(this, data.id, data.displayName, payload.email); 
     }
 
     private initGameServices() {
         this.gameServices.player = new PlayerService;
     }
 
-    private async loadUsers() {
+    public async loadUsers() {
         this.users = await this.gameServices.player!.getAllPlayers();
     }
 

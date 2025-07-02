@@ -87,7 +87,7 @@ export default class Login extends AbstractView {
 				// on success: store app’s JWT and userId in localStorage and show a success alert
 				localStorage.setItem('jwt', data.token);
 				localStorage.setItem('userId', data.id);
-				this.gameContext!.sessionUser = await this.gameContext!.gameServices.user!.getPlayerById(data.id);
+				this.gameContext!.sessionUser = await this.gameContext!.gameServices.player!.getPlayerById(data.id);
 				this.gameContext?.loadUsers();
 				alert('Google login successful!');
 				// SPA navigation to /home
@@ -211,7 +211,7 @@ export default class Login extends AbstractView {
 					if (data.token) {
 						localStorage.setItem('jwt', data.token);
 						localStorage.setItem('userId', data.id);
-						gameContext.sessionUser = await gameContext.gameServices.user!.getPlayerById(data.id);
+						gameContext.sessionUser = await gameContext.gameServices.player!.getPlayerById(data.id);
 						gameContext?.loadUsers();
 						localStorage.removeItem('google_jwt'); // Invalidate previous Google ID token
 					}

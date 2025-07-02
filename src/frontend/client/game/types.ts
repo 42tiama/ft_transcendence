@@ -49,6 +49,7 @@ export interface Tournament {
 }
 
 export interface TournamentInfo {
+    tournamentId?: number;
     totalPlayers: number;
     totalMatches: number;
     winner: User | null;

@@ -338,11 +338,11 @@ async function addTournament(
 	}
 }
 
-async function updateTornamentWinner(
+async function addTornamentWinner(
 	request: FastifyRequest<{ Params: { id: string }, Body: TournamentPayload }>,
 	reply: FastifyReply
 ){
-	const tournamentId = request.params.id;
+	const tournamentId = Number(request.params.id);
 	const {
 		winner,
 		finished
@@ -353,8 +353,7 @@ async function updateTornamentWinner(
 			UPDATE 
 				tournaments
 			SET 
-				winner = ?
-				finished = ?
+				winner = ?,	finished = ?
 			WHERE 
 				id = ?
 		`);
@@ -364,12 +363,18 @@ async function updateTornamentWinner(
 		request.server.log.info(`Tournament with ID ${tournamentId} updated.`);
 		reply.code(200).send({
 			success: true,
-			message: 'Tournament winner updated'
+			message: 'Tournament winner updated',
+			data: true
 		});
 	} catch (err) {
 		request.log.error(err, `Error updating tournament with ID ${tournamentId}`);
 		reply.code(500).send({
-			error: 'Internal server Error'
+			error: `Internal server Error: ${tournamentId}`,
+			data: {
+				winner: winner,
+				finished: finished,
+				tournamentId: tournamentId
+			}
 		});
 	}
 }
@@ -610,7 +615,7 @@ async function matchInfoById(
 	}
 }
 
-async function listMatchesByPlayer(
+async function matchListByPlayerId(
 	request: FastifyRequest<{ Params: { playerId: string } }>,
 	reply: FastifyReply
 ){
@@ -657,10 +662,10 @@ async function listMatchesByPlayer(
 }
 
 async function addResultMatch(
-	request: FastifyRequest<{ Params: { id: string }, Body: MatchPayload }>,
+	request: FastifyRequest<{ Params: { matchId: string }, Body: MatchPayload }>,
 	reply: FastifyReply
 ){
-	const matchId = request.params.id;
+	const matchId = request.params.matchId;
 	const { 
 		player1Score,
 		player2Score,
@@ -693,7 +698,7 @@ async function addResultMatch(
 	}
 }
 
-async function matchInfoByIdTornament(
+async function matchListByTornamentId(
 	request: FastifyRequest<{ Params: { tournamentId: string } }>,
 	reply: FastifyReply
 ){
@@ -746,11 +751,11 @@ app.post('/register-from-auth', addUser);
 
 // Tournament
 app.post('/tournament/register', addTournament);
-app.post('/tournament/winner/:id', updateTornamentWinner);
+app.post('/tournament/:id/result', addTornamentWinner);
 
 // Match
 app.post('/match/register', addMatch );
-app.post('/match/:id/info', addResultMatch);
+app.post('/match/:id/result', addResultMatch);
 app.post('/match/register-many', addMatches)
 
 // Player
@@ -769,8 +774,8 @@ app.get('/tournament/:winnerId/matches', tournamentListByWinner);
 
 // Match
 app.get('/match/:id/info', matchInfoById);
-app.get('/match/:tournamentId/matches', matchInfoByIdTornament);
-app.get('/match/:playerId/matches', listMatchesByPlayer);
+app.get('/match/tournament/:tournamentId/matches', matchListByTornamentId);
+app.get('/match/player/:playerId/matches', matchListByPlayerId);
 
 // Player
 app.get('/player/:id/info', playerInfoById);
