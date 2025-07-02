@@ -66,6 +66,12 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
+	prefix: '/profile-update',
+	rewritePrefix: '/profile-update'
+});
+
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
 	prefix: '/follow-stat',
 	rewritePrefix: '/follow-stat'
 });

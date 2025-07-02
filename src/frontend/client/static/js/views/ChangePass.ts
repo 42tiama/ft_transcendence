@@ -6,11 +6,6 @@ function isValidPassword(password: string): boolean {
 	return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
 }
 
-// function to validate display name (max 9 chars, not empty)
-function isValidDisplayName(displayName: string): boolean {
-	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 9;
-}
-
 export default class ChangePass extends AbstractView {
 	constructor() {
 		super();
@@ -54,19 +49,18 @@ export default class ChangePass extends AbstractView {
 			// prevent default form submission
 			e.preventDefault();
 
-			// grab input values for email, current password, TOTP code, new password, new displayName, toogle 2FA
+			// grab input values for email, current password, TOTP code, new password, toogle 2FA
 			const email = (document.getElementById('email') as HTMLInputElement)?.value;
 			const currentPassword = (document.getElementById('currentPassword') as HTMLInputElement)?.value;
 			const totp = (document.getElementById('totp') as HTMLInputElement)?.value;
 			const newPassword = (document.getElementById('newPassword') as HTMLInputElement)?.value;
-			const newDisplayName = (document.getElementById('newDisplayName') as HTMLInputElement)?.value;
 			const use2fa = (document.getElementById('use2fa-changepass') as HTMLInputElement)?.checked;
 
 			// check all fields are filled; alerts if not.
-			if (!email || !currentPassword || (!newPassword && !newDisplayName) || (use2fa && !totp)) {
+			if (!email || !currentPassword || !newPassword || (use2fa && !totp)) {
 				alert(use2fa
-					? "Please fill in email, current password, and at least one of new password or new display name, and TOTP."
-					: "Please fill in email, current password, and at least one of new password or new display name.");
+					? "Please fill in email, current password, new password, and TOTP."
+					: "Please fill in email, current password, and new password.");
 				return;
 			}
 
@@ -76,17 +70,10 @@ export default class ChangePass extends AbstractView {
 				return;
 			}
 
-			// validate the new displayName format;
-			if (newDisplayName && !isValidDisplayName(newDisplayName)) {
-				alert("Display Name must be 1 to 9 characters.");
-				return;
-			}
-
 			// build the request body
 			const body: any = { email, currentPassword };
 			if (use2fa) body.totp = totp;
 			if (newPassword) body.newPassword = newPassword;
-			if (newDisplayName) body.newDisplayName = newDisplayName;
 
 			// send a POST request to https://localhost:8044/changepass with the form data as JSON.
 			try {

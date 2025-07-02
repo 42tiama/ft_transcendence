@@ -11,6 +11,7 @@ import { TournamentData } from "services/types.js";
 export default class Tournament {
   tournamentId: number = 0;
   currentRound: Match[] = [];
+  currentGame: Game | null = null;
   totalPlayers: number = 0;
   totalMatches: number = 0;
   nextPowerOf2: number = 0;
@@ -118,9 +119,10 @@ export default class Tournament {
     matchTitle.innerHTML = this.matchTitle.length === 0 ? 'Next Match' : this.matchTitle;
     matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
     this.matchTitle = matchTitle.innerHTML;
-
-    nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
-    nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
+    if (nextMatch) {
+      nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
+      nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
+    }
   }
 
   private async renderFreezeTimeModalInfo(appElement: Element, currentMatch: Match): Promise<void> {
@@ -131,7 +133,7 @@ export default class Tournament {
 
     const startButton = appElement.querySelector('#start-button')! as HTMLButtonElement;
     const modal = appElement.querySelector('#freeze-time-modal')! as HTMLElement;
-    let countDown: number = 3;
+    let countDown: number = 1;
 
     if (modal.classList.contains('hidden')) {
       modal.classList.replace('hidden', 'flex');
@@ -161,7 +163,7 @@ export default class Tournament {
             countDown--;
           }, 1000);
         };
-        startButton.addEventListener('click', clickHandler);
+        startButton.addEventListener('click', clickHandler, { once: true });
       });
     };
   }
@@ -183,7 +185,7 @@ export default class Tournament {
       nextMatchButton.addEventListener('click', (event: MouseEvent) => {
         matchWinnerModal.classList.replace('flex', 'hidden');
         resolve();
-      })
+      }, { once: true })
     })
   }
 
@@ -199,7 +201,7 @@ export default class Tournament {
       transcendButton.addEventListener('click', (event: MouseEvent) => {
         championModal.classList.replace('flex', 'hidden');
         resolve();
-      })
+      }, { once: true })
     })
   }
 
@@ -213,10 +215,10 @@ export default class Tournament {
         this.matchTitle = 'LAST ROUND MATCH!';
       }
       for (let i : number = 0; i < this.currentRound.length; i++) {
-        const currentGame = new Game(this.currentRound[i], 'board');
+        this.currentGame = new Game(this.currentRound[i], 'board');
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
         // this.debugPrintRoundArray();
-        await currentGame.startMatch(this.currentRound[i]);
+        await this.currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
           this.matchLog.push(...this.currentRound);
           this.tournamentWinner = this.currentRound[i].winner;
@@ -246,8 +248,8 @@ export default class Tournament {
     this.byes = gameContext.preTournamentSelection.splice(0, this.totalByes);
     for (let i = 0; i < this.firstRoundTotalParticipants; i = i + 2) {
         this.currentRound.push(new Match('tournament', this, gameContext.preTournamentSelection[i], gameContext.preTournamentSelection[i + 1]));
-        gameContext.preTournamentSelection.splice(i, 2);
     }
+    gameContext.preTournamentSelection = [];
   }
 
   public createNextRound(finishedRound: Match[]) : Match[] {

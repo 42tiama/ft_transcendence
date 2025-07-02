@@ -29,7 +29,7 @@ export default class Tournament extends AbstractView {
     }
 
     else {
-        alert('You have to choose at least 3 players to play a tournament.');
+        alert('You have to choose at least 2 players to play a tournament.');
         return false;
     }
   }
@@ -38,6 +38,8 @@ export default class Tournament extends AbstractView {
     gameContext.tournamentHistory[gameContext.tournamentHistory.length - 1].runTournament(appElement);
   }
 
-  async onUnMount() {
+  async onUnMount(gameContext: TiamaPong | null) {
+      gameContext?.tournamentHistory[gameContext.tournamentHistory.length - 1].currentGame?.cancelGame();
+      gameContext!.tournamentHistory[gameContext!.tournamentHistory.length - 1].tournamentFinished = true;
   }
 }

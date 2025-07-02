@@ -16,9 +16,9 @@ function isValidPassword(password: string): boolean {
 	return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password);
 }
 
-// function to validate display name (max 9 chars)
+// function to validate display name (max 20 chars)
 function isValidDisplayName(displayName: string): boolean {
-	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 9;
+	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 20;
 }
 
 // this makes register a view that can be loaded by SPA router
@@ -98,7 +98,7 @@ export default class Register extends AbstractView {
 
 		// validate display name
 		if (!isValidDisplayName(displayName)) {
-			alert('Display Name must be 1 to 9 characters.');
+			alert('Display Name must be 1 to 20 characters.');
 			return;
 		}
 

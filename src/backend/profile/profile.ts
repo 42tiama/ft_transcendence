@@ -119,7 +119,60 @@ app.get('/profile-by-displayname/:displayName', async (request: FastifyRequest<{
 	}
 });
 
-// Get User Follow Stats
+// display name validation (max 20 chars, not empty)
+function isValidDisplayName(displayName: string): boolean {
+	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 20;
+}
+
+// Updates display name, card color and avatar
+app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: number, displayName: string, avatar: string, cardColor: string} }>, reply) => {
+	const { userId, displayName, avatar, cardColor} = request.body;
+
+	if (!userId|| !displayName || !cardColor) {
+		app.log.warn(`Missing fields in update profile request: ${JSON.stringify(request.body)}`);
+		reply.code(400).send({ error: "Missing required fields." });
+		return;
+	}
+
+	// validate displayName format
+	if (displayName && !isValidDisplayName(displayName)) {
+		reply.code(400).send({ error: "Display Name must be 1 to 20 characters." });
+		return;
+	}
+
+	const db = app.betterSqlite3;
+	// if changing display name: check for duplicates
+	if (displayName) {
+		const otherUser = db.prepare(`SELECT 1 FROM users WHERE displayName = ? AND id != ?`).get(displayName, userId);
+		if (otherUser) {
+			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
+			return;
+		}
+	}
+
+	try {
+		db.prepare(`
+			UPDATE users
+			SET
+			  displayName = ?,
+			  avatarUrl = ?,
+			  cardColor = ?
+			WHERE id = ?
+		`).run(displayName, avatar, cardColor, userId);
+
+		reply.code(200).send({
+			success: true,
+			message: "Profile update successful.",
+		});
+	} catch (err: any) {
+		let message = err.message;
+		if (message && message.includes('UNIQUE constraint failed: users.displayName')) {
+			message = 'This display name is already taken. Please choose another display name.';
+		}
+		reply.code(500).send({ error: message || "Failed to update user." });
+	}
+});
+
 app.get('/follow-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
 	const { id } = request.params;
 
@@ -438,7 +491,7 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
             id INTEGER PRIMARY KEY,
             displayName TEXT UNIQUE NOT NULL,
             avatarUrl TEXT,
-            cardColor TEXT DEFAULT '#ffba00',
+            cardColor TEXT DEFAULT '#374151',
 			lastSeen DATETIME,
 			createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 		)
