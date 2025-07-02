@@ -31,12 +31,6 @@ export default class TiamaPong {
     }
 
     public createTournament() {
-        let size: number = this.tournamentHistory.push(new TiamaTournament(this));
-        // createTournament(this.tournamentHistory[size - 1]) api method
-        this.tournamentHistory[size - 1].tournamentId = (size - 1);
-        // this.tournamentHistory[size - 1].debugPrintRoundArray();
-        // gameContext.runTournament(gameContext.tournamentHistory[size - 1]);
-        // console.log(`Tournaments: ${this.tournamentHistory[size - 1].tournamentId}`);
-        // return this.tournamentHistory[size - 1];
+        this.tournamentHistory.push(new TiamaTournament(this));
     }
 }
