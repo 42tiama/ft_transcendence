@@ -105,9 +105,10 @@ export default class Tournament {
     matchTitle.innerHTML = this.matchTitle.length === 0 ? 'Next Match' : this.matchTitle;
     matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
     this.matchTitle = matchTitle.innerHTML;
-
-    nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
-    nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
+    if (nextMatch) {
+      nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
+      nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
+    }
   }
 
   private async renderFreezeTimeModalInfo(appElement: Element, currentMatch: Match): Promise<void> {
@@ -233,8 +234,8 @@ export default class Tournament {
     this.byes = gameContext.preTournamentSelection.splice(0, this.totalByes);
     for (let i = 0; i < this.firstRoundTotalParticipants; i = i + 2) {
         this.currentRound.push(new Match('tournament', this, gameContext.preTournamentSelection[i], gameContext.preTournamentSelection[i + 1]));
-        gameContext.preTournamentSelection.splice(i, 2);
     }
+    gameContext.preTournamentSelection = [];
   }
 
   public createNextRound(finishedRound: Match[]) : Match[] {
