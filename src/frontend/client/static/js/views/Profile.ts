@@ -33,42 +33,96 @@ export default class Profile extends AbstractView {
 		// extract userId, JWT and time remaining from payload (assume standard claims)
 		const payload = parseJwt(existingJwt);
 		const userId = payload?.id;
-		console.log(payload);
-
-		// Fetch user profile from database
-		let userProfile = null;
-		if (userId) {
-			userProfile = await getUserProfileById(userId);
+		if (!userId) {
+			console.warn("No userId found in JWT payload.");
+			window.location.href = "/login";
+			return;
 		}
-		console.log(userProfile);
-		// const name = userProfile?.name || payload?.preferred_username || 'N/A';
-		const displayName = userProfile?.display_name;
-		console.log(displayName);
-		// const email = userProfile?.email || 'N/A';
 
-		// Set current avatar (fallback to default)
-		// const avatarImg = document.getElementById('avatar-preview') as HTMLImageElement;
-		// if (avatarImg) {
-		// 	const avatarUrl = userProfile?.avatar_url || 'https://localhost:8044/uploads/avatars/TIAMA-logo.png';
-		// 	avatarImg.src = avatarUrl;
-		// }
+		// Update current profile avatar, display name and card color from database
+		await loadProfile(userId);
 
-		// // Avatar upload preview and POST
-		// const avatarInput = document.getElementById('avatar-upload') as HTMLInputElement;
-		// trace(avatarInput);
-
-		// ----ACCOUNT ACTIONS----
-		// add event listener for change password
-		const changepassBtn = document.getElementById('changepass-btn');
-		if (changepassBtn) {
-			changepassBtn.addEventListener('click', () => {
-				// SPA navigation - you may need to trigger your router here
-				window.history.pushState({}, '', '/changepass');
-				// If you have a SPA router, trigger it to load the view
-				window.dispatchEvent(new PopStateEvent('popstate'));
+		//update avatar preview when the user picks a new one
+		const avatarUpload = document.getElementById("avatar-upload") as HTMLInputElement;
+	    const avatarPreviewContainer = document.getElementById("avatar-preview-container") as HTMLDivElement;
+		if (avatarUpload && avatarPreviewContainer) {
+			avatarUpload?.addEventListener("change", () => {
+				const file = avatarUpload.files?.[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = (e) => {
+					  	avatarPreviewContainer.innerHTML = `
+					    	<img src="${e.target?.result}" alt="Avatar Preview"
+					        class="w-full h-full object-contain rounded-full bg-white" />
+					  	`;
+					};
+				reader.readAsDataURL(file);
+				}
 			});
 		}
 
+		//update card preview when the user picks a new one
+		const cardColorPicker = document.getElementById('card-color-input') as HTMLInputElement;
+		const cardColorPreview = document.getElementById("card-color-preview");
+		if (cardColorPicker && cardColorPreview) {
+			cardColorPicker.addEventListener("input", (e) => {
+				const newColor = (e.target as HTMLInputElement).value;
+			    cardColorPreview.style.backgroundColor = newColor;
+			});
+		}
+
+		// profile update form input
+		const form = document.getElementById('update-profile-form') as HTMLFormElement;
+		if (!form) return;
+		form.addEventListener('submit', async (e) => {
+			// prevent default form submission
+			e.preventDefault();
+
+			// grab input values for avatar, card color and display name
+			const newDisplayName = (document.getElementById('display-name-input') as HTMLInputElement)?.value.trim();
+			const newAvatar = (document.getElementById('avatar-upload') as HTMLInputElement)?.value;
+			const newCardColor = (document.getElementById('card-color-input') as HTMLInputElement)?.value;
+
+			// validate the new displayName format;
+			if (newDisplayName && !isValidDisplayName(newDisplayName)) {
+				alert("Display Name must be 1 to 20 characters.");
+				return;
+			}
+
+			const result = await postUpdateProfile(userId, newDisplayName, newAvatar, newCardColor);
+			if (result && result.success) {
+				alert("Profile updated successfully!");
+				await loadProfile(userId);
+			}
+			else {
+				alert("There was an error updating your profile. Try again.");
+			}
+		});
+
+		// ----SESSION INFO----
+		// Format JWT for 6-line display
+		const jwtDisplay = document.getElementById('jwt-formatted');
+		if (jwtDisplay) {
+			const formattedJwt = formatJwtForDisplay(existingJwt);
+			jwtDisplay.textContent = formattedJwt;
+		}
+
+		// live update the JWT expiration countdown
+		const expiresSpan = document.getElementById('jwt-expires');
+		if (expiresSpan && payload?.exp) {
+			const interval = setInterval(() => {
+				const time = getJwtTimeRemaining(existingJwt);
+				expiresSpan.textContent = time;
+				if (time === "Expired") clearInterval(interval);
+			}, 1000);
+		}
+
+		const jwtEmail = document.getElementById('jwt-email');
+		if (jwtEmail) {
+			jwtEmail.textContent = payload?.email;
+		}
+
+		// ----ACCOUNT ACTIONS----
 		// add event listener for logout
 		const logoutBtn = document.getElementById('logout-btn');
 		if (logoutBtn) {
@@ -80,6 +134,17 @@ export default class Profile extends AbstractView {
 				alert('You have been logged out successfully!');
 				// === SPA Navigation to /login ===
 				window.history.pushState({}, '', '/login');
+				window.dispatchEvent(new PopStateEvent('popstate'));
+			});
+		}
+
+		// add event listener for change password
+		const changepassBtn = document.getElementById('changepass-btn');
+		if (changepassBtn) {
+			changepassBtn.addEventListener('click', () => {
+				// SPA navigation - you may need to trigger your router here
+				window.history.pushState({}, '', '/changepass');
+				// If you have a SPA router, trigger it to load the view
 				window.dispatchEvent(new PopStateEvent('popstate'));
 			});
 		}
@@ -131,29 +196,6 @@ export default class Profile extends AbstractView {
 			}
 		}
 
-		// ----SESSION INFO----
-		// Format JWT for 3-line display
-		const jwtDisplay = document.getElementById('jwt-formatted');
-		if (jwtDisplay) {
-			const formattedJwt = formatJwtForDisplay(existingJwt);
-			jwtDisplay.textContent = formattedJwt;
-		}
-
-		// live update the JWT expiration countdown
-		const expiresSpan = document.getElementById('jwt-expires');
-		if (expiresSpan && payload?.exp) {
-			const interval = setInterval(() => {
-				const time = getJwtTimeRemaining(existingJwt);
-				expiresSpan.textContent = time;
-				if (time === "Expired") clearInterval(interval);
-			}, 1000);
-		}
-
-		const jwtEmail = document.getElementById('jwt-email');
-		if (jwtEmail) {
-			jwtEmail.textContent = payload?.email;
-		}
-
 		// ----FRIENDS----
 		// update the following stats
 		await updateFollowStats(userId);
@@ -170,7 +212,7 @@ export default class Profile extends AbstractView {
 
 				const result = await postFriend(userId, friendDisplayName);
 
-				if (result.success) {
+				if (result && result.success) {
 		    		addFriendMessage.textContent = `✅ ${result.message}`;
 					addFriendMessage.classList.remove('text-red-400');
 					addFriendMessage.classList.add('text-green-400');
@@ -238,6 +280,88 @@ export default class Profile extends AbstractView {
   	}
 }
 
+// fetches user profile data from profile service
+async function getUserProfileById(userId: number): Promise<any> {
+	try {
+		const response = await fetch(`${API_BASE}/profile-by-id/${userId}`, {
+			method: 'GET'
+		});
+
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+
+		const data = await response.json();
+		return data.data;
+	} catch (error) {
+		console.error('Error fetching user profile:', error);
+		return null;
+	}
+}
+
+//get the current avatar, diplay name and card color
+async function loadProfile(userId: number) {
+	const userProfile = await getUserProfileById(userId);
+	if (!userProfile) return;
+
+	// === Avatar ===
+	const avatarPreviewContainer = document.getElementById("avatar-preview-container") as HTMLDivElement;
+	if (avatarPreviewContainer) {
+		avatarPreviewContainer.innerHTML = "";
+
+		if (userProfile.avatarUrl) {
+			const img = document.createElement("img");
+			img.src = userProfile.avatarUrl;
+			img.className = "w-full h-full object-cover rounded-full";
+			avatarPreviewContainer.appendChild(img);
+		} else {
+			avatarPreviewContainer.textContent = userProfile.displayName.charAt(0);
+		}
+	}
+
+	// === Display Name ===
+	const displayNameInput = document.getElementById("display-name-input") as HTMLInputElement;
+	if (displayNameInput) {
+		displayNameInput.value = userProfile.displayName;
+	}
+
+	// === Card Color ===
+	const cardColorPicker = document.getElementById("card-color-input") as HTMLInputElement;
+	const cardColorPreview = document.getElementById("card-color-preview");
+	if (cardColorPicker) {
+		cardColorPicker.value = userProfile.cardColor;
+	}
+	if (cardColorPreview) {
+		cardColorPreview.style.backgroundColor = userProfile.cardColor;
+	}
+}
+
+// function to validate display name (max 20 chars, not empty)
+function isValidDisplayName(displayName: string): boolean {
+	return typeof displayName === 'string' && displayName.trim().length > 0 && displayName.trim().length <= 20;
+}
+
+//post update profile
+async function postUpdateProfile(userId: number, displayName: string, avatar: string, cardColor: string): Promise<any> {
+	try {
+	    const response = await fetch(`${API_BASE}/profile-update`, {
+	    	method: 'POST',
+	    	headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ userId, displayName, avatar, cardColor })
+    	});
+
+	    const result = await response.json();
+
+		if (!response.ok) {
+			throw new Error(result.error || "Failed to update profile");
+		}
+		return result;
+	} catch (error) {
+		console.error('Error updating profile:', error);
+		return null;
+	}
+}
+
 // returns time remaining (as string) until JWT expiration
 function getJwtTimeRemaining(token: string | null): string {
 	const payload = parseJwt(token);
@@ -250,35 +374,15 @@ function getJwtTimeRemaining(token: string | null): string {
 	return `${min}m ${sec}s`;
 }
 
-// breaks a long JWT string into 3 lines
+// breaks a long JWT string into 6 lines
 function formatJwtForDisplay(jwt: string | null): string {
 	if (!jwt) return "";
-	const partLength = Math.ceil(jwt.length / 3);
+	const partLength = Math.ceil(jwt.length / 6);
 	const lines = [];
-	for (let i = 0; i < 3; i++) {
+	for (let i = 0; i < 6; i++) {
 		lines.push(jwt.slice(i * partLength, (i + 1) * partLength));
 	}
 	return lines.join('\n');
-}
-
-// fetches user profile data from profile service
-async function getUserProfileById(userId: number): Promise<any> {
-	try {
-		const response = await fetch(`${API_BASE}/profile-by-id/${userId}`, {
-			method: 'GET'
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-
-		const data = await response.json();
-		return data.data;
-	} catch (error) {
-		console.error('Error fetching user profile:', error);
-		return null;
-	}
 }
 
 //get follow stats
@@ -356,7 +460,7 @@ async function updateFriendList(userId: number) {
 					const statusText = `<span class="text-sm ${isOnline ? 'text-green-400' : 'text-gray-400'}">${isOnline ? 'Online' : 'Offline'}</span>`;
 
 					const li = document.createElement('li');
-					li.className = 'relative flex justify-between p-2 pl-3 pr-3 bg-gray-700 rounded min-h-[48px]';
+					li.className = 'relative flex justify-between p-2 pl-3 pr-3 bg-gray-700 rounded min-h-[42px]';
 
 					li.dataset.friendId = friend.id.toString();
 
@@ -370,7 +474,7 @@ async function updateFriendList(userId: number) {
 						</div>
 
 						<!-- Right side: status, aligned bottom -->
-						<div class="flex flex-col justify-between items-end ml-auto" style="height: 100%; min-height: 48px;">
+						<div class="flex flex-col justify-between items-end ml-auto" style="height: 100%; min-height: 42px;">
 							<div></div> <!-- empty spacer to push status down -->
 							<div class="flex items-center gap-2">
 								${statusDot}
@@ -424,7 +528,7 @@ async function getMatchStat(userId: number): Promise<any> {
 		});
 
 		const data = await response.json();
-		if (!data.data) {
+		if (data && !data.data) {
 			console.info(`User has no Match Stat.`);
 			return null;
 		}
@@ -444,7 +548,7 @@ async function getMatchHistory(userId: number): Promise<any> {
 		});
 
 		const data = await response.json();
-		if (data.data.length === 0) {
+		if (data && data.data.length === 0) {
 			console.info(`User has no Match History.`);
 			return null;
 		}
