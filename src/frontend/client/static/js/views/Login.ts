@@ -4,6 +4,8 @@ import TiamaPong from '../../../game/entities/TiamaPong.js';
 // set the API base URL to the API gateway for all authentication requests
 const API_BASE = 'https://localhost:8044';
 
+let GOOGLE_CLIENT_ID: string | null = null;
+
 // check if login JWT is valid
 function isJwtValid(token: string | null): boolean {
 	if (!token) return false;
@@ -238,27 +240,42 @@ export default class Login extends AbstractView {
 			});
 		}
 
-		// initialize the Google sign-in widget with appropriate client ID and callback (handleGoogleCredential).
-		window.google.accounts.id.initialize({
-			client_id: "445999956724-9nbpuf3kfd38j2hrji5sl86aajcrsaou.apps.googleusercontent.com",
-			callback: handleGoogleCredential,
-			context: "signin",
-			ux_mode: "popup",
-			login_uri: "http://localhost:8042/",
-		});
-
-		// render the Google sign-in button in the DOM element with ID google-signin-button.
-		window.google.accounts.id.renderButton(
-			document.getElementById("google-signin-button")!,
-			{
-				type: "standard",
-				theme: "filled_black",
-				size: "large",
-				text: "continue_with",
-				shape: "rectangular",
-				logo_alignment: "left",
+		// fetch GOOGLE_CLIENT_ID from backend "gocorinthians" endpoint, if not already set
+		if (!GOOGLE_CLIENT_ID) {
+			try {
+				const res = await fetch('/gocorinthians');
+				const data = await res.json();
+				GOOGLE_CLIENT_ID = data.GOOGLE_CLIENT_ID;
+			} catch (e) {
+				console.error('Failed to fetch GOOGLE_CLIENT_ID:', e);
 			}
-		);
+		}
+
+		// only initialize the Google sign-in widget with appropriate client ID and callback (handleGoogleCredential).
+		if (GOOGLE_CLIENT_ID) {
+			window.google.accounts.id.initialize({
+				client_id: GOOGLE_CLIENT_ID,
+				callback: handleGoogleCredential,
+				context: "signin",
+				ux_mode: "popup",
+				login_uri: "http://localhost:8042/",
+			});
+
+			// render the Google sign-in button in the DOM element with ID google-signin-button.
+			window.google.accounts.id.renderButton(
+				document.getElementById("google-signin-button")!,
+				{
+					type: "standard",
+					theme: "filled_black",
+					size: "large",
+					text: "continue_with",
+					shape: "rectangular",
+					logo_alignment: "left",
+				}
+			);
+		} else {
+			console.error('GOOGLE_CLIENT_ID not found; Google Sign-In cannot be initialized.');
+		}
 	}
 
 	async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
