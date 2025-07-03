@@ -3,6 +3,10 @@ import { readFileSync } from "node:fs"; // function to read files with SSL certi
 import dotenv from 'dotenv'; // loads environment variables from .env
 import { Database } from 'better-sqlite3'; // type for SQLite database
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify plugin for SQLite
+import fastifyMultipart from '@fastify/multipart';
+import { writeFile } from 'fs/promises';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 
 dotenv.config();
 
@@ -23,6 +27,12 @@ const httpsOptions = {
 const app = fastify({
     logger: true,
     https: httpsOptions
+});
+
+app.register(fastifyMultipart);
+app.register(fastifyStatic, {
+	root: path.join(__dirname, '/static/uploads'),
+	prefix: '/uploads/',
 });
 
 if (SINGLE_CONTAINER === 'true'){
@@ -125,8 +135,23 @@ function isValidDisplayName(displayName: string): boolean {
 }
 
 // Updates display name, card color and avatar
-app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: number, displayName: string, avatar: string, cardColor: string} }>, reply) => {
-	const { userId, displayName, avatar, cardColor} = request.body;
+app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { userId: string } }>, reply) => {
+	const { userId } = request.params;
+	const parts = request.parts();
+
+	let displayName = '';
+	let cardColor = '';
+	let avatarBuffer: Buffer | null = null; // binary contents of the file
+	let avatarFilename = ''; // original file name
+	for await (const part of parts) {
+		if (part.type === 'file' && part.fieldname === 'avatar') {
+			avatarBuffer = await part.toBuffer();
+			avatarFilename = part.filename;
+		} else if (part.type === 'field') {
+			if (part.fieldname === 'displayName') displayName = part.value as string;
+			if (part.fieldname === 'cardColor') cardColor = part.value as string;
+		}
+	}
 
 	if (!userId|| !displayName || !cardColor) {
 		app.log.warn(`Missing fields in update profile request: ${JSON.stringify(request.body)}`);
@@ -141,7 +166,8 @@ app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: numb
 	}
 
 	const db = app.betterSqlite3;
-	// if changing display name: check for duplicates
+
+	// check for duplicate display name
 	if (displayName) {
 		const otherUser = db.prepare(`SELECT 1 FROM users WHERE displayName = ? AND id != ?`).get(displayName, userId);
 		if (otherUser) {
@@ -149,6 +175,20 @@ app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: numb
 			return;
 		}
 	}
+
+	// Save avatar to disk if present
+	let avatarPath = '';
+	if (avatarBuffer && avatarFilename) {
+		const safeFilename = `${userId}-${Date.now()}-${avatarFilename}`.replace(/[^a-z0-9.\-_]/gi, '_');
+		avatarPath = `/uploads/${safeFilename}`;
+  		const fullPath = path.join(__dirname, 'static', avatarPath);
+		await writeFile(fullPath, avatarBuffer);
+	} else {
+		// Keep the one from the db if no file sent
+		const currentAvatar = db.prepare(`SELECT avatarUrl FROM users WHERE id = ?`).get(userId) as {avatarUrl: string};
+		avatarPath = currentAvatar.avatarUrl;
+	}
+
 
 	try {
 		db.prepare(`
@@ -158,7 +198,7 @@ app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: numb
 			  avatarUrl = ?,
 			  cardColor = ?
 			WHERE id = ?
-		`).run(displayName, avatar, cardColor, userId);
+		`).run(displayName, avatarPath, cardColor, userId);
 
 		reply.code(200).send({
 			success: true,
@@ -362,122 +402,6 @@ app.get('/online-status/:userId', async (request: FastifyRequest<{ Params: { use
 	}
 });
 
-// Get user Match Stat
-//TODO - move to game-service
-app.get('/match-stat/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
-	const { id } = request.params;
-
-	try {
-		const db = app.betterSqlite3;
-		const winStmt = db.prepare(`
-			SELECT COUNT(*) AS count FROM matches
-			WHERE winner = ?
-		`);
-		const lossStmt = db.prepare(`
-			SELECT COUNT(*) AS count FROM matches
-			WHERE player1 = ? OR player2 = ?
-			AND winner != ?
-		`);
-
-		const wins = winStmt.get(id) as {count: number};
-		const losses = lossStmt.get(id, id, id) as {count: number};
-		const totalMatches = wins.count + losses.count;
-		if (totalMatches === 0) {
-			app.log.info('No matches found for Match Stat');
-			return reply.send({
-				success: true,
-				data: null
-			});
-		}
-		const winRate = Math.round((wins.count / totalMatches) * 100);
-
-		app.log.info('User total matches: ', totalMatches);
-
-		reply.send({
-			success: true,
-			data: {
-				wins: wins.count,
-				losses: losses.count,
-				winRate: winRate,
-				totalMatches: totalMatches
-			}
-		});
-	} catch (err: any) {
-		app.log.error('Error fetching matches:', err);
-		reply.code(500).send({ error: "Failed to fetch matches." });
-	}
-});
-
-interface MatchRecord {
-	id: number;
-	matchType: string;
-	player1: number;
-	player2: number;
-	player1Score: number;
-	player2Score: number;
-	winner: number;
-	matchDate: string;
-};
-
-interface FormattedMatch {
-	date: string;
-	type: string;
-	opponent: string;
-	score: string;
-	result: string;
-};
-
-// Get user Match History
-//TODO - move to game-service
-app.get('/match-hist/:id', async (request: FastifyRequest<{ Params: { id: string } }>, reply) => {
-	const { id } = request.params;
-
-	try {
-		const db = app.betterSqlite3;
-		const stmt = db.prepare(`
-			SELECT * FROM matches
-			WHERE player1 = ? OR player2 = ?
-			ORDER BY matchDate DESC
-		`);
-
-		const matches = stmt.all(id, id) as MatchRecord[];
-		if (matches.length === 0) {
-			app.log.info('No matches found for Match History.');
-			return reply.send({
-				success: true,
-				data: []
-			});
-		}
-
-		// Format Match Records to Match History
-		const getDisplayName = db.prepare('SELECT displayName FROM users WHERE id = ?');
-
-		const formattedMatches: FormattedMatch[] = matches.map(match => {
-  			const isPlayer1 = match.player1 === Number(id);
-  			const opponentId = isPlayer1 ? match.player2 : match.player1;
-			const opponentResult = getDisplayName.get(opponentId) as { displayName: string };
-  			const opponent = opponentResult?.displayName ?? "AI";
-  			const score = isPlayer1 ? `${match.player1Score} - ${match.player2Score}` : `${match.player2Score} - ${match.player1Score}`;
-  			const result = match.winner === Number(id) ? 'Win' : 'Loss';
-
-  			return {
-    			date: new Date(match.matchDate).toLocaleDateString('pt-BR'),
-    			type: match.matchType,
-    			opponent,
-    			score,
-    			result
-  			};
-		});
-		reply.send({
-			success: true,
-			data: formattedMatches
-		});
-	} catch (err: any) {
-		app.log.error('Error fetching matches:', err);
-		reply.code(500).send({ error: "Failed to fetch matches." });
-	}
-});
-
 app.get('/', (request, reply) => {
 	reply.send("Hello from profile service");
 });
@@ -495,23 +419,6 @@ app.listen({host: "0.0.0.0", port: 8046 }, (err, address) => {
 			lastSeen DATETIME,
 			createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 		)
-	`).run();
-
-    //Matches table
-    db.prepare(`
-        CREATE TABLE IF NOT EXISTS matches (
-            id INTEGER PRIMARY KEY,
-            matchType TEXT NOT NULL CHECK(matchType IN ('Tournament', '1v1')),
-            player1 INTEGER NOT NULL,
-            player2 INTEGER,
-            player1Score INTEGER DEFAULT 0,
-            player2Score INTEGER DEFAULT 0,
-            winner INTEGER NOT NULL,
-            matchDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (player1) REFERENCES users(id),
-            FOREIGN KEY (player2) REFERENCES users(id),
-            FOREIGN KEY (winner) REFERENCES users(id)
-        )
 	`).run();
 
     // Friends table (one-way friendship)

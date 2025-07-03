@@ -78,18 +78,17 @@ export default class Profile extends AbstractView {
 			// prevent default form submission
 			e.preventDefault();
 
-			// grab input values for avatar, card color and display name
-			const newDisplayName = (document.getElementById('display-name-input') as HTMLInputElement)?.value.trim();
-			const newAvatar = (document.getElementById('avatar-upload') as HTMLInputElement)?.value;
-			const newCardColor = (document.getElementById('card-color-input') as HTMLInputElement)?.value;
+			// grab input for avatar file, card color and display name in formData
+			const formData = new FormData(form);
 
 			// validate the new displayName format;
+			const newDisplayName = formData.get('displayName') as string;
 			if (newDisplayName && !isValidDisplayName(newDisplayName)) {
 				alert("Display Name must be 1 to 20 characters.");
 				return;
 			}
 
-			const result = await postUpdateProfile(userId, newDisplayName, newAvatar, newCardColor);
+			const result = await postUpdateProfile(userId, formData);
 			if (result && result.success) {
 				alert("Profile updated successfully!");
 				await loadProfile(userId);
@@ -312,8 +311,8 @@ async function loadProfile(userId: number) {
 
 		if (userProfile.avatarUrl) {
 			const img = document.createElement("img");
-			img.src = userProfile.avatarUrl;
-			img.className = "w-full h-full object-cover rounded-full";
+			img.src = `${API_BASE}${userProfile.avatarUrl}`;
+			img.className = "w-full h-full object-contain rounded-full";
 			avatarPreviewContainer.appendChild(img);
 		} else {
 			avatarPreviewContainer.textContent = userProfile.displayName.charAt(0);
@@ -343,12 +342,11 @@ function isValidDisplayName(displayName: string): boolean {
 }
 
 //post update profile
-async function postUpdateProfile(userId: number, displayName: string, avatar: string, cardColor: string): Promise<any> {
+async function postUpdateProfile(userId: number, formData: FormData): Promise<any> {
 	try {
-	    const response = await fetch(`${API_BASE}/profile-update`, {
+	    const response = await fetch(`${API_BASE}/profile-update/${userId}`, {
 	    	method: 'POST',
-	    	headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ userId, displayName, avatar, cardColor })
+			body: formData
     	});
 
 	    const result = await response.json();
@@ -452,8 +450,8 @@ async function updateFriendList(userId: number) {
 				// Create list item for each friend
 				friends.forEach((friend, index) => {
 					const avatar = friend.avatarUrl
-						? `<img src="${friend.avatarUrl}" class="w-8 h-8 rounded-full object-cover" alt="${friend.displayName}">`
-						: `<div class="w-8 h-8 rounded-full bg-white text-gray-700 font-extrabold text-center flex items-center justify-center text-lg">
+						? `<img src="${API_BASE}${friend.avatarUrl}" class="w-11 h-11 rounded-full object-contain bg-white" alt="${friend.displayName}">`
+						: `<div class="w-11 h-11 rounded-full bg-white text-gray-700 font-extrabold text-center flex items-center justify-center text-lg">
  					    	${friend.displayName.charAt(0)}
  					   	   </div>`;
 					const isOnline = statuses[index];
@@ -521,7 +519,6 @@ function stopFriendListRefresh() {
 }
 
 // fetches match stat from game service
-//TODO - change path on api-gateway
 async function getMatchStat(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match/player/${userId}/stats`, {
@@ -541,7 +538,6 @@ async function getMatchStat(userId: number): Promise<any> {
 }
 
 // fetches match history from game service
-//TODO - change path on api-gateway
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match/player/${userId}/matches`, {
