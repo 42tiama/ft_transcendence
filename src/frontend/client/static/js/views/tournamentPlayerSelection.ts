@@ -108,7 +108,7 @@ export default class PlayerSelection extends AbstractView {
 
     // Create the main player card div
     const playerCard = document.createElement('div');
-    playerCard.className = 'w-32 h-38 player border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
+    playerCard.className = 'w-34 h-40 player border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200';
     playerCard.style.backgroundColor = cardColor;
     playerCard.dataset.playerId = playerId.toString(); // Store player ID for easy lookup
     playerCard.dataset.displayName = displayName; // Store display name for easy lookup
