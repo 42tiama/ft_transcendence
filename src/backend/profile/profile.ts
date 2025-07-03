@@ -183,7 +183,12 @@ app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { u
 		avatarPath = `/uploads/${safeFilename}`;
   		const fullPath = path.join(__dirname, 'static', avatarPath);
 		await writeFile(fullPath, avatarBuffer);
+	} else {
+		// Keep the one from the db if no file sent
+		const currentAvatar = db.prepare(`SELECT avatarUrl FROM users WHERE id = ?`).get(userId) as {avatarUrl: string};
+		avatarPath = currentAvatar.avatarUrl;
 	}
+
 
 	try {
 		db.prepare(`
