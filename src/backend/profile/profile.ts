@@ -191,7 +191,7 @@ app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { u
 
 
 	try {
-		db.prepare(`
+		const result = db.prepare(`
 			UPDATE users
 			SET
 			  displayName = ?,
@@ -200,12 +200,51 @@ app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { u
 			WHERE id = ?
 		`).run(displayName, avatarPath, cardColor, userId);
 
+		//sync display name update with game-service players table
+		if (result.changes === 1){
+			const userPayload = {
+				displayName: displayName,
+			}
+
+			fetch(`https://game-service:8045/player/${userId}/info/display-name`, {
+				method: 'POST',
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(userPayload)
+			})
+			.then((gameServiceResponse) => {
+				if (!gameServiceResponse.ok) {
+					app.log.warn(`Profiled failed to update display name of player ID ${userId}`);
+				} else {
+					app.log.info(`Profiled updated display name of player ID ${userId}`);
+				}
+			})
+			.catch((err) => {
+				app.log.error('Could not reach game-service - update display name:', err);
+			})
+
+			//sync display name update with auth users table
+			try {
+				const authResponse = await fetch(`https://auth:8043/change-user-displayname/${userId}`, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(userPayload)
+				})
+				if (!authResponse.ok) {
+					app.log.warn(`Profiled failed to update display name of user ID ${userId}`);
+				} else {
+					app.log.info(`Profiled updated display name of user ID ${userId}`);
+				}
+			} catch (err) {
+				app.log.error('Could not reach auth service - update display name:', err);
+			}
+		}
 		reply.code(200).send({
 			success: true,
 			message: "Profile update successful.",
 		});
 	} catch (err: any) {
 		let message = err.message;
+		console.log(err);
 		if (message && message.includes('UNIQUE constraint failed: users.displayName')) {
 			message = 'This display name is already taken. Please choose another display name.';
 		}
