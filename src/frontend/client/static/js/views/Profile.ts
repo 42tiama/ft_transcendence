@@ -312,7 +312,7 @@ async function loadProfile(userId: number) {
 		if (userProfile.avatarUrl) {
 			const img = document.createElement("img");
 			img.src = `${API_BASE}${userProfile.avatarUrl}`;
-			img.className = "w-full h-full object-cover rounded-full";
+			img.className = "w-full h-full object-contain rounded-full";
 			avatarPreviewContainer.appendChild(img);
 		} else {
 			avatarPreviewContainer.textContent = userProfile.displayName.charAt(0);
@@ -450,8 +450,8 @@ async function updateFriendList(userId: number) {
 				// Create list item for each friend
 				friends.forEach((friend, index) => {
 					const avatar = friend.avatarUrl
-						? `<img src="${friend.avatarUrl}" class="w-8 h-8 rounded-full object-cover" alt="${friend.displayName}">`
-						: `<div class="w-8 h-8 rounded-full bg-white text-gray-700 font-extrabold text-center flex items-center justify-center text-lg">
+						? `<img src="${API_BASE}${friend.avatarUrl}" class="w-11 h-11 rounded-full object-contain bg-white" alt="${friend.displayName}">`
+						: `<div class="w-11 h-11 rounded-full bg-white text-gray-700 font-extrabold text-center flex items-center justify-center text-lg">
  					    	${friend.displayName.charAt(0)}
  					   	   </div>`;
 					const isOnline = statuses[index];
