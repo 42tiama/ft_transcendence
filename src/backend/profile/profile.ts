@@ -3,6 +3,10 @@ import { readFileSync } from "node:fs"; // function to read files with SSL certi
 import dotenv from 'dotenv'; // loads environment variables from .env
 import { Database } from 'better-sqlite3'; // type for SQLite database
 import fastifyBetterSqlite3 from '@punkish/fastify-better-sqlite3'; // fastify plugin for SQLite
+import fastifyMultipart from '@fastify/multipart';
+import { writeFile } from 'fs/promises';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 
 dotenv.config();
 
@@ -23,6 +27,12 @@ const httpsOptions = {
 const app = fastify({
     logger: true,
     https: httpsOptions
+});
+
+app.register(fastifyMultipart);
+app.register(fastifyStatic, {
+	root: path.join(__dirname, '/static/uploads'),
+	prefix: '/uploads/',
 });
 
 if (SINGLE_CONTAINER === 'true'){
@@ -125,8 +135,23 @@ function isValidDisplayName(displayName: string): boolean {
 }
 
 // Updates display name, card color and avatar
-app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: number, displayName: string, avatar: string, cardColor: string} }>, reply) => {
-	const { userId, displayName, avatar, cardColor} = request.body;
+app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { userId: string } }>, reply) => {
+	const { userId } = request.params;
+	const parts = request.parts();
+
+	let displayName = '';
+	let cardColor = '';
+	let avatarBuffer: Buffer | null = null; // binary contents of the file
+	let avatarFilename = ''; // original file name
+	for await (const part of parts) {
+		if (part.type === 'file' && part.fieldname === 'avatar') {
+			avatarBuffer = await part.toBuffer();
+			avatarFilename = part.filename;
+		} else if (part.type === 'field') {
+			if (part.fieldname === 'displayName') displayName = part.value as string;
+			if (part.fieldname === 'cardColor') cardColor = part.value as string;
+		}
+	}
 
 	if (!userId|| !displayName || !cardColor) {
 		app.log.warn(`Missing fields in update profile request: ${JSON.stringify(request.body)}`);
@@ -141,13 +166,23 @@ app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: numb
 	}
 
 	const db = app.betterSqlite3;
-	// if changing display name: check for duplicates
+
+	// check for duplicate display name
 	if (displayName) {
 		const otherUser = db.prepare(`SELECT 1 FROM users WHERE displayName = ? AND id != ?`).get(displayName, userId);
 		if (otherUser) {
 			reply.code(400).send({ error: "This display name is already taken. Please choose another display name." });
 			return;
 		}
+	}
+
+	// Save avatar to disk if present
+	let avatarPath = '';
+	if (avatarBuffer && avatarFilename) {
+		const safeFilename = `${userId}-${Date.now()}-${avatarFilename}`.replace(/[^a-z0-9.\-_]/gi, '_');
+		avatarPath = `/uploads/${safeFilename}`;
+  		const fullPath = path.join(__dirname, 'static', avatarPath);
+		await writeFile(fullPath, avatarBuffer);
 	}
 
 	try {
@@ -158,7 +193,7 @@ app.post('/profile-update', async (request: FastifyRequest<{ Body: {userId: numb
 			  avatarUrl = ?,
 			  cardColor = ?
 			WHERE id = ?
-		`).run(displayName, avatar, cardColor, userId);
+		`).run(displayName, avatarPath, cardColor, userId);
 
 		reply.code(200).send({
 			success: true,

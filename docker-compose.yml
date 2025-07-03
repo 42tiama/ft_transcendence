@@ -66,6 +66,7 @@ services:
             - ./certs/profile:/build/certs/profile
             - ./certs/ca:/build/certs/ca
             - profile-data:/data
+            - profile-avatars:/build/static/uploads
         env_file:
             - .env
         environment: #in production, overrides value of env var set for development
@@ -150,3 +151,4 @@ volumes:
   elastic-data:
   game-service-data:
   profile-data:
+  profile-avatars:

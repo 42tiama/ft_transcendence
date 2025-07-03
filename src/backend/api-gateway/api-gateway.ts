@@ -118,6 +118,12 @@ server.register(fastifyHttpProxy, {
 	rewritePrefix: '/match-hist'
 });
 
+server.register(fastifyHttpProxy, {
+	upstream: 'https://profile:8046',
+	prefix: '/uploads',
+	rewritePrefix: '/uploads'
+});
+
 server.get('/', (req, reply)=> {
     req.log.info('Handling root route');
 	reply.send({hello: 'from api-gateway'});

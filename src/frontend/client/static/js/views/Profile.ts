@@ -78,18 +78,17 @@ export default class Profile extends AbstractView {
 			// prevent default form submission
 			e.preventDefault();
 
-			// grab input values for avatar, card color and display name
-			const newDisplayName = (document.getElementById('display-name-input') as HTMLInputElement)?.value.trim();
-			const newAvatar = (document.getElementById('avatar-upload') as HTMLInputElement)?.value;
-			const newCardColor = (document.getElementById('card-color-input') as HTMLInputElement)?.value;
+			// grab input for avatar file, card color and display name in formData
+			const formData = new FormData(form);
 
 			// validate the new displayName format;
+			const newDisplayName = formData.get('displayName') as string;
 			if (newDisplayName && !isValidDisplayName(newDisplayName)) {
 				alert("Display Name must be 1 to 20 characters.");
 				return;
 			}
 
-			const result = await postUpdateProfile(userId, newDisplayName, newAvatar, newCardColor);
+			const result = await postUpdateProfile(userId, formData);
 			if (result && result.success) {
 				alert("Profile updated successfully!");
 				await loadProfile(userId);
@@ -312,7 +311,7 @@ async function loadProfile(userId: number) {
 
 		if (userProfile.avatarUrl) {
 			const img = document.createElement("img");
-			img.src = userProfile.avatarUrl;
+			img.src = `${API_BASE}${userProfile.avatarUrl}`;
 			img.className = "w-full h-full object-cover rounded-full";
 			avatarPreviewContainer.appendChild(img);
 		} else {
@@ -343,12 +342,11 @@ function isValidDisplayName(displayName: string): boolean {
 }
 
 //post update profile
-async function postUpdateProfile(userId: number, displayName: string, avatar: string, cardColor: string): Promise<any> {
+async function postUpdateProfile(userId: number, formData: FormData): Promise<any> {
 	try {
-	    const response = await fetch(`${API_BASE}/profile-update`, {
+	    const response = await fetch(`${API_BASE}/profile-update/${userId}`, {
 	    	method: 'POST',
-	    	headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ userId, displayName, avatar, cardColor })
+			body: formData
     	});
 
 	    const result = await response.json();
