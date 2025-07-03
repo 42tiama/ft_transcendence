@@ -270,11 +270,11 @@ export default class Tournament {
     const winnerAvatar = appElement.querySelector('#winner-avatar')! as HTMLElement;
     const nextMatchButton = appElement.querySelector('#next-match-button')! as HTMLButtonElement;
 
+    matchWinnerModal.classList.replace('hidden', 'flex');
+
     // Fetch winner profile data
     const winnerProfile = await this.getPlayerProfile(match.winner!.id);
 
-    matchWinnerModal.classList.replace('hidden', 'flex');
-    
     // Update winner display name
     winner.innerHTML = winnerProfile?.displayName || match.winner!.displayName;
 
@@ -303,11 +303,35 @@ export default class Tournament {
 
   private async renderChampionModal(appElement: Element, match: Match): Promise<void> {
     const championModal = appElement.querySelector('#tournament-winner-modal')! as HTMLElement;
-    const winner = appElement.querySelector('#champion-display-name')! as HTMLElement;
+    const champion = appElement.querySelector('#champion-display-name')! as HTMLElement;
+    const championAvatar = appElement.querySelector('#champion-avatar')! as HTMLElement;
     const transcendButton = appElement.querySelector('#transcend-button')! as HTMLButtonElement;
 
     championModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner!.displayName;
+
+    //TODO- fix champion winner not always match winner
+    // Fetch champion profile data
+    const championProfile = await this.getPlayerProfile(match.winner!.id);
+
+    // Update champion display name
+    champion.innerHTML = championProfile?.displayName || match.winner!.displayName;
+
+    // Update winner avatar
+    if (championAvatar) {
+      if (championProfile?.avatarUrl) {
+        championAvatar.innerHTML = `<img src="${API_BASE}${championProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${championProfile.displayName}'s avatar">`;
+      } else {
+        championAvatar.innerHTML = (championProfile?.displayName || match.winner!.displayName).charAt(0);
+      }
+    }
+
+    // Update champion card color
+    const championCard = appElement.querySelector('#champion-card') as HTMLElement;
+    if (championCard && championProfile?.cardColor) {
+      championCard.style.backgroundColor = championProfile.cardColor;
+    }
+
+    champion.innerHTML = match.winner!.displayName;
 
     return new Promise<void>((resolve) => {
       transcendButton.addEventListener('click', (event: MouseEvent) => {

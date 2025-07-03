@@ -63,7 +63,7 @@
             🎉 WINNER 🎉
             </div>
 
-            <div id="winner-card" class="w-42 h-52 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center hover:scale-105 transition-all duration-200">
+            <div id="winner-card" class="w-44 h-54 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center hover:scale-105 transition-all duration-200">
                 <div id="winner-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
                 <h3 id="winner-display-name" class="font-bold text-center text-xl leading-tight break-words text-white"></h3>
                 <p class="font-bold mt-4">Well Played!</p>
@@ -79,17 +79,22 @@
     <div id="tournament-winner-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm items-center justify-center z-50 hidden">
         <div class="bg-gradient-to-br from-yellow-600 to-amber-500 border-4 border-yellow-300 rounded-3xl p-10 flex flex-col items-center gap-8 shadow-2xl">
             <div class="text-5xl font-extrabold text-white tracking-wider animate-pulse flex items-center gap-4">
-                🎉🎉🏆 TOURNAMENT CHAMPION 🏆🎉🎉
+                🏆
+                <div class="flex flex-col items-center">
+                    <div>TOURNAMENT</div>
+                    <div>CHAMPION</div>
+                </div>
+                🏆
             </div>
 
-            <div class="flex flex-col bg-white text-black p-6 rounded-2xl items-center w-52 shadow-xl ring-4 ring-yellow-400">
-                <div class="w-16 h-16 bg-yellow-300 rounded-full mb-3 ring-4 ring-white"></div>
-                <h3 id="champion-display-name" class="font-bold text-2xl"></h3>
-                <p class="text-sm mt-1 text-center">Unstoppable Victory!</p>
+            <div id="champion-card" class="w-44 h-54 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center hover:scale-105 transition-all duration-200">
+                <div id="champion-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
+                <h3 id="champion-display-name" class="font-bold text-center text-xl leading-tight break-words text-white"></h3>
+                <p class="font-bold mt-4 text-center">Victory!</p>
             </div>
 
             <a href="/" id="transcend-button" class="bg-black/80 hover:bg-black/60 text-yellow-300 font-semibold px-8 py-3 rounded-xl text-lg shadow-md cursor-pointer" data-link>
-                Transcend
+                🎉 Transcend 🎉
             </a>
         </div>
     </div>
