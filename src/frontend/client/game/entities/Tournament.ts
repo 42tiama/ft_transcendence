@@ -267,10 +267,31 @@ export default class Tournament {
   private async renderMatchWinner(appElement: Element, match: Match): Promise<void> {
     const matchWinnerModal = appElement.querySelector('#match-winner-modal')! as HTMLElement;
     const winner = appElement.querySelector('#winner-display-name')! as HTMLElement;
+    const winnerAvatar = appElement.querySelector('#winner-avatar')! as HTMLElement;
     const nextMatchButton = appElement.querySelector('#next-match-button')! as HTMLButtonElement;
 
+    // Fetch winner profile data
+    const winnerProfile = await this.getPlayerProfile(match.winner!.id);
+
     matchWinnerModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner!.displayName;
+    
+    // Update winner display name
+    winner.innerHTML = winnerProfile?.displayName || match.winner!.displayName;
+
+    // Update winner avatar
+    if (winnerAvatar) {
+      if (winnerProfile?.avatarUrl) {
+        winnerAvatar.innerHTML = `<img src="${API_BASE}${winnerProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${winnerProfile.displayName}'s avatar">`;
+      } else {
+        winnerAvatar.innerHTML = (winnerProfile?.displayName || match.winner!.displayName).charAt(0);
+      }
+    }
+
+    // Update winner card color
+    const winnerCard = appElement.querySelector('#winner-card') as HTMLElement;
+    if (winnerCard && winnerProfile?.cardColor) {
+      winnerCard.style.backgroundColor = winnerProfile.cardColor;
+    }
 
     return new Promise<void>((resolve) => {
       nextMatchButton.addEventListener('click', (event: MouseEvent) => {
