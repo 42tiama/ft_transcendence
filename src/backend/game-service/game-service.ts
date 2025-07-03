@@ -92,9 +92,9 @@ async function addUser(
 
 	try {
 		const stmt = request.server.betterSqlite3.prepare(`
-			INSERT INTO 
+			INSERT INTO
 				players (userId, displayName)
-			VALUES 
+			VALUES
 				(?, ?)
 		`);
 
@@ -122,16 +122,16 @@ async function playerInfoById(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			SELECT 
+			SELECT
 				id,
 				userId,
 				displayName,
 				points,
 				wins,
-				losses 
-			FROM 
-				players 
-			WHERE 
+				losses
+			FROM
+				players
+			WHERE
 				id = ?
 		`);
 
@@ -168,11 +168,11 @@ async function updateDisplayName(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			UPDATE 
+			UPDATE
 				players
-			SET 
+			SET
 				displayName = ?
-			WHERE 
+			WHERE
 				id = ?
 		`);
 
@@ -202,12 +202,12 @@ async function updateWinStat(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			UPDATE 
+			UPDATE
 				players
-			SET 
+			SET
 				points = points + ?,
 				wins = wins + ?
-			WHERE 
+			WHERE
 				id = ?
 		`);
 
@@ -241,12 +241,12 @@ async function updateLossStat(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			UPDATE 
+			UPDATE
 				players
-			SET 
+			SET
 				points = points + ?,
 				losses = losses + ?
-			WHERE 
+			WHERE
 				id = ?
 		`);
 
@@ -275,9 +275,9 @@ async function playersList(
 ){
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			SELECT 
-				id, userId, displayName, points, wins, losses 
-			FROM 
+			SELECT
+				id, userId, displayName, points, wins, losses
+			FROM
 				players
 		`);
 
@@ -316,7 +316,7 @@ async function addTournament(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			INSERT INTO 
+			INSERT INTO
 				tournaments (totalPlayers, totalMatches)
 			VALUES
 				(?, ?)
@@ -350,11 +350,11 @@ async function addTornamentWinner(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			UPDATE 
+			UPDATE
 				tournaments
-			SET 
+			SET
 				winner = ?,	finished = ?
-			WHERE 
+			WHERE
 				id = ?
 		`);
 
@@ -388,12 +388,12 @@ async function tournamentInfoById(
 	try {
 		const query = request.server.betterSqlite3.prepare(`
     		SELECT
-				id, 
-				totalPlayers, 
-				totalMatches, 
-				winner 
-			FROM 
-				tournaments 
+				id,
+				totalPlayers,
+				totalMatches,
+				winner
+			FROM
+				tournaments
 			WHERE
 				id = ?
 		`);
@@ -427,14 +427,14 @@ async function tournamentListByWinner(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			SELECT 
-				id, 
-				totalPlayers, 
-				totalMatches, 
-				winner 
-			FROM 
-				tournaments 
-			WHERE 
+			SELECT
+				id,
+				totalPlayers,
+				totalMatches,
+				winner
+			FROM
+				tournaments
+			WHERE
 				winner = ?
 		`);
 
@@ -479,7 +479,7 @@ async function addMatch(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			INSERT INTO 
+			INSERT INTO
 				matches (matchType, tournamentId, player1, player2, player1Score, player2Score, winner)
 			VALUES
 				(?, ?, ?, ?, ?, ?, ?)
@@ -526,7 +526,7 @@ async function addMatches(
 
 	const db = request.server.betterSqlite3;
 	const insert = db.prepare(`
-		INSERT INTO 
+		INSERT INTO
 			matches (
 				matchType,
 				tournamentId,
@@ -535,7 +535,7 @@ async function addMatches(
 				player1Score,
 				player2Score,
 				winner
-		) VALUES 
+		) VALUES
 			(?, ?, ?, ?, ?, ?, ?)
 	`);
 
@@ -580,16 +580,16 @@ async function matchInfoById(
 	try {
 		const query = request.server.betterSqlite3.prepare(`
 			SELECT
-				id, 
-				matchType, 
-				tournamentId, 
-				player1, 
-				player2, 
-				player1Score, 
-				player2Score, 
-				winner 
-			FROM 
-				matches 
+				id,
+				matchType,
+				tournamentId,
+				player1,
+				player2,
+				player1Score,
+				player2Score,
+				winner
+			FROM
+				matches
 			WHERE
 				id = ?
 		`);
@@ -634,7 +634,7 @@ interface FormattedMatch {
 	result: string;
 };
 
-async function matchListByPlayerId( 
+async function matchListByPlayerId(
 	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply
 ){
@@ -643,22 +643,22 @@ async function matchListByPlayerId(
 	try {
 		const db = app.betterSqlite3;
 		const stmt = db.prepare(`
-			SELECT 
-				* 
-			FROM 
+			SELECT
+				*
+			FROM
 				matches
-			WHERE 
+			WHERE
 				player1 = ? OR player2 = ?
-			ORDER BY 
+			ORDER BY
 				matchDate DESC
 		`);
 
 		const matches = stmt.all(id, id) as MatchRecord[];
-		app.log.info(`No matches found for Match History. ${matches}`);
+		app.log.info(`No matches found for Match History.`);
 		if (matches.length === 0) {
 			return reply.send({
 				success: true,
-				data: matches
+				data: null
 			});
 		}
 
@@ -709,7 +709,7 @@ async function matchStatsByPlayerId(
 				WHERE
 					id = ?
 			`);
-		
+
 		const stat = query.get(id) as { wins: number, losses: number } | undefined;
 		const wins = stat?.wins ?? 0;
 		const losses = stat?.losses ?? 0;
@@ -748,17 +748,17 @@ async function addResultMatch(
 	reply: FastifyReply
 ){
 	const matchId = request.params.matchId;
-	const { 
+	const {
 		player1Score,
 		player2Score,
-		winner 
+		winner
 	} = request.body;
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			UPDATE 
+			UPDATE
 				matches
-			SET 
+			SET
 				player1Score = ?, player2Score = ?, winner = ?
 			WHERE id = ?
 		`);
@@ -788,18 +788,18 @@ async function matchListByTornamentId(
 
 	try {
 		const query = request.server.betterSqlite3.prepare(`
-			SELECT 
-				id, 
-				matchType, 
-				tournamentId, 
-				player1, 
-				player2, 
-				player1Score, 
-				player2Score, 
-				winner 
-			FROM 
-				matches 
-			WHERE 
+			SELECT
+				id,
+				matchType,
+				tournamentId,
+				player1,
+				player2,
+				player1Score,
+				player2Score,
+				winner
+			FROM
+				matches
+			WHERE
 				tournamentId = ?
 		`);
 

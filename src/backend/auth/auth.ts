@@ -360,7 +360,7 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 
 	// validate inputs
 	if (!email || !currentPassword || !newPassword) {
-		reply.code(400).send({ error: "Missing required fields: email, current password, and at least one of new password or new display name." });
+		reply.code(400).send({ error: "Missing required fields: email, current password, and new password." });
 		return;
 	}
 
@@ -384,7 +384,7 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 		return;
 	}
 
-	// reject Google users from changing password or displayName
+	// reject Google users from changing password
 	if (user.password === 'Google#1A') {
 		reply.code(400).send({ error: "Change not allowed for Google Sign-In accounts." });
 		return;
@@ -449,9 +449,6 @@ app.post('/changepass', async (request: FastifyRequest<{ Body: ChangePassRequest
 		});
 	} catch (err: any) {
 		let message = err.message;
-		if (message && message.includes('UNIQUE constraint failed: users.displayName')) {
-			message = 'This display name is already taken. Please choose another display name.';
-		}
 		reply.code(500).send({ error: message || "Failed to update user." });
 	}
 });
@@ -541,6 +538,39 @@ app.post('/google-login', async (request: FastifyRequest<{ Body: { credential: s
 	} catch (err) {
 		// handle errors
 		reply.code(500).send({ error: 'Google login failed.' });
+	}
+});
+
+// --- POST /change-user-displayname ---
+app.post('/change-user-displayname/:userId', async (request: FastifyRequest<{ Params : {userId: string}, Body: {displayName: string} }>, reply) => {
+	const { userId } = request.params;
+	const { displayName } = request.body;
+
+	// validate inputs
+	if (!userId || !displayName) {
+		reply.code(400).send({ error: "Missing required fields." });
+		return;
+	}
+
+	const db = app.betterSqlite3;
+
+	try {
+		db.prepare(`
+			UPDATE
+				users
+			SET
+				displayName = ?
+			WHERE
+				id = ?
+		`).run(displayName, userId);
+
+		reply.code(200).send({
+			success: true,
+			message: "Display name update successful.",
+		});
+	} catch (err: any) {
+		let message = err.message;
+		reply.code(500).send({ error: message || "Failed to update user display name." });
 	}
 });
 
