@@ -519,7 +519,6 @@ function stopFriendListRefresh() {
 }
 
 // fetches match stat from game service
-//TODO - change path on api-gateway
 async function getMatchStat(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match/player/${userId}/stats`, {
@@ -539,7 +538,6 @@ async function getMatchStat(userId: number): Promise<any> {
 }
 
 // fetches match history from game service
-//TODO - change path on api-gateway
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
 		const response = await fetch(`${API_BASE}/match/player/${userId}/matches`, {

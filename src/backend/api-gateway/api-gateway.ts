@@ -108,18 +108,6 @@ server.register(fastifyHttpProxy, {
 
 server.register(fastifyHttpProxy, {
 	upstream: 'https://profile:8046',
-	prefix: '/match-stat',
-	rewritePrefix: '/match-stat'
-});
-
-server.register(fastifyHttpProxy, {
-	upstream: 'https://profile:8046',
-	prefix: '/match-hist',
-	rewritePrefix: '/match-hist'
-});
-
-server.register(fastifyHttpProxy, {
-	upstream: 'https://profile:8046',
 	prefix: '/uploads',
 	rewritePrefix: '/uploads'
 });
