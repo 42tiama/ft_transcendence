@@ -138,7 +138,7 @@ async function playerInfoById(
 		const playerInfo = query.get(userId);
 
 		if (playerInfo) {
-			reply.send({
+			reply.code(200).send({
 				success: true,
 				message: `Player with ID ${userId} found`,
 				data: playerInfo
@@ -615,48 +615,130 @@ async function matchInfoById(
 	}
 }
 
-async function matchListByPlayerId(
-	request: FastifyRequest<{ Params: { playerId: string } }>,
+interface MatchRecord {
+	id: number;
+	matchType: string;
+	player1: number;
+	player2: number;
+	player1Score: number;
+	player2Score: number;
+	winner: number;
+	matchDate: string;
+};
+
+interface FormattedMatch {
+	date: string;
+	type: string;
+	opponent: string;
+	score: string;
+	result: string;
+};
+
+async function matchListByPlayerId( 
+	request: FastifyRequest<{ Params: { id: string } }>,
 	reply: FastifyReply
 ){
-	const playerId = request.params.playerId;
+	const { id } = request.params;
 
 	try {
-		const query = request.server.betterSqlite3.prepare(`
+		const db = app.betterSqlite3;
+		const stmt = db.prepare(`
 			SELECT 
-				id, 
-				matchType, 
-				tournamentId, 
-				player1, 
-				player2, 
-				player1Score, 
-				player2Score, 
-				winner 
+				* 
 			FROM 
-				matches 
+				matches
 			WHERE 
 				player1 = ? OR player2 = ?
+			ORDER BY 
+				matchDate DESC
 		`);
 
-		const matches = query.all(playerId, playerId);
-
-		if (matches.length > 0) {
-			reply.send({
+		const matches = stmt.all(id, id) as MatchRecord[];
+		app.log.info(`No matches found for Match History. ${matches}`);
+		if (matches.length === 0) {
+			return reply.send({
 				success: true,
-				message: `Matches for player ID ${playerId} found`,
 				data: matches
 			});
-		} else {
-			reply.code(404).send({
-				error: `No matches found for player ID ${playerId}`,
-				success: false
+		}
+
+		// Format Match Records to Match History
+		const getDisplayName = db.prepare('SELECT displayName FROM players WHERE id = ?');
+
+		const formattedMatches: FormattedMatch[] = matches.map(match => {
+  			const isPlayer1 = match.player1 === Number(id);
+  			const opponentId = isPlayer1 ? match.player2 : match.player1;
+			const opponentResult = getDisplayName.get(opponentId) as { displayName: string };
+  			const opponent = opponentResult?.displayName ?? "AI";
+  			const score = isPlayer1 ? `${match.player1Score} - ${match.player2Score}` : `${match.player2Score} - ${match.player1Score}`;
+  			const result = match.winner === Number(id) ? 'Win' : 'Loss';
+
+  			return {
+    			date: new Date(match.matchDate).toLocaleDateString('pt-BR'),
+    			type: match.matchType,
+    			opponent,
+    			score,
+    			result
+  			};
+		});
+		reply.send({
+			success: true,
+			data: formattedMatches
+		});
+	} catch (err: any) {
+		app.log.error('Error fetching matches:', err);
+		reply.code(500).send({
+			error: "Failed to fetch matches.",
+		});
+	}
+}
+
+async function matchStatsByPlayerId(
+	request: FastifyRequest<{ Params: { id: string } }>,
+	reply: FastifyReply
+){
+	const { id } = request.params;
+
+	try {
+			const query = request.server.betterSqlite3.prepare(`
+				SELECT
+					wins,
+					losses
+				FROM
+					players
+				WHERE
+					id = ?
+			`);
+		
+		const stat = query.get(id) as { wins: number, losses: number } | undefined;
+		const wins = stat?.wins ?? 0;
+		const losses = stat?.losses ?? 0;
+		const totalMatches = wins + losses;
+
+		if (totalMatches === 0) {
+			app.log.info('No matches found for Match Stat');
+			return reply.send({
+				success: true,
+				data: null
 			});
 		}
-	} catch (err) {
-		request.log.error(err, `Error fetching matches for player ID ${playerId}`);
+		const winRate = Math.round((wins / totalMatches) * 100);
+
+		app.log.info('User total matches: ', totalMatches);
+
+		reply.send({
+			success: true,
+			data: {
+				wins,
+				losses,
+				winRate,
+				totalMatches
+			}
+		});
+	} catch (err: any) {
+		app.log.error('Error fetching matches:', err);
 		reply.code(500).send({
-			error: 'Internal server Error',
-			success: false
+			error: "Failed to fetch matches."
 		});
 	}
 }
@@ -775,7 +857,8 @@ app.get('/tournament/:winnerId/matches', tournamentListByWinner);
 // Match
 app.get('/match/:id/info', matchInfoById);
 app.get('/match/tournament/:tournamentId/matches', matchListByTornamentId);
-app.get('/match/player/:playerId/matches', matchListByPlayerId);
+app.get('/match/player/:id/matches', matchListByPlayerId);
+app.get('/match/player/:id/stats', matchStatsByPlayerId);
 
 // Player
 app.get('/player/:id/info', playerInfoById);
@@ -816,6 +899,7 @@ app.listen({ host: "0.0.0.0", port: 8045 }, (err: any, address: any) => {
             player1Score INTEGER DEFAULT 0,
             player2Score INTEGER DEFAULT 0,
             winner INTEGER,
+			matchDate DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (tournamentId) REFERENCES tournaments(id),
             FOREIGN KEY (player1) REFERENCES players(id),
             FOREIGN KEY (player2) REFERENCES players(id),

@@ -175,6 +175,7 @@ export default class Profile extends AbstractView {
 		if (matches) {
 			const matchTable = document.getElementById('match-history-table');
 			if (matchTable) {
+				console.log("Match History:", matches);
 				// Clear table first
 				matchTable.innerHTML = '';
 
@@ -523,7 +524,7 @@ function stopFriendListRefresh() {
 //TODO - change path on api-gateway
 async function getMatchStat(userId: number): Promise<any> {
 	try {
-		const response = await fetch(`${API_BASE}/match-stat/${userId}`, {
+		const response = await fetch(`${API_BASE}/match/player/${userId}/stats`, {
 			method: 'GET'
 		});
 
@@ -543,13 +544,13 @@ async function getMatchStat(userId: number): Promise<any> {
 //TODO - change path on api-gateway
 async function getMatchHistory(userId: number): Promise<any> {
 	try {
-		const response = await fetch(`${API_BASE}/match-hist/${userId}`, {
+		const response = await fetch(`${API_BASE}/match/player/${userId}/matches`, {
 			method: 'GET'
 		});
 
 		const data = await response.json();
-		if (data && data.data.length === 0) {
-			console.info(`User has no Match History.`);
+		if (data && !data.data) {
+			console.info(`User has no Match History. ${data.data}`);
 			return null;
 		}
 		return data.data;
