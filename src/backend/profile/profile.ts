@@ -160,7 +160,7 @@ app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { u
 	}
 
 	// validate displayName format
-	if (displayName && !isValidDisplayName(displayName)) {
+	if (!isValidDisplayName(displayName)) {
 		reply.code(400).send({ error: "Display Name must be 1 to 20 characters." });
 		return;
 	}

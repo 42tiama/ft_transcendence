@@ -83,7 +83,7 @@ export default class Profile extends AbstractView {
 
 			// validate the new displayName format;
 			const newDisplayName = formData.get('displayName') as string;
-			if (newDisplayName && !isValidDisplayName(newDisplayName)) {
+			if (!isValidDisplayName(newDisplayName)) {
 				alert("Display Name must be 1 to 20 characters.");
 				return;
 			}
