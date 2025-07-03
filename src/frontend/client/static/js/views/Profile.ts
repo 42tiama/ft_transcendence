@@ -94,7 +94,7 @@ export default class Profile extends AbstractView {
 				await loadProfile(userId);
 			}
 			else {
-				alert("There was an error updating your profile. Try again.");
+				alert("This display name is already taken. Please choose another display name.");
 			}
 		});
 
@@ -174,7 +174,6 @@ export default class Profile extends AbstractView {
 		if (matches) {
 			const matchTable = document.getElementById('match-history-table');
 			if (matchTable) {
-				console.log("Match History:", matches);
 				// Clear table first
 				matchTable.innerHTML = '';
 
@@ -350,10 +349,6 @@ async function postUpdateProfile(userId: number, formData: FormData): Promise<an
     	});
 
 	    const result = await response.json();
-
-		if (!response.ok) {
-			throw new Error(result.error || "Failed to update profile");
-		}
 		return result;
 	} catch (error) {
 		console.error('Error updating profile:', error);
@@ -546,7 +541,7 @@ async function getMatchHistory(userId: number): Promise<any> {
 
 		const data = await response.json();
 		if (data && !data.data) {
-			console.info(`User has no Match History. ${data.data}`);
+			console.info(`User has no Match History.`);
 			return null;
 		}
 		return data.data;

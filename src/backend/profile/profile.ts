@@ -213,9 +213,9 @@ app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { u
 			})
 			.then((gameServiceResponse) => {
 				if (!gameServiceResponse.ok) {
-					app.log.warn(`Profiled failed to update display name of player ID ${userId}`);
+					app.log.warn(`Profile failed to update display name of player ID ${userId}`);
 				} else {
-					app.log.info(`Profiled updated display name of player ID ${userId}`);
+					app.log.info(`Profile updated display name of player ID ${userId}`);
 				}
 			})
 			.catch((err) => {
@@ -230,9 +230,9 @@ app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { u
 					body: JSON.stringify(userPayload)
 				})
 				if (!authResponse.ok) {
-					app.log.warn(`Profiled failed to update display name of user ID ${userId}`);
+					app.log.warn(`Profile failed to update display name of auth user ID ${userId}`);
 				} else {
-					app.log.info(`Profiled updated display name of user ID ${userId}`);
+					app.log.info(`Profile updated display name of auth user ID ${userId}`);
 				}
 			} catch (err) {
 				app.log.error('Could not reach auth service - update display name:', err);
