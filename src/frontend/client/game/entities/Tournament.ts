@@ -232,11 +232,12 @@ export default class Tournament {
         // this.debugPrintRoundArray();
         await this.currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
-          this.matchLog.push(...this.currentRound);
+          this.matchLog.push(this.currentRound[i]);
           await this.renderMatchWinner(appElement, this.currentRound[i]);
+        } else {
+          this.matchLog.push(this.currentRound[0]);
         }
       }
-      this.matchLog.push(...this.currentRound);
       // Iury, Andre nesse ponto, caso decida enviar os matchs antes de finalizar o campeonato
       // vc consegue no array "matchLog", todos os resultados de partidas desse round
       this.totalRounds--;
