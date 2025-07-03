@@ -672,9 +672,19 @@ async function matchListByPlayerId(
   			const opponent = opponentResult?.displayName ?? "AI";
   			const score = isPlayer1 ? `${match.player1Score} - ${match.player2Score}` : `${match.player2Score} - ${match.player1Score}`;
   			const result = match.winner === Number(id) ? 'Win' : 'Loss';
+			const timestamp = new Intl.DateTimeFormat('pt-BR', {
+				timeZone: 'America/Sao_Paulo',
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+				hour12: false,
+			}).format(new Date(match.matchDate)).replace(',', ' -');
+
 
   			return {
-    			date: new Date(match.matchDate).toLocaleDateString('pt-BR'),
+    			date: timestamp,
     			type: match.matchType,
     			opponent,
     			score,
