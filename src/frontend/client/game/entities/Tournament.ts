@@ -140,8 +140,9 @@ export default class Tournament {
     matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
     this.matchTitle = matchTitle.innerHTML;
     if (nextMatch) {
-      nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
-      nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
+      nextMatchInfo.style.display = 'flex';
+      nextMatchP1!.innerHTML = nextMatch.player1.displayName ? nextMatch.player1.displayName : '';
+      nextMatchP2!.innerHTML = nextMatch.player2!.displayName ? nextMatch.player2!.displayName : '';
     }
   }
 
@@ -320,9 +321,14 @@ export default class Tournament {
         this.matchTitle = 'SEMI-FINALS';
       } else if (this.currentRound.length == 1) {
         this.matchTitle = 'LAST ROUND MATCH!';
+      } else {
+        this.matchTitle = '';
       }
       for (let i : number = 0; i < this.currentRound.length; i++) {
         this.currentGame = new Game(this.currentRound[i], 'board');
+        if (i == this.currentRound.length - 1 && this.matchTitle != 'FINAL') {
+          this.matchTitle = 'LAST ROUND MATCH!';
+        }
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
         await this.currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
