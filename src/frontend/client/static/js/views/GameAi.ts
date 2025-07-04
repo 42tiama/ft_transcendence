@@ -104,6 +104,7 @@ export default class GameAi extends AbstractView {
   async renderGame(gameContext: TiamaPong) {
     try {
       this.user = new User(gameContext, gameContext.sessionUser!.id, gameContext.sessionUser!.displayName, "");
+      document.querySelector("#human-player h1")!.innerHTML = gameContext.sessionUser!.displayName;
       this.game = new Game(new Match('versus-ai', null, this.user, null), 'board');
       this.game.setSelectedDifficulty(this.selectedDifficulty);
       await this.game!.startMatch(this.game!.match);

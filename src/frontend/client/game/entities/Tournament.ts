@@ -9,7 +9,6 @@ import MatchService from '../../services/MatchService.js'
 import { MatchData, TournamentData } from "services/types.js";
 import { Player } from "./Player.js";
 
-// sets the API base URL to the API gateway for all authentication requests.
 const API_BASE = 'https://localhost:8044';
 
 export default class Tournament {
@@ -31,17 +30,9 @@ export default class Tournament {
 
   constructor(gameContext: TiamaPong) {
     this.tournamentInit(gameContext);
-    // this.initGameServices();
   }
 
-  // initGameServices() {
-  //   this.gameServices!.tournament = new TournamentService();
-  //   this.gameServices!.match = new MatchService();
-  //   this.gameServices!.player = new PlayerService();
-  // }
-
   private async tournamentInit(gameContext: TiamaPong) {
-    // this.initGameServices();
     this.totalPlayers = gameContext.preTournamentSelection.length;
     this.totalMatches = this.totalPlayers - 1;
     this.nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(this.totalPlayers)));
@@ -58,14 +49,6 @@ export default class Tournament {
       totalRounds: ${this.totalRounds}`);
       this.createFirstRound(gameContext);
       await this.registerTournament();
-
-    // const payload: TournamentData = { 
-    //   numberMatches: this.totalMatches,
-    //   numberPlayers: this.totalPlayers, 
-    //   winner: undefined, finished: 0
-    // };
-    // this.tournamentId = await this.gameServices.tournament!.addTournament(payload);
-    // this.debugPrintRoundArray();
   }
 
   private async registerTournament() {
@@ -87,17 +70,6 @@ export default class Tournament {
       console.log(`player ${i}: ${participants[i].displayName}\n`);
     }
   }
-
-  // public debugPrintRoundArray(): void {
-  //   for (let i = 0; i < this.currentRound.length; i++) {
-  //     console.log(`Match ${i}\n`);
-  //     console.log(`player 1 - ${this.currentRound[i].player1.displayName} VS ${this.currentRound[i].player2.displayName} - Player 2\n`);
-  //   }
-  //   console.log(`Byers: \n`);
-  //   for (let i = 0; i < this.byes.length; i++) {
-  //     console.log(`Byer ${i}: ${this.byes[i].displayName}`);
-  //   }
-  // }
 
   private shuffleParticipants(participants: User[]): User[] {
     console.log("Before shuffle: ");
@@ -168,12 +140,12 @@ export default class Tournament {
     matchTitle.innerHTML != 'Next Match' ? nextMatchInfo.style.display = 'none' : matchTitle;
     this.matchTitle = matchTitle.innerHTML;
     if (nextMatch) {
-      nextMatchP1!.innerHTML = nextMatch ? nextMatch.player1.displayName : '';
-      nextMatchP2!.innerHTML = nextMatch ? nextMatch.player2!.displayName : '';
+      nextMatchInfo.style.display = 'flex';
+      nextMatchP1!.innerHTML = nextMatch.player1.displayName ? nextMatch.player1.displayName : '';
+      nextMatchP2!.innerHTML = nextMatch.player2!.displayName ? nextMatch.player2!.displayName : '';
     }
   }
 
-  // Fetch player profile data from profile service
   private async getPlayerProfile(playerId: number): Promise<{displayName: string, avatarUrl: string, cardColor: string} | null> {
     try {
       const response = await fetch(`${API_BASE}/profile-by-id/${playerId}`, {
@@ -193,7 +165,6 @@ export default class Tournament {
   }
 
   private async renderFreezeTimeModalInfo(appElement: Element, currentMatch: Match): Promise<void> {
-    // Fetch profile data for both players
     const player1Profile = await this.getPlayerProfile(currentMatch.player1.id);
     const player2Profile = await this.getPlayerProfile(currentMatch.player2!.id);
 
@@ -203,7 +174,6 @@ export default class Tournament {
       displayNameP1!.innerHTML = player1Profile?.displayName || currentMatch.player1.displayName;
       displayNameP2!.innerHTML = player2Profile?.displayName || currentMatch.player2!.displayName;
 
-      // Update avatars
       const avatar1 = appElement.querySelector('#player1-freeze-avatar') as HTMLElement;
       const avatar2 = appElement.querySelector('#player2-freeze-avatar') as HTMLElement;
 
@@ -223,7 +193,6 @@ export default class Tournament {
         }
       }
 
-      // Update card colors
       const card1 = appElement.querySelector('#player1-freeze-card') as HTMLElement;
       const card2 = appElement.querySelector('#player2-freeze-card') as HTMLElement;
       if (card1 && player1Profile?.cardColor) {
@@ -284,13 +253,10 @@ export default class Tournament {
 
     matchWinnerModal.classList.replace('hidden', 'flex');
 
-    // Fetch winner profile data
     const winnerProfile = await this.getPlayerProfile(match.winner!.id);
 
-    // Update winner display name
     winner.innerHTML = winnerProfile?.displayName || match.winner!.displayName;
 
-    // Update winner avatar
     if (winnerAvatar) {
       if (winnerProfile?.avatarUrl) {
         winnerAvatar.innerHTML = `<img src="${API_BASE}${winnerProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${winnerProfile.displayName}'s avatar">`;
@@ -299,7 +265,6 @@ export default class Tournament {
       }
     }
 
-    // Update winner card color
     const winnerCard = appElement.querySelector('#winner-card') as HTMLElement;
     if (winnerCard && winnerProfile?.cardColor) {
       winnerCard.style.backgroundColor = winnerProfile.cardColor;
@@ -321,14 +286,10 @@ export default class Tournament {
 
     championModal.classList.replace('hidden', 'flex');
 
-    //TODO- fix champion winner not always match winner
-    // Fetch champion profile data
     const championProfile = await this.getPlayerProfile(match.winner!.id);
 
-    // Update champion display name
     champion.innerHTML = championProfile?.displayName || match.winner!.displayName;
 
-    // Update winner avatar
     if (championAvatar) {
       if (championProfile?.avatarUrl) {
         championAvatar.innerHTML = `<img src="${API_BASE}${championProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${championProfile.displayName}'s avatar">`;
@@ -337,7 +298,6 @@ export default class Tournament {
       }
     }
 
-    // Update champion card color
     const championCard = appElement.querySelector('#champion-card') as HTMLElement;
     if (championCard && championProfile?.cardColor) {
       championCard.style.backgroundColor = championProfile.cardColor;
@@ -361,11 +321,15 @@ export default class Tournament {
         this.matchTitle = 'SEMI-FINALS';
       } else if (this.currentRound.length == 1) {
         this.matchTitle = 'LAST ROUND MATCH!';
+      } else {
+        this.matchTitle = '';
       }
       for (let i : number = 0; i < this.currentRound.length; i++) {
         this.currentGame = new Game(this.currentRound[i], 'board');
+        if (i == this.currentRound.length - 1 && this.matchTitle != 'FINAL') {
+          this.matchTitle = 'LAST ROUND MATCH!';
+        }
         await this.renderTournamentInfo(appElement, this.currentRound[i], this.currentRound[i + 1]);
-        // this.debugPrintRoundArray();
         await this.currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
           this.matchLog.push(this.currentRound[i]);
@@ -374,8 +338,7 @@ export default class Tournament {
           this.matchLog.push(this.currentRound[0]);
         }
       }
-      // Iury, Andre nesse ponto, caso decida enviar os matchs antes de finalizar o campeonato
-      // vc consegue no array "matchLog", todos os resultados de partidas desse round
+
       this.totalRounds--;
       if (this.totalRounds == 0) {
         this.tournamentFinished = true;
@@ -387,9 +350,6 @@ export default class Tournament {
       }
     }
     await this.createTournamentLog();
-    // Iury, Andre aqui da forma que eu havia pensado, eu crio o payload pra mandar os dados macros do torneio
-    // e tbm chamo o endpoint pra mandar o log dos matchs, igual pode ser feito la em cima(213), porem de uma vez só,
-    // matchs do torneio inteiro
   }
 
   private createFirstRound(gameContext: TiamaPong) {
@@ -432,10 +392,11 @@ export default class Tournament {
     if (tournamentServiceResponse) {
       console.log('Tournament history saved successfully!');
     } else {
-      console.error('Failed to save the tournament log');
+      console.error('Failed to save the tournament log, no tournament nor matches will be saved.');
+      return ;
     }
 
-    this.matchLog.forEach(element => { 
+    for (const element of this.matchLog) {
       const payload = {
         matchType: 'tournament',
         tournamentId: this.tournamentId,
@@ -446,31 +407,23 @@ export default class Tournament {
         winner: element.winner?.id
       }
       
-      let matchServiceResponse = async () => await this.gameServices!.match?.createMatch(payload as MatchData);
+      let matchServiceResponse =  await this.gameServices!.match?.createMatch(payload as MatchData);
       
-      console.log(`Match id: ${matchServiceResponse()} created`);
+      console.log(`Match id: ${matchServiceResponse} created`);
 
       const points = payload.player1Score > payload.player2Score ? payload.player1Score : payload.player2Score;
       const loserId = payload.player1Score < payload.player2Score ? payload.player1 : payload.player2;
 
       if (payload.winner) {
-        const win = async () => await this.gameServices.player?.addWinStat(payload.winner!, points)
+        await this.gameServices.player?.addWinStat(payload.winner!, points)
           .catch(err => console.error(`Failed to update winner stats: ${err}`));
-        win();  
       }
 
       if (loserId) {
         console.log(`AI match, no loser to update stats for. ${loserId}`);
-        const loser = async () => await this.gameServices.player?.addLossStat(loserId, points)
+        await this.gameServices.player?.addLossStat(loserId, points)
           .catch(err => console.error(`Failed to update loser stats: ${err}`));
-          loser();
       }
-    });
-  
-    // if (matchServiceResponse !== 0 && matchServiceResponse !== undefined) {
-    //   console.log('Match history saved successfully!');
-    // } else {
-    //   console.error('Failed to save the tournament log');
-    // }
+    };
   }
 }

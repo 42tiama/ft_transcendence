@@ -5,7 +5,7 @@ import TiamaPong from '../../../game/entities/TiamaPong.js';
 
 export default class GameMenu extends AbstractView {
   private selectedMode: { versusAi: boolean, versusPlayer: boolean, tournament: boolean };
-  private keyHandler?: (event: KeyboardEvent) => void;
+  private mouseHoverHandler?: (event: MouseEvent) => void;
 
   constructor() {
     super();
@@ -30,59 +30,38 @@ export default class GameMenu extends AbstractView {
     }
   }
 
-  moveCursor = (e: KeyboardEvent, gameContext: TiamaPong) => {
-    const versus = document.getElementById("versus");
+  moveCursor = (e: MouseEvent, gameContext: TiamaPong) => {
+    const versus = document.getElementById("versus-player");
+    const versusAi = document.getElementById("versus-ai");
     const tournament = document.getElementById("tournament");
-    const versusAiLink = document.getElementById("versus-ai-link");
-    const versusPlayerLink = document.getElementById("versus-player-link");
+    const versusLink = document.getElementById("versus-player-Link");
+    const versusAiLink = document.getElementById("versusLink-ai-link");
     const tournamentLink = document.getElementById("tournamentLink");
-    if (e.code === "ArrowDown" || e.code === "ArrowUp") {
-        e.preventDefault();
-        if (e.type === "keydown") {
-          this.selectedMode.versusAi = !this.selectedMode.versusAi;
-          this.selectedMode.versusPlayer = !this.selectedMode.versusPlayer;
-          this.selectedMode.tournament = !this.selectedMode.tournament;
-        }
-        if (this.selectedMode.versusAi)
-          versus!.innerHTML = '&#x25b6;';
-        else
-          versus!.innerHTML = '';
-
-        if (this.selectedMode.versusPlayer)
-          tournament!.innerHTML = '&#x25b6;';
-        else
-          tournament!.innerHTML = '';
-
-        if (this.selectedMode.tournament)
-          tournament!.innerHTML = '&#x25b6;';
-        else
-          tournament!.innerHTML = '';
-    } else if (e.code === "Enter") {
-      if (this.selectedMode.versusAi) {
-        this.onUnMount()
-        versusAiLink!.click();
-      }
-      else if (this.selectedMode.versusPlayer) {
-        this.onUnMount()
-        versusPlayerLink!.click();
-      }
-      else if (this.selectedMode.tournament) {
-        this.onUnMount()
-        tournamentLink!.click();
-      }
-    }
+    if (e.target == versusLink) {
+      versus!.innerHTML = '&#x25b6;';
+      versusAi!.innerHTML = '';
+      tournament!.innerHTML = '';
+    } else if (e.target == versusAiLink) {
+      versus!.innerHTML = '';
+      versusAi!.innerHTML = '&#x25b6;';
+      tournament!.innerHTML = '';
+    } else if (e.target == tournamentLink) {
+      versus!.innerHTML = '';
+      versusAi!.innerHTML = '';
+      tournament!.innerHTML = '&#x25b6;';
+    } 
   } 
 
   async onMount(gameContext: TiamaPong, appElement: Element) {
-    if (this.keyHandler) {
-      document.removeEventListener("keydown", this.keyHandler);
+    if (this.mouseHoverHandler) {
+      document.getElementById('menu-link-container')!.removeEventListener("mouseover", this.mouseHoverHandler);
     }
 
-    this.keyHandler = (event: KeyboardEvent) => {
+    this.mouseHoverHandler = (event: MouseEvent) => {
       this.moveCursor(event, gameContext);
     };
 
-    document.addEventListener("keydown", this.keyHandler);
+    document.getElementById('menu-link-container')!.addEventListener("mouseover", this.mouseHoverHandler);
   }
 
   async beforeMount(gameContext: TiamaPong | null): Promise<boolean> {
@@ -90,9 +69,9 @@ export default class GameMenu extends AbstractView {
   }
 
   async onUnMount() {
-    if (this.keyHandler) {
-      document.removeEventListener("keydown", this.keyHandler);
-      this.keyHandler = undefined;
+    if (this.mouseHoverHandler) {
+      document.getElementById('menu-link-container')!.removeEventListener("mouseover", this.mouseHoverHandler);
+      this.mouseHoverHandler = undefined;
     }
   }
 }
