@@ -197,10 +197,31 @@ export default class Versus extends AbstractView {
   private async renderMatchWinner(appElement: Element, match: Match): Promise<boolean> {
     const matchWinnerModal = appElement.querySelector('#match-winner-modal')! as HTMLElement;
     const winner = appElement.querySelector('#winner-display-name')! as HTMLElement;
-    const reMatchButton = appElement.querySelector('#next-match-button')! as HTMLButtonElement;
+    const winnerAvatar = appElement.querySelector('#winner-avatar')! as HTMLElement;
+    const reMatchButton = appElement.querySelector('#rematch-button')! as HTMLButtonElement;
 
     matchWinnerModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner!.displayName;
+
+    // Fetch winner profile data
+    const winnerProfile = await this.getPlayerProfile(match.winner!.id);
+
+    // Update winner display name
+    winner.innerHTML = winnerProfile?.displayName || match.winner!.displayName;
+
+    // Update winner avatar
+    if (winnerAvatar) {
+      if (winnerProfile?.avatarUrl) {
+        winnerAvatar.innerHTML = `<img src="${API_BASE}${winnerProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${winnerProfile.displayName}'s avatar">`;
+      } else {
+        winnerAvatar.innerHTML = (winnerProfile?.displayName || match.winner!.displayName).charAt(0);
+      }
+    }
+
+    // Update winner card color
+    const winnerCard = appElement.querySelector('#winner-card') as HTMLElement;
+    if (winnerCard && winnerProfile?.cardColor) {
+      winnerCard.style.backgroundColor = winnerProfile.cardColor;
+    }
 
     return new Promise<boolean>((resolve) => {
       reMatchButton.addEventListener('click', (event: MouseEvent) => {
