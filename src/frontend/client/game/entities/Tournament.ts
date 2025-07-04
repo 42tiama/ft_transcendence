@@ -307,7 +307,7 @@ export default class Tournament {
         player2: element.player2?.id,
         player1Score: element.player1Score,
         player2Score: element.player2Score,
-        winner: this.tournamentWinner?.id
+        winner: element.winner?.id
       }
       
       let matchServiceResponse = async () => await this.gameServices!.match?.createMatch(payload as MatchData);
