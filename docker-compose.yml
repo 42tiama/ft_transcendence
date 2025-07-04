@@ -2,6 +2,7 @@ services:
 
     api-gateway:
         restart: always
+        container_name: transcendence-api-gateway
         build:
           context: .
           dockerfile: containers/api-gateway/Dockerfile
@@ -16,6 +17,7 @@ services:
 
     game-service:
         restart: always
+        container_name: transcendence-game-service
         build:
           context: .
           dockerfile: containers/game-service/Dockerfile
@@ -31,6 +33,7 @@ services:
 
     auth:
         restart: always
+        container_name: transcendence-auth
         build:
           context: .
           dockerfile: containers/auth/Dockerfile
@@ -45,6 +48,7 @@ services:
 
     client:
         restart: always
+        container_name: transcendence-client
         build:
           context: .
           dockerfile: containers/client/Dockerfile
@@ -59,6 +63,7 @@ services:
 
     profile:
         restart: always
+        container_name: transcendence-profile
         build:
             context: .
             dockerfile: containers/profile/Dockerfile
@@ -141,7 +146,7 @@ services:
         volumes:
             # - ./certs/filebeat:/usr/share/filebeat/config/certs
             # - ./certs/ca:/usr/share/filebeat/config/certs/ca
-            - /goinfre/iusantos/docker/containers:/var/lib/docker/containers:ro
+            - /goinfre/docker/containers:/var/lib/docker/containers:ro
             - /var/run/docker.sock:/var/run/docker.sock:ro
         depends_on:
             - logstash
