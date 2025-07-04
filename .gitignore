@@ -6,3 +6,4 @@ src/node_modules
 package-lock.json
 old-game*.DS_Store
 src/frontend/client/static/css/style.out.css
+src/backend/profile/node_modules
