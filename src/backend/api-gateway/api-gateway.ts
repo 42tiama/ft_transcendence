@@ -9,7 +9,7 @@ const httpsOptions = {
 }
 
 const corsOptions = {
-	origin : true
+	origin : "https://localhost:8042"
 }
 
 //instatiate server
