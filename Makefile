@@ -1,5 +1,6 @@
 #builda e inicia todos os containers (inclusive o devcontainer)
 all: install-mkcert setup
+	docker compose build --no-cache
 	docker compose up -d
 
 ### HTTPS (mTLS) -> Todo mundo usa https para falar com todo mundo, a.k.a. zero trust
@@ -90,6 +91,18 @@ rebuild-auth:
 
 rebuild-profile:
 	docker compose up --detach --build profile
+
+rebuild-elasticsearch:
+	docker compose up --detach --build elasticsearch
+
+rebuild-kibana:
+	docker compose up --detach --build kibana
+
+rebuild-logstash:
+	docker compose up --detach --build logstash
+
+rebuild-filebeat:
+	docker compose up --detach --build filebeat
 
 #clean entire build folder
 bclean:

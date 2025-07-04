@@ -75,11 +75,11 @@ services:
     elasticsearch:
         restart: always
         build:
-            context: ./containers/elk-logs/elasticsearch
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: containers/elk-logs/elasticsearch/Dockerfile
         volumes:
-            - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
-            - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
+            # - ./certs/elasticsearch:/usr/share/elasticsearch/config/certs
+            # - ./certs/ca:/usr/share/elasticsearch/config/certs/ca
             - elastic-data:/usr/share/elasticsearch/data
         environment:
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
@@ -99,11 +99,11 @@ services:
     logstash:
         restart: always
         build:
-            context: ./containers/elk-logs/logstash
-            dockerfile: Dockerfile
-        volumes:
-            - ./certs/logstash:/usr/share/logstash/config/certs
-            - ./certs/ca:/usr/share/logstash/config/certs/ca
+            context: .
+            dockerfile: containers/elk-logs/logstash/Dockerfile
+        # volumes:
+        #     - ./certs/logstash:/usr/share/logstash/config/certs
+        #     - ./certs/ca:/usr/share/logstash/config/certs/ca
         environment:
             - LS_JAVA_OPTS=-Xms512m -Xmx512m
             - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -117,11 +117,11 @@ services:
     kibana:
         restart: always
         build:
-            context: ./containers/elk-logs/kibana
-            dockerfile: Dockerfile
-        volumes:
-            - ./certs/kibana:/usr/share/kibana/config/certs
-            - ./certs/ca:/usr/share/kibana/config/certs/ca
+            context: .
+            dockerfile: containers/elk-logs/kibana/Dockerfile
+        # volumes:
+            # - ./certs/kibana:/usr/share/kibana/config/certs
+            # - ./certs/ca:/usr/share/kibana/config/certs/ca
         environment:
             - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
             - KIBANA_PASSWORD=${ELASTIC_PASSWORD}
@@ -135,13 +135,13 @@ services:
     filebeat:
         restart: always
         build:
-            context: ./containers/elk-logs/filebeat
-            dockerfile: Dockerfile
+            context: .
+            dockerfile: containers/elk-logs/filebeat/Dockerfile
         user: root
         volumes:
-            - ./certs/filebeat:/usr/share/filebeat/config/certs
-            - ./certs/ca:/usr/share/filebeat/config/certs/ca
-            - /var/lib/docker/containers:/var/lib/docker/containers:ro
+            # - ./certs/filebeat:/usr/share/filebeat/config/certs
+            # - ./certs/ca:/usr/share/filebeat/config/certs/ca
+            - /goinfre/iusantos/docker/containers:/var/lib/docker/containers:ro
             - /var/run/docker.sock:/var/run/docker.sock:ro
         depends_on:
             - logstash
