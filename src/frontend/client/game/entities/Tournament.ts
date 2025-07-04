@@ -4,12 +4,13 @@ import TiamaPong  from "./TiamaPong.js";
 import Game from "./Game.js";
 import { TournamentInfo, GameServices } from "../types.js";
 import TournamentService from '../../services/TournamentService.js'
+import PlayerService from "../../services/PlayerService.js";
 import MatchService from '../../services/MatchService.js'
-import { TournamentData } from "services/types.js";
-// import { Server } from "http";
+import { MatchData, TournamentData } from "services/types.js";
+import { Player } from "./Player.js";
 
 export default class Tournament {
-  tournamentId: number = 0;
+  tournamentId: number | null = null;
   currentRound: Match[] = [];
   currentGame: Game | null = null;
   totalPlayers: number = 0;
@@ -23,31 +24,21 @@ export default class Tournament {
   tournamentWinner?: User | null;
   matchTitle: string = '';
   matchLog: Match[] = [];
-  gameServices: Partial<GameServices> = { tournament: undefined, match: undefined };
+  gameServices: Partial<GameServices> = {player : undefined, tournament: undefined, match: undefined};
 
   constructor(gameContext: TiamaPong) {
     this.tournamentInit(gameContext);
-    this.initGameServices();
+    // this.initGameServices();
   }
 
-  initGameServices() {
-    this.gameServices.tournament = new TournamentService();
-    this.gameServices.match = new MatchService();
-  }
+  // initGameServices() {
+  //   this.gameServices!.tournament = new TournamentService();
+  //   this.gameServices!.match = new MatchService();
+  //   this.gameServices!.player = new PlayerService();
+  // }
 
-  private async registerTournament() {
-    this.gameServices.tournament = new TournamentService();
-
-    if (this.gameServices.tournament) {
-        const tournamentInfo: TournamentData = {
-          totalMatches: this.totalMatches,
-          totalPlayers: this.totalPlayers,
-      };
-      this.tournamentId = await this.gameServices.tournament.createTournament(tournamentInfo);
-    }
-  }
-
-  private tournamentInit(gameContext: TiamaPong) {
+  private async tournamentInit(gameContext: TiamaPong) {
+    // this.initGameServices();
     this.totalPlayers = gameContext.preTournamentSelection.length;
     this.totalMatches = this.totalPlayers - 1;
     this.nextPowerOf2 = Math.pow(2, Math.ceil(Math.log2(this.totalPlayers)));
@@ -56,15 +47,36 @@ export default class Tournament {
     this.totalRounds = Math.ceil(Math.log2(this.nextPowerOf2));
     console.log("INIT DONE!");
     console.log(`
-            totalPlayers: ${this.totalPlayers}\n
-            totalMatches: ${this.totalMatches}\n
-            nextPowerOf2: ${this.nextPowerOf2}\n
-            totalByes: ${this.totalByes}\n
-            firstRoundTotalParticipants: ${this.firstRoundTotalParticipants}\n
-            totalRounds: ${this.totalRounds}`);
-    this.registerTournament();
-    this.createFirstRound(gameContext);
+      totalPlayers: ${this.totalPlayers}\n
+      totalMatches: ${this.totalMatches}\n
+      nextPowerOf2: ${this.nextPowerOf2}\n
+      totalByes: ${this.totalByes}\n
+      firstRoundTotalParticipants: ${this.firstRoundTotalParticipants}\n
+      totalRounds: ${this.totalRounds}`);
+      this.createFirstRound(gameContext);
+      await this.registerTournament();
+
+    // const payload: TournamentData = { 
+    //   numberMatches: this.totalMatches,
+    //   numberPlayers: this.totalPlayers, 
+    //   winner: undefined, finished: 0
+    // };
+    // this.tournamentId = await this.gameServices.tournament!.addTournament(payload);
     // this.debugPrintRoundArray();
+  }
+
+  private async registerTournament() {
+    this.gameServices.tournament = new TournamentService();
+    this.gameServices.match = new MatchService();
+    this.gameServices.player = new PlayerService();
+
+    if (this.gameServices!.tournament) {
+        const tournamentInfo: TournamentData = {
+          totalMatches: this.totalMatches,
+          totalPlayers: this.totalPlayers,
+      };
+      this.tournamentId = await this.gameServices!.tournament.createTournament(tournamentInfo);
+    }
   }
 
   private debugPrintParticipantsArray(participants: User[]): void {
@@ -220,17 +232,18 @@ export default class Tournament {
         // this.debugPrintRoundArray();
         await this.currentGame.startMatch(this.currentRound[i]);
         if (this.matchTitle != 'FINAL') {
-          this.matchLog.push(...this.currentRound);
-          this.tournamentWinner = this.currentRound[i].winner;
+          this.matchLog.push(this.currentRound[i]);
           await this.renderMatchWinner(appElement, this.currentRound[i]);
+        } else {
+          this.matchLog.push(this.currentRound[0]);
         }
       }
-      this.matchLog.push(...this.currentRound);
       // Iury, Andre nesse ponto, caso decida enviar os matchs antes de finalizar o campeonato
       // vc consegue no array "matchLog", todos os resultados de partidas desse round
       this.totalRounds--;
       if (this.totalRounds == 0) {
         this.tournamentFinished = true;
+        this.tournamentWinner = this.currentRound[0].winner;
         await this.renderChampionModal(appElement, this.currentRound[0]);
       }
       else {
@@ -274,13 +287,7 @@ export default class Tournament {
   }
 
   public async createTournamentLog(): Promise<void> {
-    const tournamentInfo: TournamentInfo = {
-      totalPlayers: this.totalPlayers,
-      totalMatches: this.totalMatches,
-      winner: this.tournamentWinner!
-    }
-
-    const tournamentServiceResponse = await this.gameServices.tournament!.registerTournamentResults({
+    const tournamentServiceResponse = await this.gameServices!.tournament!.registerTournamentResults({
       tournamentId: this.tournamentId,
       winner: this.tournamentWinner!.id,
       finished: this.tournamentFinished ? 1 : 0,
@@ -292,11 +299,42 @@ export default class Tournament {
       console.error('Failed to save the tournament log');
     }
 
-    // const matchServiceResponse = await this.gameServices.match!.createMatches(this.matchLog);
-    // if (matchServiceResponse) {
-    //   // server.log('Matches saved successfully!');
+    this.matchLog.forEach(element => { 
+      const payload = {
+        matchType: 'tournament',
+        tournamentId: this.tournamentId,
+        player1: element.player1.id,
+        player2: element.player2?.id,
+        player1Score: element.player1Score,
+        player2Score: element.player2Score,
+        winner: element.winner?.id
+      }
+      
+      let matchServiceResponse = async () => await this.gameServices!.match?.createMatch(payload as MatchData);
+      
+      console.log(`Match id: ${matchServiceResponse()} created`);
+
+      const points = payload.player1Score > payload.player2Score ? payload.player1Score : payload.player2Score;
+      const loserId = payload.player1Score < payload.player2Score ? payload.player1 : payload.player2;
+
+      if (payload.winner) {
+        const win = async () => await this.gameServices.player?.addWinStat(payload.winner!, points)
+          .catch(err => console.error(`Failed to update winner stats: ${err}`));
+        win();  
+      }
+
+      if (loserId) {
+        console.log(`AI match, no loser to update stats for. ${loserId}`);
+        const loser = async () => await this.gameServices.player?.addLossStat(loserId, points)
+          .catch(err => console.error(`Failed to update loser stats: ${err}`));
+          loser();
+      }
+    });
+  
+    // if (matchServiceResponse !== 0 && matchServiceResponse !== undefined) {
+    //   console.log('Match history saved successfully!');
     // } else {
-    //   // server.log.error('Failed to save matches');
+    //   console.error('Failed to save the tournament log');
     // }
   }
 }

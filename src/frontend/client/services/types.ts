@@ -33,7 +33,7 @@ export interface PlayerData {
 }
 
 export interface TournamentData {
-    tournamentId?: number;
+    tournamentId?: number | null;
     totalMatches?: number;
     totalPlayers?: number;
     winner?: number;
