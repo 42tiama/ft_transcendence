@@ -9,6 +9,9 @@ import MatchService from '../../services/MatchService.js'
 import { MatchData, TournamentData } from "services/types.js";
 import { Player } from "./Player.js";
 
+// sets the API base URL to the API gateway for all authentication requests.
+const API_BASE = 'https://localhost:8044';
+
 export default class Tournament {
   tournamentId: number | null = null;
   currentRound: Match[] = [];
@@ -108,9 +111,44 @@ export default class Tournament {
     return participants;
   }
 
-  renderPageInfo(appElement: Element, currentMatch: Match, nextMatch: Match | null) {
-    const displayNameP1 = appElement.querySelector('#p1-display-name');
-    const displayNameP2 = appElement.querySelector('#p2-display-name');
+  async renderPageInfo(appElement: Element, currentMatch: Match, nextMatch: Match | null) {
+    // Fetch profile data for both players
+    const player1Profile = await this.getPlayerProfile(currentMatch.player1.id);
+    const player2Profile = await this.getPlayerProfile(currentMatch.player2!.id);
+
+    if (player1Profile && player2Profile) {
+      const displayNameP1 = appElement.querySelector('#p1-display-name');
+      const displayNameP2 = appElement.querySelector('#p2-display-name');
+      displayNameP1!.innerHTML = player1Profile?.displayName || currentMatch.player1.displayName;
+      displayNameP2!.innerHTML = player2Profile?.displayName || currentMatch.player2!.displayName;
+
+      const p1Avatar = appElement.querySelector('#p1-avatar') as HTMLElement;
+      const p2Avatar = appElement.querySelector('#p2-avatar') as HTMLElement;
+      if (p1Avatar) {
+        if (player1Profile?.avatarUrl) {
+          p1Avatar.innerHTML = `<img src="${API_BASE}${player1Profile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${player1Profile.displayName}'s avatar">`;
+        } else {
+          p1Avatar.innerHTML = (player1Profile?.displayName || currentMatch.player1.displayName).charAt(0);
+        }
+      }
+      if (p2Avatar) {
+        if (player2Profile?.avatarUrl) {
+          p2Avatar.innerHTML = `<img src="${API_BASE}${player2Profile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${player2Profile.displayName}'s avatar">`;
+        } else {
+          p2Avatar.innerHTML = (player2Profile?.displayName || currentMatch.player2!.displayName).charAt(0);
+        }
+      }
+
+      const p1Card = appElement.querySelector('#p1-card') as HTMLElement;
+      const p2Card = appElement.querySelector('#p2-card') as HTMLElement;
+      if (p1Card && player1Profile?.cardColor) {
+        p1Card.style.backgroundColor = player1Profile.cardColor;
+      }
+      if (p2Card && player2Profile?.cardColor) {
+        p2Card.style.backgroundColor = player2Profile.cardColor;
+      }
+    }
+
     const p1Wins = appElement.querySelector('#p1-wins');
     const p1Losses = appElement.querySelector('#p1-losses');
     const p2Wins = appElement.querySelector('#p2-wins');
@@ -121,8 +159,6 @@ export default class Tournament {
     const nextMatchP1 = appElement.querySelector('#next-match-p1');
     const nextMatchP2 = appElement.querySelector('#next-match-p2');
 
-    displayNameP1!.innerHTML = currentMatch.player1.displayName;
-    displayNameP2!.innerHTML = currentMatch.player2!.displayName;
     p1Wins!.innerHTML = `Wins: ${currentMatch.player1.wins.toString()}`;
     p1Losses!.innerHTML = `Losses: ${currentMatch.player1.losses.toString()}`;
     p2Wins!.innerHTML = `Wins: ${currentMatch.player2!.wins.toString()}`;
@@ -137,11 +173,66 @@ export default class Tournament {
     }
   }
 
+  // Fetch player profile data from profile service
+  private async getPlayerProfile(playerId: number): Promise<{displayName: string, avatarUrl: string, cardColor: string} | null> {
+    try {
+      const response = await fetch(`${API_BASE}/profile-by-id/${playerId}`, {
+        method: 'GET'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      console.error('Error fetching player profile:', error);
+      return null;
+    }
+  }
+
   private async renderFreezeTimeModalInfo(appElement: Element, currentMatch: Match): Promise<void> {
-    const displayNameP1 = appElement.querySelector('#player1')!;
-    const displayNameP2 = appElement.querySelector('#player2')!;
-    displayNameP1.textContent = currentMatch.player1.displayName;
-    displayNameP2.textContent = currentMatch.player2!.displayName;
+    // Fetch profile data for both players
+    const player1Profile = await this.getPlayerProfile(currentMatch.player1.id);
+    const player2Profile = await this.getPlayerProfile(currentMatch.player2!.id);
+
+    if (player1Profile && player2Profile) {
+      const displayNameP1 = appElement.querySelector('#player1-freeze-name');
+      const displayNameP2 = appElement.querySelector('#player2-freeze-name');
+      displayNameP1!.innerHTML = player1Profile?.displayName || currentMatch.player1.displayName;
+      displayNameP2!.innerHTML = player2Profile?.displayName || currentMatch.player2!.displayName;
+
+      // Update avatars
+      const avatar1 = appElement.querySelector('#player1-freeze-avatar') as HTMLElement;
+      const avatar2 = appElement.querySelector('#player2-freeze-avatar') as HTMLElement;
+
+      if (avatar1) {
+        if (player1Profile?.avatarUrl) {
+          avatar1.innerHTML = `<img src="${API_BASE}${player1Profile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${displayNameP1}'s avatar">`;
+        } else {
+          avatar1.innerHTML = player1Profile.displayName.charAt(0);
+        }
+      }
+
+      if (avatar2) {
+        if (player2Profile?.avatarUrl) {
+          avatar2.innerHTML = `<img src="${API_BASE}${player2Profile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${displayNameP2}'s avatar">`;
+        } else {
+          avatar2.innerHTML = player2Profile.displayName.charAt(0);
+        }
+      }
+
+      // Update card colors
+      const card1 = appElement.querySelector('#player1-freeze-card') as HTMLElement;
+      const card2 = appElement.querySelector('#player2-freeze-card') as HTMLElement;
+      if (card1 && player1Profile?.cardColor) {
+        card1.style.backgroundColor = player1Profile.cardColor;
+      }
+      if (card2 && player2Profile?.cardColor) {
+        card2.style.backgroundColor = player2Profile.cardColor;
+      }
+    }
 
     const startButton = appElement.querySelector('#start-button')! as HTMLButtonElement;
     const modal = appElement.querySelector('#freeze-time-modal')! as HTMLElement;
@@ -181,17 +272,38 @@ export default class Tournament {
   }
 
   private async renderTournamentInfo(appElement: Element, currentMatch: Match, nextMatch: Match | null) {
-    this.renderPageInfo(appElement, currentMatch, nextMatch);
+    await this.renderPageInfo(appElement, currentMatch, nextMatch);
     await this.renderFreezeTimeModalInfo(appElement, currentMatch);
   }
 
   private async renderMatchWinner(appElement: Element, match: Match): Promise<void> {
     const matchWinnerModal = appElement.querySelector('#match-winner-modal')! as HTMLElement;
     const winner = appElement.querySelector('#winner-display-name')! as HTMLElement;
+    const winnerAvatar = appElement.querySelector('#winner-avatar')! as HTMLElement;
     const nextMatchButton = appElement.querySelector('#next-match-button')! as HTMLButtonElement;
 
     matchWinnerModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner!.displayName;
+
+    // Fetch winner profile data
+    const winnerProfile = await this.getPlayerProfile(match.winner!.id);
+
+    // Update winner display name
+    winner.innerHTML = winnerProfile?.displayName || match.winner!.displayName;
+
+    // Update winner avatar
+    if (winnerAvatar) {
+      if (winnerProfile?.avatarUrl) {
+        winnerAvatar.innerHTML = `<img src="${API_BASE}${winnerProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${winnerProfile.displayName}'s avatar">`;
+      } else {
+        winnerAvatar.innerHTML = (winnerProfile?.displayName || match.winner!.displayName).charAt(0);
+      }
+    }
+
+    // Update winner card color
+    const winnerCard = appElement.querySelector('#winner-card') as HTMLElement;
+    if (winnerCard && winnerProfile?.cardColor) {
+      winnerCard.style.backgroundColor = winnerProfile.cardColor;
+    }
 
     return new Promise<void>((resolve) => {
       nextMatchButton.addEventListener('click', (event: MouseEvent) => {
@@ -203,11 +315,35 @@ export default class Tournament {
 
   private async renderChampionModal(appElement: Element, match: Match): Promise<void> {
     const championModal = appElement.querySelector('#tournament-winner-modal')! as HTMLElement;
-    const winner = appElement.querySelector('#champion-display-name')! as HTMLElement;
+    const champion = appElement.querySelector('#champion-display-name')! as HTMLElement;
+    const championAvatar = appElement.querySelector('#champion-avatar')! as HTMLElement;
     const transcendButton = appElement.querySelector('#transcend-button')! as HTMLButtonElement;
 
     championModal.classList.replace('hidden', 'flex');
-    winner.innerHTML = match.winner!.displayName;
+
+    //TODO- fix champion winner not always match winner
+    // Fetch champion profile data
+    const championProfile = await this.getPlayerProfile(match.winner!.id);
+
+    // Update champion display name
+    champion.innerHTML = championProfile?.displayName || match.winner!.displayName;
+
+    // Update winner avatar
+    if (championAvatar) {
+      if (championProfile?.avatarUrl) {
+        championAvatar.innerHTML = `<img src="${API_BASE}${championProfile.avatarUrl}" class="w-full h-full object-contain rounded-full bg-white" alt="${championProfile.displayName}'s avatar">`;
+      } else {
+        championAvatar.innerHTML = (championProfile?.displayName || match.winner!.displayName).charAt(0);
+      }
+    }
+
+    // Update champion card color
+    const championCard = appElement.querySelector('#champion-card') as HTMLElement;
+    if (championCard && championProfile?.cardColor) {
+      championCard.style.backgroundColor = championProfile.cardColor;
+    }
+
+    champion.innerHTML = match.winner!.displayName;
 
     return new Promise<void>((resolve) => {
       transcendButton.addEventListener('click', (event: MouseEvent) => {
