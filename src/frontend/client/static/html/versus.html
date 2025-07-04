@@ -6,11 +6,11 @@
             <h1 class="text-2xl font-bold text-white tracking-wider">
                 Player 1
             </h1>
-            <div class="bg-yellow-500 text-black p-6 rounded-lg flex flex-col items-center shadow-lg">
-                <div id="p1Avatar" class="text-5xl text-center font-extrabold w-16 h-16 bg-white rounded-full mb-4"></div>
-                    <h2 id="p1-display-name" class="text-xl font-bold"></h2>
-                    <p id="p1-wins"></p>
-                    <p id="p1-losses"></p>
+            <div id="p1-card" class="w-40 h-50 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center shadow-lg">
+                <div id="p1-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
+                <h2 id="p1-display-name" class="font-bold text-center text-sm leading-tight break-words text-white mb-4"></h2>
+                <p id="p1-wins" class="font-bold text-xs text-white"></p>
+                <p id="p1-losses" class="font-bold text-xs text-white"></p>
             </div>
         </div>
 
@@ -24,26 +24,26 @@
             <h1 class="text-2xl font-bold text-white tracking-wider">
                 Player 2
             </h1>
-            <div class="bg-cyan-700 p-6 rounded-lg flex flex-col items-center shadow-lg">
-                <div id="p2Avatar" class="text-5xl text-center font-extrabold w-16 h-16 bg-white rounded-full mb-4"></div>
-                <h2 id="p2-display-name" class="text-xl font-bold"></h2>
-                <p id="p2-wins"></p>
-                <p id="p2-losses"></p>
+            <div id="p2-card" class="w-40 h-50 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center shadow-lg">
+                <div id="p2-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
+                <h2 id="p2-display-name" class="font-bold text-center text-sm leading-tight break-words text-white mb-4"></h2>
+                <p id="p2-wins" class="font-bold text-xs text-white"></p>
+                <p id="p2-losses" class="font-bold text-xs text-white"></p>
             </div>
         </div>
 
-            <!-- modal "freeze time" antes de iniciar -->
-        <div id="freeze-time-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm items-center justify-center z-50 hidden">
+        <!-- modal "freeze time" antes de iniciar -->
+        <div id="freeze-time-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
             <div class="bg-white/10 border-4 border-amber-400 rounded-3xl p-8 flex flex-col items-center gap-8 shadow-2xl">
                 <div class="flex items-center gap-6">
-                    <div class="flex flex-col bg-yellow-500 text-black p-4 rounded-xl items-center w-40">
-                        <div class="w-12 h-12 bg-white rounded-full mb-2"></div>
-                        <h3 id="player1" class="font-bold"></h3>
+                    <div id="player1-freeze-card" class="w-32 h-38 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200">
+                        <div id="player1-freeze-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
+                        <h3 id="player1-freeze-name" class="font-bold text-center text-sm leading-tight break-words text-white"></h3>
                     </div>
                     <div class="text-white text-4xl font-extrabold">VS</div>
-                    <div class="flex flex-col bg-cyan-700 text-white p-4 rounded-xl items-center w-40">
-                        <div class="w-12 h-12 bg-white rounded-full mb-2"></div>
-                        <h3 id="player2" class="font-bold"></h3>
+                    <div id="player2-freeze-card" class="w-32 h-38 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center cursor-pointer hover:scale-105 transition-all duration-200">
+                        <div id="player2-freeze-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
+                        <h3 id="player2-freeze-name" class="font-bold text-center text-sm leading-tight break-words text-white"></h3>
                     </div>
                 </div>
                 <button id="start-button"
@@ -54,26 +54,25 @@
         </div>
 
         <!-- modal do vencedor do round -->
-
         <div id="match-winner-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm items-center justify-center z-50 hidden">
             <div class="bg-white/10 border-4 border-emerald-400 rounded-3xl p-8 flex flex-col items-center gap-8 shadow-2xl">
                 <div class="text-4xl font-extrabold text-yellow-300 tracking-widest animate-pulse flex items-center gap-3">
                 🎉 WINNER 🎉
                 </div>
 
-                <div class="flex flex-col bg-emerald-500 text-black p-5 rounded-2xl items-center w-48 shadow-lg ring-4 ring-emerald-300">
-                <div class="w-14 h-14 bg-white rounded-full mb-3"></div>
-                <h3 id="winner-display-name" class="font-bold text-xl"></h3>
-                <p class="text-sm mt-1">Well Played!</p>
+                <div id="winner-card" class="w-44 h-54 border-8 border-white/10 text-black p-4 rounded-xl flex flex-col items-center hover:scale-105 transition-all duration-200">
+                    <div id="winner-avatar" class="w-14 h-14 text-5xl text-center font-extrabold bg-white rounded-full mb-4 flex items-center justify-center overflow-hidden text-gray-700"></div>
+                    <h3 id="winner-display-name" class="font-bold text-center text-xl leading-tight break-words text-white"></h3>
+                    <p class="font-bold mt-4">Well Played!</p>
                 </div>
 
-                <button id="next-match-button" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer">
-                Continue to Next Match
+                <button id="rematch-button" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer">
+                Rematch
                 </button>
-                <a href="/versus-player-selection" id="next-match-button" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer" data-link>
+                <a href="/versus-player-selection" id="new-match-button" class="bg-green-600 hover:bg-green-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer" data-link>
                 Choose another opponent
                 </a>
-                <a href="/game-menu" id="next-match-button" class="bg-red-600 hover:bg-red-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer" data-link>
+                <a href="/game-menu" id="menu-button" class="bg-red-600 hover:bg-red-500 text-white font-semibold px-6 py-3 rounded-xl text-lg shadow-lg cursor-pointer" data-link>
                 Game Menu
                 </a>
             </div>

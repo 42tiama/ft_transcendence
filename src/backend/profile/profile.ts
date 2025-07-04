@@ -29,7 +29,14 @@ const app = fastify({
     https: httpsOptions
 });
 
-app.register(fastifyMultipart);
+app.register(fastifyMultipart, {
+    limits: {
+        fileSize: 2 * 1024 * 1024, // 2MB limit per file
+        files: 1, // Maximum number of files
+        fields: 5, // Maximum number of non-file fields
+		fieldSize: 100 * 1024 // 100 KB limit per field
+	}
+});
 app.register(fastifyStatic, {
 	root: path.join(__dirname, '/static/uploads'),
 	prefix: '/uploads/',
@@ -137,20 +144,35 @@ function isValidDisplayName(displayName: string): boolean {
 // Updates display name, card color and avatar
 app.post('/profile-update/:userId', async (request: FastifyRequest<{ Params: { userId: string } }>, reply) => {
 	const { userId } = request.params;
-	const parts = request.parts();
 
 	let displayName = '';
 	let cardColor = '';
 	let avatarBuffer: Buffer | null = null; // binary contents of the file
 	let avatarFilename = ''; // original file name
-	for await (const part of parts) {
-		if (part.type === 'file' && part.fieldname === 'avatar') {
-			avatarBuffer = await part.toBuffer();
-			avatarFilename = part.filename;
-		} else if (part.type === 'field') {
-			if (part.fieldname === 'displayName') displayName = part.value as string;
-			if (part.fieldname === 'cardColor') cardColor = part.value as string;
+
+	try {
+		const parts = request.parts();
+		for await (const part of parts) {
+			if (part.type === 'file' && part.fieldname === 'avatar') {
+				avatarBuffer = await part.toBuffer();
+				avatarFilename = part.filename;
+			} else if (part.type === 'field') {
+				if (part.fieldname === 'displayName') displayName = part.value as string;
+				if (part.fieldname === 'cardColor') cardColor = part.value as string;
+			}
 		}
+	} catch (err: any) {
+		if (err.code === 'FST_REQ_FILE_TOO_LARGE') {
+			return reply.code(413).send({ error: "File too large. Maximum size is 2MB." });
+		}
+		if (err.code === 'FST_FILES_LIMIT') {
+			return reply.code(413).send({ error: "Too many files. Only 1 file is allowed." });
+		}
+		if (err.code === 'FST_FIELD_SIZE_LIMIT') {
+			return reply.code(413).send({ error: "Field value too large." });
+		}
+		app.log.error('Error processing multipart data:', err);
+		return reply.code(400).send({ error: "Invalid multipart data." });
 	}
 
 	if (!userId|| !displayName || !cardColor) {

@@ -3,8 +3,6 @@ import Game from '../../../game/entities/Game.js';
 import TiamaPong from "../../../game/entities/TiamaPong";
 import Match from '../../../game/entities/Match.js';
 import User from '../../../game/entities/User.js';
-import { parseJwt } from '../views/Login.js'
-import PlayerService from '../../../services/PlayerService.js';
 import { PlayerData } from '../../../services/types.js';
 
 export default class GameAi extends AbstractView {
@@ -92,7 +90,7 @@ export default class GameAi extends AbstractView {
     }
   }
 
-	
+
 
   async onMount(gameContext: TiamaPong) {
     this.showElement('ai-player', false);

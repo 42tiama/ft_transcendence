@@ -94,7 +94,9 @@ export default class Profile extends AbstractView {
 				await loadProfile(userId);
 			}
 			else {
-				alert("This display name is already taken. Please choose another display name.");
+				// Display the actual error message from the backend
+				const errorMessage = result?.error || "An error occurred while updating the profile.";
+				alert(errorMessage);
 			}
 		});
 
@@ -352,7 +354,7 @@ async function postUpdateProfile(userId: number, formData: FormData): Promise<an
 		return result;
 	} catch (error) {
 		console.error('Error updating profile:', error);
-		return null;
+		return { success: false, error: 'Network error. Please try again.' };
 	}
 }
 

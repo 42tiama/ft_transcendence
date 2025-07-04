@@ -159,6 +159,7 @@ export default class PlayerSelection extends AbstractView {
       return null;
     }
   }
+
   async beforeMount(gameContext: TiamaPong): Promise<boolean> {
     return true;
   }
